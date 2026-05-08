@@ -1,0 +1,17 @@
+luftqualitaet-projekt/
+│
+├── data/
+│   ├── raw/                  # Unberührte Originaldaten (UBA oder KBA)
+│   └── processed/            # Aggregierte CSVs für Streamlit
+│
+├── notebooks/                # Jupyter Notebooks (Vorbereitung)
+│   ├── 01_data_cleaning.ipynb
+│   └── 02_eda_and_models.ipynb
+│
+├── app/                      # Alles, was zur Webanwendung gehört
+│   ├── main.py               # Streamlit-App
+│   └── assets/               # Bilder oder Icons für die App
+│
+├── .gitignore                # Schließt virtuelle Umgebungen oder riesige Rohdaten aus
+├── requirements.txt          # Tech-Stack (pandas, scikit-learn, streamlit)
+└── README.md                 # Projektübersicht mit den Credits
