@@ -1,2 +1,5 @@
 #Ordner, die ignoriert werden
 docs/
+.testskripte/
+.ipynb_checkpoints/
+dsi_env/
