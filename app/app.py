@@ -13,6 +13,15 @@ import numpy as np
 
 st.set_page_config(page_title="Luft & Wetter Bayern", page_icon="🌬️", layout="wide")
 
+# Gemeinsame Chart-Einstellungen für Dark/Tech-Theme
+_DARK = dict(
+    template='plotly_dark',
+    paper_bgcolor='#161B22',
+    plot_bgcolor='#0D1117',
+    font_color='#E6EDF3',
+    font_family='monospace',
+)
+
 # --- 1. DATEN LADEN ---
 @st.cache_data
 def load_data():
@@ -94,7 +103,7 @@ with tab1:
         labels={'Datum_Uhrzeit': 'Datum', 'Temperatur_C': 'Temperatur (°C)'},
         color_discrete_sequence=['#FF7F0E'],
     )
-    fig_temp.update_layout(height=350)
+    fig_temp.update_layout(height=350, **_DARK)
     st.plotly_chart(fig_temp, use_container_width=True)
 
     col_a, col_b = st.columns(2)
@@ -106,7 +115,7 @@ with tab1:
             labels={'Datum_Uhrzeit': 'Datum', 'Wind_ms': 'Wind (m/s)'},
             color_discrete_sequence=['#1F77B4'],
         )
-        fig_wind.update_layout(height=300)
+        fig_wind.update_layout(height=300, **_DARK)
         st.plotly_chart(fig_wind, use_container_width=True)
 
     with col_b:
@@ -116,7 +125,7 @@ with tab1:
             labels={'Datum_Uhrzeit': 'Datum', 'Sonnenschein_min': 'Minuten'},
             color_discrete_sequence=['#FFC300'],
         )
-        fig_sun.update_layout(height=300)
+        fig_sun.update_layout(height=300, **_DARK)
         st.plotly_chart(fig_sun, use_container_width=True)
 
     if st.checkbox("Rohdaten anzeigen", key="tab1_raw"):
@@ -160,7 +169,7 @@ with tab2:
         labels={'Datum_Uhrzeit': 'Datum'},
         color_discrete_map={'Ozon': '#2CA02C', 'NO2': '#D62728', 'PM10': '#9467BD'},
     )
-    fig_luft.update_layout(height=380)
+    fig_luft.update_layout(height=380, **_DARK)
     st.plotly_chart(fig_luft, use_container_width=True)
 
     st.markdown("### Zusammenhang Temperatur & Ozon")
@@ -180,7 +189,7 @@ with tab2:
             opacity=0.5,
             trendline='ols',
         )
-        fig_scatter.update_layout(height=380)
+        fig_scatter.update_layout(height=380, **_DARK)
         st.plotly_chart(fig_scatter, use_container_width=True)
     else:
         st.info("Nicht genügend Daten für den Scatter-Plot in diesem Jahr.")
@@ -238,7 +247,7 @@ with tab3:
                 mode='lines', name='Trend',
                 line=dict(dash='dash', color='red', width=2),
             )
-        fig_t.update_layout(height=320)
+        fig_t.update_layout(height=320, **_DARK)
         st.plotly_chart(fig_t, use_container_width=True)
 
     with col2:
@@ -251,7 +260,7 @@ with tab3:
             color_discrete_map={'Ozon': '#2CA02C', 'NO2': '#D62728', 'PM10': '#9467BD'},
             markers=True,
         )
-        fig_p.update_layout(height=320)
+        fig_p.update_layout(height=320, **_DARK)
         st.plotly_chart(fig_p, use_container_width=True)
 
     # Tachometer: Luftqualitäts-Index für das gewählte Jahr
@@ -287,5 +296,5 @@ with tab3:
             },
         },
     ))
-    fig_gauge.update_layout(height=350)
+    fig_gauge.update_layout(height=350, **_DARK)
     st.plotly_chart(fig_gauge, use_container_width=True)
