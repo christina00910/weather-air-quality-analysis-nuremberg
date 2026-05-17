@@ -34,10 +34,33 @@ st.write("Grundgerüst ist fertig")
 # Neu: Daten laden mit @st.cache. Das sorgt dafür, dass die Daten nur einmal geladen werden und nicht bei jedem Skriptlauf erneut eingelesen werden müssen.
 @st.cache_data
 def load_data():
+    """
+    Lädt die kombinierten Wetter- und Schadstoffdaten aus der CSV-Datei.
+    
+    Nutzt Streamlit-Caching (@st.cache_data), um das wiederholte Einlesen 
+    von der Festplatte bei jeder Nutzerinteraktion zu verhindern.
+    
+    Returns:
+        pd.DataFrame: Aufbereiteter Datensatz mit korrekten Datentypen und Spaltennamen.
+    """
+# Datenimport mit pathlib - modul
+# Path(__file__).parent ist eine sehr gängige Kombination aus der 
+# Python-Bibliothek pathlib. Sie ermittelt dynamisch das Verzeichnis, 
+# in dem sich die gerade ausgeführte Python-Datei befindet
 
-# Datenimport mit pathlib
-    data_pfad = Path("data") / "Schadstoff_Wetter.csv"
+    base_dir = Path(__file__).parent
+    data_pfad = base_dir / 'data' / 'Schadstoff_Wetter.csv'
+
+    # CSV einlesen
     df = pd.read_csv(data_pfad)
+
+    # WICHTIG: Erst in String casten, da 'datumstunde' als int64 eingelesen wird.
+    # Das verhindert Fehler beim anschließenden Text-basierten Datetime-Parsing.
+    df['Datum_Uhrzeit'] = pd.to_datetime(
+        df['datumstunde'].astype(str), 
+        format='%Y%m%d%H', 
+        errors='coerce'
+    )
 
     # Spalten umbenennen (Translation Layer für das Dashboard)
     df = df.rename(columns={
@@ -53,8 +76,9 @@ def load_data():
     return df  
 
 df = load_data()
-st.write("Daten erfolgreich geladen:") 
+
 # Kurzer Test-Output im Browser
-st.success(f"Daten erfolgreich geladen: {len(df)} Zeilen!")
+# st.success zeigt eine grüne Erfolgsmeldung an, ist wie st.write, nur eben grün hinterlegt
+st.success(f"Daten erfolgreich geladen: {len(df)} Zeilen!") 
 st.dataframe(df.head()) # Zeigt die ersten 5 Zeilen interaktiv an
 
