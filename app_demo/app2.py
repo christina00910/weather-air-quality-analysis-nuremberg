@@ -21,9 +21,7 @@ def load_data():
     # 3. Lade die Datei mit dem absoluten Pfad
     df = pd.read_csv(file_path)
     
-    # ... hier folgt dein restlicher Code (Datum parsen etc.) ...
-    return df
-    
+   
     # 2. Datum parsen und echten Timestamp aus 'datum' und 'stunde' generieren
     df['datum'] = pd.to_datetime(df['datum'], errors='coerce')
     df['timestamp'] = df['datum'] + pd.to_timedelta(df['stunde'], unit='h')
