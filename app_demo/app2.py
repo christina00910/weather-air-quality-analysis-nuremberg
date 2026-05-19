@@ -1,3 +1,4 @@
+import pathlib
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -11,8 +12,17 @@ st.title("🌤️ Luftqualität & Wetter-Dynamik in Bayern")
 
 @st.cache_data
 def load_data():
-    # 1. Echte Rohdaten laden (Passe den Pfad an, falls die Datei im Ordner 'data/' liegt)
-    df = pd.read_csv("data/Schadstoff_Wetter.csv")
+    # 1. Ermittelt den absoluten Pfad des Ordners, in dem app2.py liegt
+    base_dir = pathlib.Path(__file__).parent.resolve()
+    
+    # 2. Baut den Pfad exakt zusammen: .../app_demo/data/Schadstoff_Wetter.csv
+    file_path = base_dir / "data" / "Schadstoff_Wetter.csv"
+    
+    # 3. Lade die Datei mit dem absoluten Pfad
+    df = pd.read_csv(file_path)
+    
+    # ... hier folgt dein restlicher Code (Datum parsen etc.) ...
+    return df
     
     # 2. Datum parsen und echten Timestamp aus 'datum' und 'stunde' generieren
     df['datum'] = pd.to_datetime(df['datum'], errors='coerce')
