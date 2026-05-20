@@ -89,45 +89,85 @@ with tab1:
 with tab2:
     st.header("Das Ozon-Paradoxon im Hochsommer")
     st.markdown("Ozon entsteht durch Sonneneinstrahlung unter Verbrauch von NO₂.")
-    
-    # Dynamische Jahresauswahl für den Nutzer
-    verfuegbare_jahre = df['Jahr'].dropna().unique()
-    selected_year = st.selectbox("Wähle ein Jahr für den Sommer-Zoom:", sorted(verfuegbare_jahre, reverse=True))
-    
-    # Filtern auf Juli (Monat 7) des gewählten Jahres (erste 14 Tage für Übersichtlichkeit)
-    df_sommer = df[(df['Monat'] == 7) & (df['Jahr'] == selected_year)].head(24*14) 
-    
-    fig_ozon = go.Figure()
 
-    # Temperatur im Hintergrund
+# 1. Datums- und Uhrzeitspalte generieren
+if 'Datum_Uhrzeit' not in df.columns:
+    df['Datum_Uhrzeit'] = pd.to_datetime(df['datum']) + pd.to_timedelta(df['stunde'], unit='h')
+
+# Dynamische Jahresauswahl für den Nutzer
+verfuegbare_jahre = df['Datum_Uhrzeit'].dt.year.dropna().unique()
+selected_year_ozon = st.selectbox("Wähle ein Jahr für den Sommer-Zoom:", sorted(verfuegbare_jahre, reverse=True))
+
+# Filtern auf Juli (Monat 7) des gewählten Jahres (erste 14 Tage)
+df_sommer = df[
+    (df['Datum_Uhrzeit'].dt.month == 7) & (df['Datum_Uhrzeit'].dt.year == selected_year_ozon)
+].sort_values('Datum_Uhrzeit').head(24 * 14).copy()
+
+# DATA CLEANING: Nächte haben 0 Minuten Sonnenschein (NaNs auffüllen)
+df_sommer['sonnenscheindauer_minuten'] = df_sommer['sonnenscheindauer_minuten'].fillna(0)
+
+
+# INTERAKTIVES FEATURE: Nutzer wählt den Hintergrund-Treiber
+hintergrund_wahl = st.radio(
+    "Wähle den primären Einflussfaktor für den Hintergrund:",
+    options=["Temperatur (°C)", "Sonnenscheindauer (Minuten/Stunde)"],
+    horizontal=True
+)
+
+fig_ozon = go.Figure()
+
+# 2. Dynamischer Hintergrund-Trace je nach Auswahl
+if hintergrund_wahl == "Temperatur (°C)":
     fig_ozon.add_trace(go.Scatter(
-        x=df_sommer['timestamp'], y=df_sommer['temperatur'],
+        x=df_sommer['Datum_Uhrzeit'], y=df_sommer['temperatur'],
         name="Temperatur (°C)", fill='tozeroy', mode='lines',
-        line=dict(color='rgba(255, 165, 0, 0.3)'), yaxis='y1'
+        line=dict(color='rgba(255, 165, 0, 0.25)'), yaxis='y1'
     ))
-
-    # Ozon (steigt bei Sonne/Hitze)
+    y1_title = "Temperatur (°C)"
+else:
     fig_ozon.add_trace(go.Scatter(
-        x=df_sommer['timestamp'], y=df_sommer['o3'],
-        name="Ozon (µg/m³)", mode='lines',
-        line=dict(color='#00CC96', width=3), yaxis='y2'
+        x=df_sommer['Datum_Uhrzeit'], y=df_sommer['sonnenscheindauer_minuten'],
+        name="Sonnenscheindauer (Min/Std)", fill='tozeroy', mode='lines',
+        line=dict(color='rgba(255, 235, 59, 0.25)'), yaxis='y1'
     ))
+    y1_title = "Sonnenscheindauer (Minuten/Stunde)"
 
-    # NO2 (wird verbraucht, verhält sich gegenläufig)
-    fig_ozon.add_trace(go.Scatter(
-        x=df_sommer['timestamp'], y=df_sommer['no2'],
-        name="NO₂ (µg/m³)", mode='lines',
-        line=dict(color='#EF553B', width=3, dash='dot'), yaxis='y2'
-    ))
+# 3. Die Schadstoff-Kurven (bleiben auf der rechten Y-Achse konstant)
+# Ozon (o3)
+fig_ozon.add_trace(go.Scatter(
+    x=df_sommer['Datum_Uhrzeit'], y=df_sommer['o3'],
+    name="Ozon (O₃ in µg/m³)", mode='lines',
+    line=dict(color='#00CC96', width=3), yaxis='y2'
+))
 
-    fig_ozon.update_layout(
-        title=f"Zusammenspiel im Juli {int(selected_year)}",
-        template="plotly_dark",
-        yaxis=dict(title="Temperatur (°C)", side='left', showgrid=False),
-        yaxis2=dict(title="Schadstoffe (µg/m³)", side='right', overlaying='y', showgrid=True),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    st.plotly_chart(fig_ozon, use_container_width=True)
+# Stickstoffdioxid (no2)
+fig_ozon.add_trace(go.Scatter(
+    x=df_sommer['Datum_Uhrzeit'], y=df_sommer['no2'],
+    name="NO₂ (µg/m³)", mode='lines',
+    line=dict(color='#EF553B', width=3, dash='dot'), yaxis='y2'
+))
+
+# 4. Layout-Updates mit dynamischen Achsenbeschriftungen
+fig_ozon.update_layout(
+    title=f"Zusammenspiel im Juli {int(selected_year_ozon)}",
+    template="plotly_dark",
+    yaxis=dict(title=y1_title, side='left', showgrid=False),
+    yaxis2=dict(title="Schadstoffkonzentration (µg/m³)", side='right', overlaying='y', showgrid=True),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    margin=dict(l=40, r=40, t=80, b=40)
+)
+
+st.plotly_chart(fig_ozon, use_container_width=True)
+# 5. Die wissenschaftliche Erklärung als Textbox darunter
+st.info(f"""
+### 💡 Das Ozon-Paradoxon wissenschaftlich erklärt
+
+Wenn du im Chart auf **{hintergrund_wahl}** umschaltest, siehst du die treibende Kraft hinter den chemischen Prozessen in unserer Atmosphäre.
+
+* **Die photochemische Reaktion (Sonne als Motor):** Sobald morgens die **Sonnenscheindauer** ansteigt, trifft energiereiche UV-Strahlung auf die Luftschadstoffe. Diese Strahlung spaltet die vorhandenen $\\text{NO}_2$-Moleküle auf. Ein freies Sauerstoffatom verbindet sich sofort mit dem normalen Luftsauerstoff ($\\text{O}_2$) zu **Ozon ($\\text{O}_3$)**. 
+* **Der Verbrauchseffekt im Chart:** Weil das $\\text{NO}_2$ aktiv aufgespalten und *verbraucht* wird, um Ozon zu bilden, sinkt die $\\text{NO}_2$-Kurve tagsüber spiegelverkehrt exakt in dem Maße, wie die Ozon-Kurve nach oben schießt.
+* **Das urbane Paradoxon:** Man würde vermuten, dass Ozon dort am höchsten ist, wo der meiste Verkehr herrscht (in Städten). Das Gegenteil ist oft der Fall! Auspuffabgase enthalten auch frisches Stickstoffmonoxid ($\\text{NO}$), welches Ozon extrem schnell wieder zerstört (Titration). Auf dem Land fehlen diese frischen Abgase. Das dorthin transportierte Ozon kann nicht abgebaut werden, weshalb die Belastung in ländlichen Gebieten im Hochsommer paradoxerweise oft deutlich höher ist als an einer befahrenen Kreuzung in der Stadt.
+""")
 
 # =============================================================================
 # TAB 3: Chronobiologie (2D-Heatmap)

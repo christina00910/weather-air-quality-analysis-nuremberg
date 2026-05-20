@@ -9,7 +9,8 @@ import streamlit as st
 import pandas as pd
 import os
 from pathlib import Path 
-import plotly.express as px 
+import plotly.express as px
+import plotly.graph_objects as go
 import time
 
 # ============================================================
@@ -171,9 +172,9 @@ with tab1:
     )
 
     # KORREKTUR: Metrics wurden in den tab1-Block eingerückt
-    col1.metric("Ø Temperatur", f"{avg_temp:.1f} °C", border=True, height="content")
-    col2.metric("Max. Windgeschwindigkeit", f"{max_wind:.1f} m/s", border=True, height="content")
-    col3.metric("Gesamte Sonnenstunden", f"{sun_hours:.0f} h", border=True, height="content")
+    col1.metric("Ø Temperatur", f"{avg_temp:.1f} °C", border=True)
+    col2.metric("Max. Windgeschwindigkeit", f"{max_wind:.1f} m/s", border=True)
+    col3.metric("Gesamte Sonnenstunden", f"{sun_hours:.0f} h", border=True)
         
     st.dataframe(df_year, height=400, use_container_width=True, hide_index=True)
     
@@ -243,37 +244,17 @@ with tab2:
     elif schadstoff_auswahl == "Ozon (O₃)":
         st.subheader("Ozon (O₃) – Detailanalyse")
         st.write("Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht.")
-
-        st.header("Reinigung der Atmosphäre durch Regen")
-        st.markdown("Wie stark sinkt die Feinstaubbelastung (PM10) an Regentagen?")
-
-        # Kategorisierung in 'Trocken' und 'Regen' anhand der echten Spalte
-        df_washout = df[['niederschlagshoehe_mm', 'pm10']].dropna().copy()
-        df_washout['Wetterlage'] = df_washout['niederschlagshoehe_mm'].apply(
-            lambda x: 'Regen (>0 mm)' if x > 0 else 'Trocken (0 mm)'
-        )
-
-        fig_washout = px.box(
-            df_washout,
-            x='Wetterlage',
-            y='pm10',
-            color='Wetterlage',
-            color_discrete_map={'Trocken (0 mm)': '#ef553b', 'Regen (>0 mm)': '#636efa'},
-            title="PM10-Verteilung: Trockenheit vs. Niederschlag",
-            template="plotly_dark",
-            labels={'pm10': 'PM10 (µg/m³)'}
-        )
-
-        # Achse begrenzen (auf das 95% Quantil), um die Boxen trotz extremer Ausreißer gut zu sehen
-        q95 = df_washout['pm10'].quantile(0.95)
-        fig_washout.update_yaxes(range=[0, q95])
-
-        st.plotly_chart(fig_washout, use_container_width=True)
+        
+        st.header("Das Ozon-Paradoxon im Hochsommer")
+        st.markdown("Ozon entsteht durch Sonneneinstrahlung unter Verbrauch von NO₂.")
+        
+           
 
     elif schadstoff_auswahl == "Stickstoffdioxid (NO₂)":
         st.subheader("Stickstoffdioxid (NO₂) – Verkehrsbelastung")
         st.write("NO₂ entsteht primär bei Verbrennungsprozessen (z. B. Dieselmotoren).")
         st.info("Hier kommt die NO₂-Auswertung und der Bezug zu den WHO-Grenzwerten hin.")
+        
 
     elif schadstoff_auswahl == "Feinstaub (PM10)":
         st.subheader("Feinstaub (PM10) – Partikelanalyse")
@@ -293,8 +274,8 @@ with tab3:
 # ============================================================
 with tab4:
     st.header("📝 Technische Insights")
-    st.write("Diese Übersicht zeigt die gelösten Fallstricke und architektonischen Besonderheiten dieses Dashboards und beschreibt einige der wichtigsten Berechnungen")
-    st.info("Hier platzieren wir später detaillierte technische Informationen.")
+    
+    st.info("Dieses Dokument beschreibt die architektonischen Kniffe und gelösten Fallstricke bei der Entwicklung des Umwelt-Dashboards (*Milestone 1: Nürnberg*). Die Punkte dienen als Kernkompetenz-Nachweis für die Abschlusspräsentation im Dezember 2025.")
 
     # Pfad zur .md-Datei mit den technischen Insights
     insights_pfad = Path(__file__).parent / 'data' / 'Technische_Insights_Lessons_Learned.md'  

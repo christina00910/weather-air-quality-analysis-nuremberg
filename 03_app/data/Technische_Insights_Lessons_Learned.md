@@ -1,6 +1,4 @@
-Dieses Dokument beschreibt die architektonischen Kniffe und gelösten Fallstricke bei der Entwicklung des Umwelt-Dashboards (*Milestone 1: Nürnberg*). Die Punkte dienen als Kernkompetenz-Nachweis für die Abschlusspräsentation im Dezember 2025.
 
----
 
 ## 1. Dynamische Datenerweiterung im RAM (Spalte: `Stadt`)
 
@@ -18,7 +16,34 @@ Durch die Manipulation der Spaltenliste mittels `cols.remove('Stadt')` und `cols
 
 ---
 
-## 2. Dynamische Slider-Grenzen mittels Datetime-Auswertung
+## 2. Die Filter-Bedingung des Sliders
+
+```python
+df['Datum_Uhrzeit'].dt.year == selected_year
+df['Datum_Uhrzeit']: Greift auf die Spalte zu, in der unsere Datumsangaben stehen.
+```
+*.dt.year* ist ein sogenannter Accessor. Er sagt Pandas: „Behandle diese Spalte wie ein Datum und ziehe mir von jedem Eintrag nur das Kalenderjahr heraus“ (z. B. 2026).
+
+*== selected_year* vergleicht jedes dieser Jahre mit der Variable *selected_year* (das Jahr, das der Nutzer im Slider angeklickt hat). Das Ergebnis ist eine Liste von True (Jahr stimmt überein) und False (Jahr stimmt nicht überein).
+
+### 2.a. Das Filtern (Die äußere Klammer)
+```Python
+df[...]
+```
+Pandas nutzt diese True/False-Liste ales *booleschen Filter*. Es wirft alle Zeilen raus, die False sind, und behält nur die Zeilen, bei denen die Bedingung True war.
+
+### 2.b. Das .copy() am Ende
+
+```Python
+.copy()
+```
+Das ist ein wichtiger Best-Practice-Schritt in Pandas. Ohne .copy() hätten wir nur eine „Sicht“ (eine Verknüpfung) auf den alten Datensatz. Wenn wir später versuchen, df_year zu verändern, würde Pandas eine Warnung ausgeben (SettingWithCopyWarning). Das .copy() erstellt einen komplett neuen, unabhängigen Datensatz im Arbeitsspeicher.
+
+Wichtig für Streamlit: Da diese Zeile jedes Mal von oben nach unten ausgeführt wird, wenn ein Nutzer den Slider bewegt, sorgt sie dafür, dass unsere Diagramme oder Tabellen darunter blitzschnell und dynamisch aktualisiert werden.
+
+---
+
+## 3. Dynamische Slider-Grenzen mittels Datetime-Auswertung
 
 **Der Fallstrick:** Werden die Min- und Max-Werte eines Jahres-Sliders fest im Quellcode verankert (Hardcoding, z. B. `min_value=1980`, `max_value=2024`), stürzt die App ab, wirft Fehler oder ignoriert Daten, sobald der Datensatz in der Zukunft erweitert wird.
 
@@ -33,22 +58,30 @@ max_year = int(df['Datum_Uhrzeit'].dt.year.max())
 
 ---
 
-## 3. Optisches Feintuning: `config.toml` vs. CSS-Injection
+## 4. Optisches Feintuning: `config.toml` vs. CSS-Injection
 
 **Der Fallstrick:** Streamlits Standard-Design sieht für wissenschaftliche Dashboards oft zu großflächig aus. Die Standard-KPI-Karten (`st.metric`) nehmen extrem viel Platz weg. Standardthemen lassen sich über die `config.toml` nur grob steuern (Hintergrundfarbe, Primärfarbe), nicht aber auf granularer Elementebene.
 
 **Die Lösung:** Für das globale App-Thema wird die `config.toml` genutzt. Für chirurgisch präzises Anpassen von Schriftgrößen und Abständen wird gezielt CSS über `st.markdown(..., unsafe_allow_html=True)` direkt in die jeweiligen Tabs injiziert:
 
 ```css
-div[data-testid="stMetricLabel"] p { font-size: 14px !important; }
-div[data-testid="stMetricValue"]  { font-size: 24px !important; }
+    st.markdown(
+        f"""
+        <div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);">
+            <span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;">
+                ✅ Daten erfolgreich geladen: {len(df):,} Zeilen!
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 ```
 
 > **Präsentations-Nutzen:** Nachweis von fortgeschrittenem UI/UX-Engineering. Framework-Limitierungen werden sauber umgangen, um eine kompakte, professionelle Datendichte zu erzielen, die auf Dashboards im Industrie-Standard abgestimmt ist.
 
 ---
 
-## 4. Die `if-elif`-Logik in Tab 2 & Invertierte Delta-Farben
+## 5. Die `if-elif`-Logik in Tab 2 & Invertierte Delta-Farben
 
 ### A) Das Re-Rendering-Problem bei verschachtelten Strukturen
 
@@ -91,7 +124,7 @@ c1.metric(
 
 ---
 
-## 5. Kaskadierende Filterung: Slider, RAM-Kopie und Unter-Tabs
+## 6. Kaskadierende Filterung: Slider, RAM-Kopie und Unter-Tabs
 
 Die Daten werden im RAM hierarchisch in drei Stufen gefiltert:
 
@@ -104,3 +137,5 @@ Die Daten werden im RAM hierarchisch in drei Stufen gefiltert:
 **Der Vorteil:** Wechselt der Nutzer zwischen „Ozon" und „Feinstaub", muss nicht neu gefiltert werden – die Daten für das gewählte Jahr stehen bereits im RAM bereit. Erst eine Slider-Bewegung triggert ein neues globales Re-Rendering.
 
 > **Präsentations-Nutzen:** Nachweis von tiefem Verständnis für Performance-Optimierung, State-Management und RAM-Ressourcenschonung in modernen Web-Apps.
+
+

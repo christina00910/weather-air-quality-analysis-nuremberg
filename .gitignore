@@ -7,3 +7,4 @@ nogithub/
 .tmp.driveupload/
 .virtual_documents/
 .devcontainer/
+03_app/tests/
