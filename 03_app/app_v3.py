@@ -80,7 +80,7 @@ df = load_data()
 # Seitenleiste definieren
 with st.sidebar:
     
-    st.title("🌦️ Projekt-Menü")
+    st.write("🌦️ Filter & Einstellungen")
     st.markdown("---")
 
     with st.spinner("Loading..."):
@@ -98,11 +98,35 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
+      # Der unsichtbare Platzhalter ---
+    # Sorgt dafür, dass der letzte Inhalt nicht dauerhaft hinter dem Footer verschwindet.
+    st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
+
+    # 1. Dynamisch das kleinste und größte Jahr aus den Daten ermitteln
+    min_year = int(df['Datum_Uhrzeit'].dt.year.min())
+    max_year = int(df['Datum_Uhrzeit'].dt.year.max())
+
+    # 2. Den Slider erstellen
+    selected_year = st.sidebar.slider(
+        "Wähle ein Jahr für die Analyse:",
+        min_value=min_year,
+        max_value=max_year,
+        value=2020  # Startwert, wenn die App geöffnet wird
+    )
+    
+    # 3. Das DataFrame basierend auf der Auswahl filtern
+    # Das .copy() verhindert die Pandas 'SettingWithCopyWarning' bei späteren Berechnungen
+    df_year = df[df['Datum_Uhrzeit'].dt.year == selected_year].copy()
+    
+    # Kleines visuelles Feedback in der Sidebar
+    st.sidebar.caption(f"📊 Datensätze im Jahr {selected_year}: {len(df_year):,}")
+
+
     # Der unsichtbare Platzhalter ---
     # Sorgt dafür, dass der letzte Inhalt nicht dauerhaft hinter dem Footer verschwindet.
-    st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
 
-    # Der "Sticky" Footer mit Hintergrund ---
+    # --- Der "Sticky" Footer mit Hintergrund ---
     st.markdown(
         """
         <style>
@@ -112,49 +136,74 @@ with st.sidebar:
                 left: 0;
                 width: 100%;
                 background-color: #262730; /* Standard Streamlit Dark-Mode Seitenleisten-Farbe */
-                padding: 15px 0 20px 0; /* Abstand oben und unten */
-                text-align: center;
+                /* WICHTIG: Padding angepasst! Oben 15px, Rechts 20px, Unten 20px, Links 20px */
+                padding: 15px 20px 20px 20px; 
+                text-align: left;
                 font-size: 12px;
                 color: #888888;
                 z-index: 999; /* Zwingt den Footer in den absoluten Vordergrund */
             }
         </style>
-        
+  
         <div class="sidebar-footer">
             <hr style="margin-top: 0; margin-bottom: 10px; border-color: #444444;">
-            <b>Projekt:</b> Modulare Analyse von Wetter- und Luftqualitätsdaten<br>
+            <b>Projekt:</b> <br>Modulare Analyse von Wetter- und Luftqualitätsdaten<br>
             <b>Milestone 1:</b> Nürnberg<br>
-            <b>Team:</b> Christina, Markus, Frank<br>
+            <b>Team:</b> Christina, Markus, Frank
         </div>
         """,
         unsafe_allow_html=True
     )
 
 
+
+
 # Tabs definieren
 tab1, tab2, tab3 = st.tabs(["Wetterdaten", "Luftqualität", "Klimatrends"])    
 
-# Tab 1: Datenüberblick
+# Tab 1: Wetterdaten
 with tab1:
-    st.header("Wetterdaten")
-    st.dataframe(df.head()) # Zeigt die ersten 5 Zeilen interaktiv an
+    st.header(f"Wetterdaten für das Jahr {selected_year}")
+
+# 1. Wir teilen den Platz horizontal in 3 Spalten auf
+    col1, col2, col3 = st.columns(3)
+    
+    # 2. Wir nutzen df_year im RAM, um blitzschnell Aggregate zu berechnen
+    avg_temp = df_year['Temperatur_C'].mean()
+    max_wind = df_year['Wind_ms'].max()
+    sun_hours = df_year['Sonnenschein_min'].fillna(0).sum() / 60
+    
+    # 3. Wir befüllen die Spalten mit den fertigen Kennzahlen
+    col1.metric("Ø Temperatur", f"{avg_temp:.1f} °C")
+    col2.metric("Max. Windgeschwindigkeit", f"{max_wind:.1f} m/s")
+    col3.metric("Gesamte Sonnenstunden", f"{sun_hours:.0f} h")
+    
+    # Dataframe-Anzeige: Wir zeigen hier bewusst das gefilterte df_year an, um die Performance zu optimieren.
+    st.dataframe(df, height=200, use_container_width=True)
+
+    
+    # WICHTIG: Hier übergeben wir jetzt das GEFILTERTE df_year statt df!
+    st.dataframe(df_year, height=400, use_container_width=True)
     st.echo()
+
     # Infobox unter Grafiken
-    st.markdown    
+    st.markdown(
+    f"""
     <div style="background-color: rgba(0, 104, 249, 0.1); padding: 10px; border-radius: 0.3rem; border: 1px solid rgba(0, 104, 249, 0.2);">
         <span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;">
-            📄 Dateipfad: "data" / "Schadstoff_Wetter.csv"
+            📄 Dateipfad: "data" / "Schadstoff_Wetter.csv" <br>
+            Filterung: df_year = df[df['Datum_Uhrzeit'].dt.year == selected_year].copy()
         </span>
     </div>
-    ,
+    """,
     unsafe_allow_html=True
 )
 
-# Tab 2: Zeitreihenanalyse
+# Tab 2: Luftqualität
 with tab2:
     st.header("Luftqualität über die Zeit")
 
-# Tab 3: Korrelationen
+# Tab 3: Klimatrends
 with tab3:
     st.header("Klimatrends")  
     st.write("hier kommen Korrelationen rein")
