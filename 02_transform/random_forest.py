@@ -1,3 +1,6 @@
+#Random Forest Regressor
+#Tatsächliche Wichtigkeit der Wetterfaktoren für die Vorhersage
+
 # Bibliotheken laden
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -47,7 +50,7 @@ y = rf_df[schadstoff]
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
 # Random Forest Modell erstellen
-modell = RandomForestRegressor(n_estimators=100, random_state=42)
+modell = RandomForestRegressor(n_estimators=20, random_state=42, n_jobs=-1)
 modell.fit(x_train, y_train)
 
 # Vorhersagen treffen
@@ -77,7 +80,7 @@ plt.bar(
     importance_df["Variable"],
     importance_df["Wichtigkeit"])
 
-plt.title(f"Feature Importance für {schadstoff}")
+plt.title(f"Einfluss der Wettervariablen auf {schadstoff}")
 plt.ylabel("Wichtigkeit")
 plt.xticks(rotation=45)
 plt.show()
