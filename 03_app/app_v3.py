@@ -29,7 +29,7 @@ def load_data():
     Lädt die kombinierten Wetter- und Schadstoffdaten aus der CSV-Datei.
     """
     base_dir = Path(__file__).parent
-    data_pfad = base_dir / 'data' / 'Schadstoff_Wetter.csv'
+    data_pfad = base_dir / 'data' / 'data_2.csv'
 
     df = pd.read_csv(data_pfad)
 
@@ -44,10 +44,29 @@ def load_data():
         'windgeschwindigkeit': 'Wind_ms',
         'sonnenscheindauer_minuten': 'Sonnenschein_min',
         'luftfeuchtigkeit': 'Luftfeuchtigkeit',
+        "stunde": 'Stunde',
+        "datum": 'Datum',  
+        "station": 'Station',
+        "qualitaetsniveau_temperatur": 'Temperatur_Qualität',
         'o3': 'Ozon',
         'no2': 'NO2',
         'pm10': 'PM10',
     })
+    # NEU 1: Spalte "Stadt" dynamisch im RAM hinzufügen
+    df['Stadt'] = 'Nürnberg'
+
+    # NEU 2: Spaltenreihenfolge flexibel ändern
+    # Wir holen uns eine Liste aller aktuellen Spaltennamen
+    cols = list(df.columns)
+    
+    # Wir nehmen "Stadt" aus der Liste heraus...
+    cols.remove('Stadt')
+    
+    # ...und fügen sie an Index-Position 1 (also als zweite Spalte) wieder ein
+    cols.insert(1, 'Stadt')
+    
+    # Das DataFrame mit der neuen Spaltenreihenfolge überschreiben
+    df = df[cols]
 
     return df  
 
@@ -122,7 +141,7 @@ with st.sidebar:
 # ============================================================
 # 02 TABS DEFINIEREN & SEITENSTRUKTUR
 # ============================================================
-tab1, tab2, tab3 = st.tabs(["🌡️ Wetterdaten", "🧪 Luftqualität", "📈 Klimatrends"])    
+tab1, tab2, tab3, tab4= st.tabs(["🌡️ Wetterdaten", "🧪 Luftqualität", "📈 Klimatrends", "📝 Technische Insights"])    
 
 # ------------------------------------------------------------
 # TAB 1: WETTERDATEN
@@ -156,7 +175,7 @@ with tab1:
     col2.metric("Max. Windgeschwindigkeit", f"{max_wind:.1f} m/s", border=True, height="content")
     col3.metric("Gesamte Sonnenstunden", f"{sun_hours:.0f} h", border=True, height="content")
         
-    st.dataframe(df_year, height=400, use_container_width=True)
+    st.dataframe(df_year, height=400, use_container_width=True, hide_index=True)
     
     st.markdown(
         f"""
@@ -167,9 +186,9 @@ with tab1:
         unsafe_allow_html=True
     )
 
-# ------------------------------------------------------------
+# ============================================================
 # TAB 2: LUFTQUALITÄT
-# ------------------------------------------------------------
+# ============================================================
 with tab2:
     st.header(f"Luftqualität & Schadstoffanalyse ({selected_year})")
 
@@ -224,7 +243,32 @@ with tab2:
     elif schadstoff_auswahl == "Ozon (O₃)":
         st.subheader("Ozon (O₃) – Detailanalyse")
         st.write("Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht.")
-        st.warning("Hier platzieren wir als nächstes den Ozon-Temperatur-Scatterplot.")
+
+        st.header("Reinigung der Atmosphäre durch Regen")
+        st.markdown("Wie stark sinkt die Feinstaubbelastung (PM10) an Regentagen?")
+
+        # Kategorisierung in 'Trocken' und 'Regen' anhand der echten Spalte
+        df_washout = df[['niederschlagshoehe_mm', 'pm10']].dropna().copy()
+        df_washout['Wetterlage'] = df_washout['niederschlagshoehe_mm'].apply(
+            lambda x: 'Regen (>0 mm)' if x > 0 else 'Trocken (0 mm)'
+        )
+
+        fig_washout = px.box(
+            df_washout,
+            x='Wetterlage',
+            y='pm10',
+            color='Wetterlage',
+            color_discrete_map={'Trocken (0 mm)': '#ef553b', 'Regen (>0 mm)': '#636efa'},
+            title="PM10-Verteilung: Trockenheit vs. Niederschlag",
+            template="plotly_dark",
+            labels={'pm10': 'PM10 (µg/m³)'}
+        )
+
+        # Achse begrenzen (auf das 95% Quantil), um die Boxen trotz extremer Ausreißer gut zu sehen
+        q95 = df_washout['pm10'].quantile(0.95)
+        fig_washout.update_yaxes(range=[0, q95])
+
+        st.plotly_chart(fig_washout, use_container_width=True)
 
     elif schadstoff_auswahl == "Stickstoffdioxid (NO₂)":
         st.subheader("Stickstoffdioxid (NO₂) – Verkehrsbelastung")
@@ -236,10 +280,29 @@ with tab2:
         st.write("Feinstaubpartikel dringen tief in die Atemwege ein. Quellen sind Industrie, Heizungen und Abrieb.")
         st.info("Hier platzieren wir die Feinstaub-Statistiken.")
 
-# ------------------------------------------------------------
+# ============================================================
 # TAB 3: KLIMATRENDS
-# ------------------------------------------------------------
+# ============================================================
 with tab3:
     st.header("📈 Langzeit-Klimatrends (1980–2024)")
     st.write("Dieser Bereich analysiert die klimatischen Veränderungen über die letzten Jahrzehnte hinweg.")
     st.info("Hier visualisieren wir später die langfristige Erwärmung und Schadstoffreduktion.")
+
+# ============================================================
+# TAB 4: TECHNISCHE INSIGHTS
+# ============================================================
+with tab4:
+    st.header("📝 Technische Insights")
+    st.write("Diese Übersicht zeigt die gelösten Fallstricke und architektonischen Besonderheiten dieses Dashboards und beschreibt einige der wichtigsten Berechnungen")
+    st.info("Hier platzieren wir später detaillierte technische Informationen.")
+
+    # Pfad zur .md-Datei mit den technischen Insights
+    insights_pfad = Path(__file__).parent / 'data' / 'Technische_Insights_Lessons_Learned.md'  
+
+    # Prüfen, ob .md-Pfad existiert
+    if insights_pfad.exists():
+        with open(insights_pfad, 'r', encoding='utf-8') as file:
+            insights_inhalt = file.read()
+        st.markdown(insights_inhalt)
+    else:
+        st.warning("Die Datei mit den technischen Insights konnte nicht gefunden werden.")
