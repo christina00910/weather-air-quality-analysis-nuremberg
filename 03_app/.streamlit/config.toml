@@ -3,7 +3,7 @@
 base="dark"
 
 # Die Akzentfarbe (z.B. für Buttons, aktive Tabs, Slider)
-primaryColor="#00CC96" 
+primaryColor="rgba(1, 132, 157, 0.8)" 
 
 # Hintergrundfarbe der Hauptseite (ein tiefes, augenschonendes Dunkelblau/Grau)
 backgroundColor="#0E1117"
