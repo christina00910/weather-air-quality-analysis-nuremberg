@@ -139,3 +139,26 @@ Die Daten werden im RAM hierarchisch in drei Stufen gefiltert:
 > **Präsentations-Nutzen:** Nachweis von tiefem Verständnis für Performance-Optimierung, State-Management und RAM-Ressourcenschonung in modernen Web-Apps.
 
 
+## 6. Datenquellen & API-Erweiterung
+Um die lückenhaften historischen Ozon-Messdaten aus `data_02.csv` (seit 1980) physikalisch und meteorologisch analysieren zu können, wurde das Datengerüst durch eine automatisierte Schnittstelle erweitert:
+* **Schnittstelle:** *Open-Meteo Historical Archive API*
+* **Geografischer Fokus:** Nürnberg (49.45° N, 11.08° O)
+* **Umfang:** Lückenloser `DatetimeIndex` mit **406.152 Zeilen** (stündliche Auflösung vom 01.01.1980 bis 01.05.2026).
+* **Integrierte meteorologische Treiber (Messhöhe: 2 Meter über Boden):**
+  - `temperature_2m` (Lufttemperatur)
+  - `humidity_2m` (Relative Luftfeuchtigkeit)
+  - `direct_radiation` & `shortwave_radiation` (Direkte und globale Solarstrahlung in W/m²)
+
+## 2. Datenkonsolidierung & Zeitstempel-Harmonisierung
+Die ursprüngliche Datenstruktur in `data_02.csv` trennte zeitliche Informationen in die Spalten `datum` (String/Date) und `stunde` (Integer), während die Spalte `datumstunde` als numerischer Wert vorlag. Für eine fehlerfreie Zusammenführung wurde folgende ETL-Logik implementiert:
+
+1. **Zeitstempel-Synthese:** Kombination der atomaren Spalten zu einem standardisierten Pandas-Zeitstempel:
+   $$\text{timestamp} = \text{pd.to\_datetime}(\text{datum}) + \text{pd.to\_timedelta}(\text{stunde}, \text{unit='h'})$$
+2. **Daten-Mapping (Left Join):** Verwendung des lückenlosen API-Wetterdatensatzes als linke Basis (`how='left'`). Die historischen Ozonwerte wurden über den generierten Index exakt gematcht. 
+3. **Ergebnis:** Nicht vorhandene Messwerte werden automatisch als `NaN` maskiert, behalten jedoch ihren lückenlosen physikalischen Kontext (Wetterbedingungen der jeweiligen Stunde), was spätere Machine-Learning-Imputationen (z.B. via Random Forest) ermöglicht.
+4. **Ziel-Datei:** Speicherung des konsolidierten Datensatzes unter `data_gesamt_ozon.csv`.
+
+## 3. Implementierung in der Applikations-Architektur (Streamlit)
+Für die Integration in das interaktive *Exploration Dashboard* wird eine performante Datenhaltungs-Strategie gewählt:
+* **Separates Caching:** Um die Ladezeiten der Streamlit-App minimal zu halten, wird die Zusammenführung über den `@st.cache_data`-Decorator ausgelagert.
+* **Vorteil:** Der rechenintensive Merge der >400k Zeilen erfolgt exakt *einmal* beim Initialisieren der App. Folge-Renderings für Diagramme und Zeitreihen-Charts greifen 
