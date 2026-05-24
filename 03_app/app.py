@@ -30,7 +30,7 @@ def load_data():
     Lädt die kombinierten Wetter- und Schadstoffdaten aus der CSV-Datei.
     """
     base_dir = Path(__file__).parent
-    data_pfad = base_dir / 'data' / 'data_2.csv'
+    data_pfad = base_dir / 'data' / 'Schadstoff_Wetter.csv'
 
     df = pd.read_csv(data_pfad)
 
@@ -245,8 +245,42 @@ with tab2:
         st.subheader("Ozon (O₃) – Detailanalyse")
         st.write("Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht.")
         
-        st.header("Das Ozon-Paradoxon im Hochsommer")
-        st.markdown("Ozon entsteht durch Sonneneinstrahlung unter Verbrauch von NO₂.")
+        # Beispiel für eine dreispaltige Anordnung unter den Charts:
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            # Hier die st.info Box rein
+            pass
+
+        with col2:
+            # Hier die st.warning Box rein
+            pass
+
+        with col3:
+            # Hier die st.success Box rein
+            pass
+        # --- INFOBOX FÜR GRAFIK 1 (Heatmap) ---
+        st.info("""
+        📊 **Erkenntnis 1: Die meteorologischen Triebkräfte der Ozonbildung**
+        * **Starker Hitze-Einfluss ($+0.61$):** Die Korrelationsmatrix zeigt einen deutlichen, positiven Zusammenhang zwischen der Temperatur und dem Ozonwert. Da bodennahes Ozon ein Sekundärschadstoff ist, beschleunigen hohe Temperaturen die photochemischen Prozesse in der Atmosphäre massiv.
+        * **Sonnenschein als Katalysator ($+0.36$):** Die solare Einstrahlung liefert die notwendige UV-Energie, um Stickstoffdioxid ($NO_2$) zu spalten und die Ozonbildung in Gang zu setzen.
+        * **Der inverse Abgas-Effekt:** Während das Wetter Ozon antreibt, zeigen die Schadstoffe $NO_2$ ($-0.40$) und insbesondere das frisch emittierte $NO$ ($-0.51$) eine stark negative Korrelation. Sie wirken im städtischen Raum als Ozon-Bremse.
+        """)
+
+        # --- INFOBOX FÜR GRAFIK 2 (Scatterplot / Ozon-Paradoxon) ---
+        st.warning("""
+        🧪 **Erkenntnis 2: Das Ozon-Paradoxon (Die chemische Titration)**
+        * **Direkter Ozon-Abbau durch Verkehr:** Der steile Abfall der Trendlinie im Scatterplot beweist das Ozon-Paradoxon für den Großraum Nürnberg. Sobald die Konzentration von Stickstoffmonoxid ($NO$) durch frische Autoabgase steigt, kollabiert der Ozonwert in Sekundenschnelle ($\text{NO} + \text{O}_3 \rightarrow \text{NO}_2 + \text{O}_2$).
+        * **Das Stadt-Land-Phänomen:** In stark verkehrsbelasteten Zonen (hohe $NO$- und $NO_2$-Werte, dargestellt durch die dunkleren Punkte) wird Ozon kontinuierlich abgebaut. Das führt dazu, dass die Ozonbelastung in der Nürnberger Innenstadt paradoxerweise oft niedriger ist als in angrenzenden, verkehrsarmen Reinluftgebieten oder Wäldern, wo kein frisches $NO$ für den Abbau zur Verfügung steht.
+        """)
+
+        # --- INFOBOX FÜR DIE KORRELATIONSMATRIX ---
+        st.success("""
+        🔢 **Quick Guide: Interpretation der Korrelationskoeffizienten**
+        * **Wert nahe $+1.0$ (Starker positiver Trend):** Ein Anstieg der einen Variable führt zu einem klaren Anstieg der anderen. In deinen Daten betrifft das vor allem den Zusammenhang zwischen **Temperatur und Ozon ($+0.61$)**. Je wärmer die Luft, desto mehr Ozon bildet sich.
+        * **Wert nahe $-1.0$ (Starker inverser/negativer Trend):** Steigt ein Wert, sinkt der andere spiegelbildlich. Das ist das statistische Herzstück des Ozon-Paradoxons: Die starke negative Korrelation von **Ozon zu Stickstoffmonoxid ($-0.51$)** und **Stickstoffdioxid ($-0.40$)**. Abgase fressen Ozon auf.
+        * **Wert nahe $0.0$ (Kein linearer Zusammenhang):** Die Variablen beeinflussen sich nicht direkt linear. Ein schwach positiver Wert wie zwischen **Sonnenschein und Ozon ($+0.36$)** zeigt zwar eine Tendenz, deutet aber auch darauf hin, dass Ozon eine komplexe Kettenreaktion ist, die nicht *nur* von Minuten an Sonnenschein abhängt, sondern auch von der gestauten Hitze des Tages.
+        """)
         
            
 

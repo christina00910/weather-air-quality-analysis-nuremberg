@@ -1,6 +1,38 @@
 
+## Datenbasis & Datenbeschaffung (Data Sourcing)
 
-## 1. Dynamische Datenerweiterung im RAM (Spalte: `Stadt`)
+Die Modellierung basiert auf einer Kombination aus historischen Wetterdaten und atmosphärischen Reanalysen, die über die **Open-Meteo API** (lizenzfrei für nicht-kommerzielle Nutzung, basierend auf Open-Data-Quellen) bezogen wurden.
+
+### 1. Datenquellen & APIs
+Aufgrund der unterschiedlichen Datenstruktur und Speicherorte wurden zwei separate Endpoints abgefragt und über den Zeitstempel (`timestamp`) zusammengeführt:
+
+* **Meteorologische Treiber (Features):** 
+  * **API:** `Historical Weather API` (`/v1/archive`)
+  * **Datenbasis:** ERA5 und ERA5-Land Reanalysen (ECMWF).
+  * **Variablen:** Temperatur ($2m$), relative Luftfeuchtigkeit, Direktstrahlung, Diffusstrahlung und Globalstrahlung (`shortwave_radiation`).
+* **Luftschadstoffe & Zielvariablen:** 
+  * **API:** `Air Quality API` (`/v1/air-quality`)
+  * **Datenbasis:** CAMS (Copernicus Atmosphere Monitoring Service) Regional- und Globalkomponenten.
+  * **Variablen:** $PM_{10}$, $PM_{2.5}$, Stickstoffdioxid ($NO_2$), Kohlenmonoxid ($CO$) und Ozon ($O_3$).
+
+### 1.a. Zeitlicher Rahmen & Einschränkungen
+* **Untersuchungszeitraum:** `2013-01-01` bis `[DEIN_ENDDATUM_HIER, z.B. 2023-12-31]`
+* **Zeitliche Auflösung:** Stündlich (`hourly`)
+* **Zeitzone:** `Europe/Berlin` (inkl. automatischer Berücksichtigung von Sommer-/Winterzeit)
+
+> **⚠️ Wichtiger methodischer Hinweis (Data Science Insight):** 
+> Während reine Wetterdaten (ERA5) lückenlos bis ins Jahr 1940 zurückreichen, stehen die hochwertigen, europäisch validierten Luftschadstoff-Reanalysen des Copernicus-Dienstes (CAMS) erst **ab dem Jahr 2013** verlässlich zur Verfügung. Für ein valides Feature-Engineering (Kombination aus Chemie und Wetter) ist das Startjahr des Gesamtdatensatzes daher fix auf 2013 begrenzt.
+
+### 1.b.. Einheiten & Datenvorbereitung
+* Alle Gase und Feinstäube ($PM_{10}, PM_{2.5}, NO_2, O_3$) werden standardmäßig in **$\mu g/m^3$** (Mikrogramm pro Kubikmeter) ausgegeben; Kohlenmonoxid ($CO$) in **$\mu g/m^3$**.
+* Fehlende Werte (bedingt durch kleinere API-Ausfälle oder Reanalyse-Lücken) wurden im Zuge der Pipeline überprüft und [ergänze hier kurz deine Methode, z.B. *mittels linearer Interpolation bereinigt*].
+
+
+
+
+
+
+## 2. Dynamische Datenerweiterung im RAM (Spalte: `Stadt`)
 
 **Der Fallstrick:** Das manuelle Bearbeiten von Roh-CSV-Dateien bricht die Automatisierungskette (ETL) und macht das System starr für zukünftige Erweiterungen (z. B. Integration von München oder Augsburg).
 
@@ -16,7 +48,7 @@ Durch die Manipulation der Spaltenliste mittels `cols.remove('Stadt')` und `cols
 
 ---
 
-## 2. Die Filter-Bedingung des Sliders
+## 3. Die Filter-Bedingung des Sliders
 
 ```python
 df['Datum_Uhrzeit'].dt.year == selected_year
@@ -26,13 +58,13 @@ df['Datum_Uhrzeit']: Greift auf die Spalte zu, in der unsere Datumsangaben stehe
 
 *== selected_year* vergleicht jedes dieser Jahre mit der Variable *selected_year* (das Jahr, das der Nutzer im Slider angeklickt hat). Das Ergebnis ist eine Liste von True (Jahr stimmt überein) und False (Jahr stimmt nicht überein).
 
-### 2.a. Das Filtern (Die äußere Klammer)
+### 3.a. Das Filtern (Die äußere Klammer)
 ```Python
 df[...]
 ```
 Pandas nutzt diese True/False-Liste ales *booleschen Filter*. Es wirft alle Zeilen raus, die False sind, und behält nur die Zeilen, bei denen die Bedingung True war.
 
-### 2.b. Das .copy() am Ende
+### 3.b. Das .copy() am Ende
 
 ```Python
 .copy()
@@ -43,7 +75,7 @@ Wichtig für Streamlit: Da diese Zeile jedes Mal von oben nach unten ausgeführt
 
 ---
 
-## 3. Dynamische Slider-Grenzen mittels Datetime-Auswertung
+## 4. Dynamische Slider-Grenzen mittels Datetime-Auswertung
 
 **Der Fallstrick:** Werden die Min- und Max-Werte eines Jahres-Sliders fest im Quellcode verankert (Hardcoding, z. B. `min_value=1980`, `max_value=2024`), stürzt die App ab, wirft Fehler oder ignoriert Daten, sobald der Datensatz in der Zukunft erweitert wird.
 
@@ -58,7 +90,7 @@ max_year = int(df['Datum_Uhrzeit'].dt.year.max())
 
 ---
 
-## 4. Optisches Feintuning: `config.toml` vs. CSS-Injection
+## 5. Optisches Feintuning: `config.toml` vs. CSS-Injection
 
 **Der Fallstrick:** Streamlits Standard-Design sieht für wissenschaftliche Dashboards oft zu großflächig aus. Die Standard-KPI-Karten (`st.metric`) nehmen extrem viel Platz weg. Standardthemen lassen sich über die `config.toml` nur grob steuern (Hintergrundfarbe, Primärfarbe), nicht aber auf granularer Elementebene.
 
@@ -81,9 +113,9 @@ max_year = int(df['Datum_Uhrzeit'].dt.year.max())
 
 ---
 
-## 5. Die `if-elif`-Logik in Tab 2 & Invertierte Delta-Farben
+## 6. Die `if-elif`-Logik in Tab 2 & Invertierte Delta-Farben
 
-### A) Das Re-Rendering-Problem bei verschachtelten Strukturen
+### 6.a. Das Re-Rendering-Problem bei verschachtelten Strukturen
 
 In traditionellen Web-Frameworks müsste man komplexe Event-Listener in JavaScript schreiben, um Inhalte dynamisch auszutauschen. Streamlit arbeitet radikal anders: Sobald ein UI-Element (z. B. ein Radio-Button) bedient wird, läuft das gesamte Skript von oben nach unten neu durch. Durch die `if-elif`-Struktur:
 
@@ -96,7 +128,7 @@ elif schadstoff_auswahl == "Ozon (O₃)":
 
 …wird das Rendering hocheffizient gesteuert. Es wird im Arbeitsspeicher nur der HTML-Code für das aktive Unterthema generiert – das spart Rechenleistung im Browser des Nutzers und hält das Interface übersichtlich.
 
-### B) Die „Börsenkurs-Inversion" bei Umweltmetriken
+### 6.b. Die „Börsenkurs-Inversion" bei Umweltmetriken
 
 Standardmäßig interpretiert `st.metric` einen positiven Delta-Wert als *gut/steigend* (grün) und einen negativen als *schlecht/sinkend* (rot) – perfekt für Aktienkurse oder Umsatzstatistiken.
 
@@ -124,7 +156,7 @@ c1.metric(
 
 ---
 
-## 6. Kaskadierende Filterung: Slider, RAM-Kopie und Unter-Tabs
+## 7. Kaskadierende Filterung: Slider, RAM-Kopie und Unter-Tabs
 
 Die Daten werden im RAM hierarchisch in drei Stufen gefiltert:
 
@@ -139,26 +171,27 @@ Die Daten werden im RAM hierarchisch in drei Stufen gefiltert:
 > **Präsentations-Nutzen:** Nachweis von tiefem Verständnis für Performance-Optimierung, State-Management und RAM-Ressourcenschonung in modernen Web-Apps.
 
 
-## 6. Datenquellen & API-Erweiterung
-Um die lückenhaften historischen Ozon-Messdaten aus `data_02.csv` (seit 1980) physikalisch und meteorologisch analysieren zu können, wurde das Datengerüst durch eine automatisierte Schnittstelle erweitert:
-* **Schnittstelle:** *Open-Meteo Historical Archive API*
-* **Geografischer Fokus:** Nürnberg (49.45° N, 11.08° O)
-* **Umfang:** Lückenloser `DatetimeIndex` mit **406.152 Zeilen** (stündliche Auflösung vom 01.01.1980 bis 01.05.2026).
-* **Integrierte meteorologische Treiber (Messhöhe: 2 Meter über Boden):**
-  - `temperature_2m` (Lufttemperatur)
-  - `humidity_2m` (Relative Luftfeuchtigkeit)
-  - `direct_radiation` & `shortwave_radiation` (Direkte und globale Solarstrahlung in W/m²)
+## 8. Technische Insights: Speicherstrategie & Performance-Optimierung
 
-## 2. Datenkonsolidierung & Zeitstempel-Harmonisierung
-Die ursprüngliche Datenstruktur in `data_02.csv` trennte zeitliche Informationen in die Spalten `datum` (String/Date) und `stunde` (Integer), während die Spalte `datumstunde` als numerischer Wert vorlag. Für eine fehlerfreie Zusammenführung wurde folgende ETL-Logik implementiert:
+### Ausgangslage & Hybrid-Architektur
+Für die Plattform wird ein hybrider Speicheransatz implementiert, der nun auf **zwei getrennten Datengrundlagen** basiert:
+1. **Basis-CSV:** Wird weiterhin für die allgemeinen Kernfunktionen und Standard-Datenstrukturen der Anwendung genutzt.
+2. **Parquet-Datei (Ozon-Tab):** Wird exklusiv für das Analyse-Modul des *Ozon-Paradoxons* eingesetzt. Da hier massiv verdichtete, stündliche Klimadaten seit 1980 für den Stadt-Land-Vergleich (Nürnberg vs. Schleswig) verarbeitet werden, stößt das CSV-Format an funktionale Grenzen. Der Wechsel auf ein spaltenorientiertes Format löst die daraus resultierenden Performance-Engpässe.
 
-1. **Zeitstempel-Synthese:** Kombination der atomaren Spalten zu einem standardisierten Pandas-Zeitstempel:
-   $$\text{timestamp} = \text{pd.to\_datetime}(\text{datum}) + \text{pd.to\_timedelta}(\text{stunde}, \text{unit='h'})$$
-2. **Daten-Mapping (Left Join):** Verwendung des lückenlosen API-Wetterdatensatzes als linke Basis (`how='left'`). Die historischen Ozonwerte wurden über den generierten Index exakt gematcht. 
-3. **Ergebnis:** Nicht vorhandene Messwerte werden automatisch als `NaN` maskiert, behalten jedoch ihren lückenlosen physikalischen Kontext (Wetterbedingungen der jeweiligen Stunde), was spätere Machine-Learning-Imputationen (z.B. via Random Forest) ermöglicht.
-4. **Ziel-Datei:** Speicherung des konsolidierten Datensatzes unter `data_gesamt_ozon.csv`.
+---
 
-## 3. Implementierung in der Applikations-Architektur (Streamlit)
-Für die Integration in das interaktive *Exploration Dashboard* wird eine performante Datenhaltungs-Strategie gewählt:
-* **Separates Caching:** Um die Ladezeiten der Streamlit-App minimal zu halten, wird die Zusammenführung über den `@st.cache_data`-Decorator ausgelagert.
-* **Vorteil:** Der rechenintensive Merge der >400k Zeilen erfolgt exakt *einmal* beim Initialisieren der App. Folge-Renderings für Diagramme und Zeitreihen-Charts greifen 
+### Die Vorteile von Parquet im Ozon-Modul
+
+#### 1. Speicherkapazität (Komprimierung)
+CSV-Dateien speichern Daten zeilenweise als Klartext ab, was bei Millionen von Zeilen zu immensem Overhead führt. Parquet nutzt eine **spaltenorientierte (columnar) Speicherarchitektur**. Da in einer Spalte immer derselbe Datentyp liegt (z. B. Fließkommazahlen für die Temperatur), greifen Komprimierungsalgorithmen (wie Snappy) extrem effizient. 
+* **Effekt:** Die Dateigröße schrumpft im Vergleich zu einer unkomprimierten CSV um **70–90 %**. Das schont den lokalen Festplattenspeicher und reduziert den RAM-Verbrauch beim Einlesen drastisch.
+
+#### 2. Ladezeitvorteil & Streamlit-Performance
+In Streamlit führt jede Benutzerinteraktion (z. B. das Umschalten zwischen Nürnberg und Schleswig) zu einem vollständigen Rerun des Skripts. 
+* **I/O-Schnittgeschwindigkeit:** Während bei einer CSV immer die *gesamte* Datei sequenziell von der Festplatte gelesen werden muss, erlaubt Parquet das gezielte Laden einzelner Spalten (`columns=['timestamp', 'stadt', 'temperatur_c']`). 
+* **Typsicherheit:** Zeitaufwendiges Parsen von Datums- und Zeitzonen-Strings entfällt komplett. Das vordefinierte Schema übergibt die Datentypen nativ an Pandas. Das Laden und Filtern der Daten geschieht in Streamlit dadurch nahezu **in Echtzeit (Faktor 10x bis 100x schneller als CSV)**.
+
+#### 3. Nahtlose Skalierung in der Cloud (AWS Athena)
+Für eine spätere Überführung des Projekts in eine Cloud-Infrastruktur legt Parquet das fundamentale Design fest:
+* **Serverless Analytics mit AWS Athena:** Athena berechnet die Abfragekosten exklusiv basierend auf der Menge der von S3 gescannten Daten. 
+* **Kosteneffizienz in der Praxis:** Führt man eine SQL-Abfrage aus, die nur den Mittelwert der Temperatur berechnet, scannt Athena dank des spaltenbasierten Parquet-Formats auch *nur diese eine Spalte* (und überspringt Windrichtung, Strahlung etc.). Zusammen mit der starken Komprimierung senkt dies die Datenmenge pro Abfrage im Vergleich zu CSV oft um **über 90 %**, was die Cloud-Infrastruktur extrem kosteneffizient und performant macht.
