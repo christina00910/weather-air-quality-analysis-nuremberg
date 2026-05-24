@@ -14,7 +14,7 @@ df["datum"] = pd.to_datetime(df["datum"])
 df = df[df["datum"].dt.year >= 2008]
 
 # Zielvariable festlegen
-schadstoff = "no2"
+schadstoff = "pm10"
 
 # Zeitvariablen erstellen
 df["wochentag"] = df["datum"].dt.dayofweek
@@ -74,4 +74,34 @@ plt.bar(schadstoff_jahreszeit.index, schadstoff_jahreszeit.values)
 plt.title(f"Durchschnittliche {schadstoff.upper()}-Werte nach Jahreszeit")
 plt.xlabel("Jahreszeit")
 plt.ylabel(f"Durchschnittlicher {schadstoff.upper()}-Wert")
+plt.show()
+
+# Durchschnitt Rush Hour vs Nicht-Rush Hour
+# Dadurch wird sichtbar, ob während typischer Berufsverkehrszeiten
+# höhere Schadstoffwerte auftreten.
+schadstoff_rushhour = df.groupby("rush_hour")[schadstoff].mean()
+plt.figure(figsize=(6,5))
+plt.bar(
+    ["Keine Rush Hour", "Rush Hour"],
+    schadstoff_rushhour.values)
+plt.title(f"{schadstoff.upper()}: Rush Hour vs Nicht-Rush Hour")
+plt.ylabel(f"Durchschnittlicher {schadstoff.upper()}-Wert")
+plt.show()
+
+# Durchschnittliche Schadstoffwerte pro Stunde analysieren
+# Dadurch wird sichtbar, wie sich die Werte im Tagesverlauf verändern.
+
+schadstoff_stunde = df.groupby("stunde")[schadstoff].mean()
+
+plt.figure(figsize=(12,6))
+plt.plot(
+    schadstoff_stunde.index,
+    schadstoff_stunde.values,
+    linewidth=2)
+plt.title(f"Durchschnittliche {schadstoff.upper()}-Werte im Tagesverlauf")
+plt.xlabel("Stunde")
+plt.ylabel(f"Durchschnittlicher {schadstoff.upper()}-Wert")
+plt.xticks(range(0, 24))
+plt.grid()
+plt.tight_layout()
 plt.show()

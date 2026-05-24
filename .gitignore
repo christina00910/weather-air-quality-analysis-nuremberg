@@ -1,10 +1,20 @@
 #Ordner, die ignoriert werden
-docs/
-.testskripte/
+
 .ipynb_checkpoints/
+ipynb_checkpoints/
 dsi_env/
 nogithub/
 .tmp.driveupload/
 .virtual_documents/
 .devcontainer/
-03_app/tests/
+testskripte/
+app_demo/
+archiv/
+
+# Python Virtual Environments
+.venv/
+venv/
+
+# Environment Configuration Files
+.env
+.env.*
