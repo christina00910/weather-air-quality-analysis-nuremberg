@@ -13,6 +13,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import time
 
+import analyse as a
 # ============================================================
 # 00 SEITENKONFIGURATION & CACHING
 # ============================================================
@@ -24,55 +25,52 @@ st.set_page_config(
     layout="wide"
 )
 
+def showEDAPlots (dfOrginal, stoff)  :        
+    fig = a.calcMeanYear (dfOrginal, stoff)
+    st.plotly_chart(fig, use_container_width=True)
+
+    fig = a.calcMeanSaisonYear (dfOrginal, stoff)
+    st.plotly_chart(fig, use_container_width=True)
+
+    fig = a.rushHourEffekt (dfOrginal, stoff) 
+    st.pyplot(fig)
+        
+#    fig = a.inversionswetter (dfOrginal, stoff)
+#    st.pyplot(fig)
+
+#    fig = a.seasonalInfluence (dfOrginal, stoff)
+#    st.pyplot(fig)
+
+#    fig = a.smogVSNormal (dfOrginal, stoff)
+#    st.pyplot(fig)
+    
+    return
+
 @st.cache_data
-def load_data():
+def load ():
     """
     Lädt die kombinierten Wetter- und Schadstoffdaten aus der CSV-Datei.
     """
     base_dir = Path(__file__).parent
     data_pfad = base_dir / 'data' / 'data_2.csv'
 
-    df = pd.read_csv(data_pfad)
+    dfRead = pd.read_csv(data_pfad)
 
-    df['Datum_Uhrzeit'] = pd.to_datetime(
-        df['datumstunde'].astype(str), 
+    dfRead['datum'] = pd.to_datetime(dfRead['datum'])
+    
+    dfRead ['datumstunde'] = pd.to_datetime(
+        dfRead ['datumstunde'].astype(str), 
         format='%Y%m%d%H', 
         errors='coerce'
     )
+    spaltenList = ['datum', 'stunde', 'temperatur', 'luftfeuchtigkeit',  'windgeschwindigkeit', 'windrichtung',  'luftdruck', 'niederschlagshoehe_mm', 'sonnenscheindauer_minuten',  'gesamtbewoelkung', 'no2', 'o3', 'pm10', 'pm2x5']
 
-    df = df.rename(columns={
-        'temperatur': 'Temperatur_C',
-        'windgeschwindigkeit': 'Wind_ms',
-        'sonnenscheindauer_minuten': 'Sonnenschein_min',
-        'luftfeuchtigkeit': 'Luftfeuchtigkeit',
-        "stunde": 'Stunde',
-        "datum": 'Datum',  
-        "station": 'Station',
-        "qualitaetsniveau_temperatur": 'Temperatur_Qualität',
-        'o3': 'Ozon',
-        'no2': 'NO2',
-        'pm10': 'PM10',
-    })
-    # NEU 1: Spalte "Stadt" dynamisch im RAM hinzufügen
-    df['Stadt'] = 'Nürnberg'
+    dfO = dfRead[spaltenList].copy()
+    return dfO  
 
-    # NEU 2: Spaltenreihenfolge flexibel ändern
-    # Wir holen uns eine Liste aller aktuellen Spaltennamen
-    cols = list(df.columns)
-    
-    # Wir nehmen "Stadt" aus der Liste heraus...
-    cols.remove('Stadt')
-    
-    # ...und fügen sie an Index-Position 1 (also als zweite Spalte) wieder ein
-    cols.insert(1, 'Stadt')
-    
-    # Das DataFrame mit der neuen Spaltenreihenfolge überschreiben
-    df = df[cols]
+dfOrginal  = load ()
 
-    return df  
-
-df = load_data()
-
+#df = load_data()
 # ============================================================
 # 01 SIDEBAR-KONFIGURATION
 # ============================================================
@@ -87,7 +85,7 @@ with st.sidebar:
         f"""
         <div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);">
             <span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;">
-                ✅ Daten erfolgreich geladen: {len(df):,} Zeilen!
+                ✅ Daten erfolgreich geladen: {len(dfOrginal):,} Zeilen!
             </span>
         </div>
         """,
@@ -96,8 +94,8 @@ with st.sidebar:
 
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
 
-    min_year = int(df['Datum_Uhrzeit'].dt.year.min())
-    max_year = int(df['Datum_Uhrzeit'].dt.year.max())
+    min_year = int(dfOrginal['datum'].dt.year.min())
+    max_year = int(dfOrginal['datum'].dt.year.max())
 
     selected_year = st.sidebar.slider(
         "Wähle ein Jahr für die Analyse:",
@@ -106,7 +104,7 @@ with st.sidebar:
         value=2023 
     )
   
-    df_year = df[df['Datum_Uhrzeit'].dt.year == selected_year].copy()
+    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year].copy()
 
     st.sidebar.caption(f"📊 Datensätze im Jahr {selected_year}: {len(df_year):,}")
     st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
@@ -152,9 +150,9 @@ with tab1:
     
     col1, col2, col3 = st.columns(3)
     
-    avg_temp = df_year['Temperatur_C'].mean()
-    max_wind = df_year['Wind_ms'].max()
-    sun_hours = df_year['Sonnenschein_min'].fillna(0).sum() / 60
+    avg_temp = df_year['temperatur'].mean()
+    max_wind = df_year['windgeschwindigkeit'].max()
+    sun_hours = df_year['sonnenscheindauer_minuten'].fillna(0).sum() / 60
     
     # KORREKTUR: CSS wurde in den tab1-Block eingerückt
     st.markdown(
@@ -208,9 +206,9 @@ with tab2:
         
         c1, c2, c3 = st.columns(3)
         
-        mean_ozon = df_year['Ozon'].mean()
-        mean_no2  = df_year['NO2'].mean()
-        mean_pm10 = df_year['PM10'].mean()
+        mean_ozon = df_year['o3'].mean()
+        mean_no2  = df_year['no2'].mean()
+        mean_pm10 = df_year['pm10'].mean()
         
         diff_ozon = mean_ozon - 100
         diff_no2  = mean_no2 - 25
@@ -242,24 +240,24 @@ with tab2:
         st.info("Hier kommt später irgendein kombinierter Plotly-Linienchart für alle Schadstoffe hin.")
 
     elif schadstoff_auswahl == "Ozon (O₃)":
+
+        stoff = 'o3'
         st.subheader("Ozon (O₃) – Detailanalyse")
         st.write("Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht.")
-        
-        st.header("Das Ozon-Paradoxon im Hochsommer")
-        st.markdown("Ozon entsteht durch Sonneneinstrahlung unter Verbrauch von NO₂.")
-        
-           
+        showEDAPlots (dfOrginal, stoff)
 
     elif schadstoff_auswahl == "Stickstoffdioxid (NO₂)":
-        st.subheader("Stickstoffdioxid (NO₂) – Verkehrsbelastung")
+        stoff = 'no2'
+        st.subheader("Stickstoffdioxid (NO₂) – Analysen")
         st.write("NO₂ entsteht primär bei Verbrennungsprozessen (z. B. Dieselmotoren).")
-        st.info("Hier kommt die NO₂-Auswertung und der Bezug zu den WHO-Grenzwerten hin.")
-        
+        showEDAPlots (dfOrginal, stoff)
 
     elif schadstoff_auswahl == "Feinstaub (PM10)":
+        stoff = 'pm10'
         st.subheader("Feinstaub (PM10) – Partikelanalyse")
         st.write("Feinstaubpartikel dringen tief in die Atemwege ein. Quellen sind Industrie, Heizungen und Abrieb.")
         st.info("Hier platzieren wir die Feinstaub-Statistiken.")
+        showEDAPlots (dfOrginal, stoff)
 
 # ============================================================
 # TAB 3: KLIMATRENDS
