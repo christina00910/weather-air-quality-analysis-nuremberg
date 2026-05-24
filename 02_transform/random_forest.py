@@ -11,7 +11,7 @@ from sklearn.metrics import r2_score, mean_absolute_error
 
 
 # Datensatz laden
-df = pd.read_csv("02_transform/Schadstoff_Wetter.csv")
+df = pd.read_csv("02_transform/data_2.csv")
 
 # Datum umwandeln
 df["datum"] = pd.to_datetime(df["datum"])
@@ -44,13 +44,14 @@ features_wetter = [
 # Erweitertes Modell
 # Dieses Modell ergänzt die Wetterdaten um zeitliche Faktoren.
 features_erweitert = features_wetter + [
+    "stunde",
     "rush_hour",
     "wochenende",
     "monat"]
 
 
 # Funktion für Random-Forest-Modell
-def random_forest_analyse(features, titel):
+def random_forest_analyse(features, modellname):
 
     # Relevante Spalten auswählen und fehlende Werte entfernen
     daten = df[features + [schadstoff]].dropna()
@@ -62,10 +63,17 @@ def random_forest_analyse(features, titel):
     y = daten[schadstoff]
 
     # Trainings- und Testdaten aufteilen
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(
+        x,
+        y,
+        test_size=0.2,
+        random_state=42)
 
     # Random-Forest-Modell erstellen
-    modell = RandomForestRegressor(n_estimators=20, random_state=42, n_jobs=-1)
+    modell = RandomForestRegressor(
+        n_estimators=20,
+        random_state=42,
+        n_jobs=-1)
 
     # Modell trainieren
     modell.fit(x_train, y_train)
@@ -76,29 +84,64 @@ def random_forest_analyse(features, titel):
     # Modellbewertung
     r2 = r2_score(y_test, vorhersage)
     mae = mean_absolute_error(y_test, vorhersage)
-    print("\n" + titel)
-    print("R²:", r2)
-    print("MAE:", mae)
 
-    # Feature Importance
-    importance_df = pd.DataFrame({"Variable": x.columns, "Wichtigkeit": modell.feature_importances_}).sort_values(by="Wichtigkeit", ascending=False)
+    # Feature Importance berechnen
+    importance_df = pd.DataFrame({
+        "Variable": x.columns,
+        "Wichtigkeit": modell.feature_importances_})
+
+    importance_df = importance_df.sort_values(
+        by="Wichtigkeit",
+        ascending=False)
+
+    # Werte runden
+    importance_df["Wichtigkeit"] = importance_df["Wichtigkeit"].round(3)
+
+    # Ergebnisse anzeigen
+    print("\n" + modellname)
+    print("R²:", round(r2, 3))
+    print("MAE:", round(mae, 3))
     print(importance_df)
 
-    # Visualisierung
-    plt.figure(figsize=(10, 6))
-    plt.bar(importance_df["Variable"], importance_df["Wichtigkeit"])
-    plt.title(f"{titel} für {schadstoff.upper()}")
-    plt.ylabel("Wichtigkeit")
+    # ------------------------------------------------------------
+    # Grafik erstellen
+    # ------------------------------------------------------------
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Balkendiagramm erstellen
+    ax.bar(
+        importance_df["Variable"],
+        importance_df["Wichtigkeit"])
+
+    # Titel
+    ax.set_title(
+        f"{modellname} für {schadstoff.upper()}",
+        fontsize=15,
+        fontweight="bold")
+
+    # Modellbewertung anzeigen
+    ax.text(0.5, 0.95, f"R² = {r2:.3f} | MAE = {mae:.3f}",
+        transform=ax.transAxes,
+        ha="center",
+        fontsize=11)
+
+    # Achsenbeschriftungen
+    ax.set_xlabel("Einflussvariable")
+    ax.set_ylabel("Wichtigkeit")
+
+    # X-Achse drehen
     plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
     plt.show()
 
+
 # Modell 1: Wettervariablen
 random_forest_analyse(
     features_wetter,
-    "Wichtigkeit der Wettervariablen")
+    "Modell 1: Wettervariablen")
 
 # Modell 2: Wettervariablen und Zeitfaktoren
 random_forest_analyse(
     features_erweitert,
-    "Wichtigkeit der Wetter- und Zeitfaktoren")
+    "Modell 2: Wettervariablen und Zeitfaktoren")

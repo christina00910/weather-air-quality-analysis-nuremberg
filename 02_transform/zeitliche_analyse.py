@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Daten laden
-df = pd.read_csv("02_transform/Schadstoff_Wetter.csv")
+df = pd.read_csv("02_transform/data_2.csv")
 
 # Datum umwandeln
 df["datum"] = pd.to_datetime(df["datum"])
@@ -105,3 +105,4 @@ plt.xticks(range(0, 24))
 plt.grid()
 plt.tight_layout()
 plt.show()
+
