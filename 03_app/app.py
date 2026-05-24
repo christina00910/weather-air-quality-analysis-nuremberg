@@ -142,7 +142,7 @@ with st.sidebar:
 # ============================================================
 # 02 TABS DEFINIEREN & SEITENSTRUKTUR
 # ============================================================
-tab1, tab2, tab3, tab4= st.tabs(["🌡️ Wetterdaten", "🧪 Luftqualität", "📈 Klimatrends", "📝 Technische Insights"])    
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Startseite/Projektüberblick", "Explorative Analyse", "Korrelationsanalyse", "Multiple Regression", "Random Forest", "Vorhersage", "📝 Technische Insights"])    
 
 # ------------------------------------------------------------
 # TAB 1: WETTERDATEN
