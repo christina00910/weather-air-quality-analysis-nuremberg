@@ -16,7 +16,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
-
+import seaborn as sns
 import analyse as a
 import randomForest as r
 import korrelation as k
@@ -246,7 +246,121 @@ with tab2:
         
         st.markdown("---")
         # KORREKTUR: Doppelten if-Zweig zusammengeführt
-        st.info("Hier kommt später irgendein kombinierter Chart für alle Schadstoffe hin.")
+        
+        schadstoffe = ["no2", "pm10", "pm2x5", "o3"]
+
+        # ====== Vorbereitung: DatetimeIndex für resample ======
+        df = dfOrginal.copy()
+        df["timestamp"] = df["datum"] + pd.to_timedelta(df["stunde"], unit="h")
+        df = df.set_index("timestamp")
+
+        # ====== Jahresmittel berechnen ======
+        schadstoffe = ["no2", "pm10", "pm2x5", "o3"]
+        df_yearly_schad = df[schadstoffe].resample("YE").mean()
+        df_yearly_temp = df["temperatur"].resample("YE").mean()
+        df_yearly_schad.index = df_yearly_schad.index.year
+        df_yearly_temp.index = df_yearly_temp.index.year
+
+        # --- Prozentuale Veränderung berechnen ---
+        def proz_veraenderung(serie):
+            serie_clean = serie.dropna()
+            start_jahr = serie_clean.index.min()
+            end_jahr = serie_clean.index.max()
+            start_wert = serie_clean.iloc[0]
+            end_wert = serie_clean.iloc[-1]
+            proz = (end_wert - start_wert) / start_wert * 100
+            return proz, start_jahr, end_jahr, start_wert, end_wert
+
+        # Schöne Labels statt der rohen Spaltennamen
+        label_map = {
+            "no2":   r"NO$_2$",
+            "pm10":  "PM10",
+            "pm2x5": "PM2.5",
+            "o3":    r"O$_3$",
+        }
+
+        # seaborn darkgrid mit angepassten Farben für dunklen Hintergrund
+        plt.style.use("dark_background")
+        sns.set_theme(style="darkgrid", rc={
+            "axes.facecolor": "#1e1e1e",
+            "figure.facecolor": "#1e1e1e",
+            "grid.color": "#444444",
+            "text.color": "white",
+            "axes.labelcolor": "white",
+            "xtick.color": "white",
+            "ytick.color": "white",
+            "axes.edgecolor": "white",
+        })
+
+        veraenderungen = {}
+        for col in schadstoffe:
+            veraenderungen[label_map[col]] = proz_veraenderung(df_yearly_schad[col])
+        veraenderungen["Temperatur"] = proz_veraenderung(df_yearly_temp)
+
+        # --- Plot ---
+        fig, (ax1, ax2, ax3) = plt.subplots(
+            3, 1, figsize=(11, 10),
+            gridspec_kw={"height_ratios": [3, 2, 2]}
+        )
+
+        # Oben: Schadstoffe
+        for col in schadstoffe:
+            ax1.plot(df_yearly_schad.index, df_yearly_schad[col],
+                    marker="o", linewidth=2, label=label_map[col])
+        ax1.set_ylabel("Konzentration (µg/m³)")
+        ax1.set_title("Langzeitentwicklung der Schadstoff-Jahresmittelwerte",
+                    fontsize=12, fontweight="bold")
+        ax1.legend()
+        ax1.grid(True, alpha=0.3)
+
+        # Mitte: Temperatur
+        ax2.plot(df_yearly_temp.index, df_yearly_temp.values,
+                marker="s", linewidth=2, color="tab:red")
+        ax2.fill_between(df_yearly_temp.index, df_yearly_temp.values,
+                        alpha=0.2, color="tab:red")
+        ax2.set_xlabel("Jahr")
+        ax2.set_ylabel("Temperatur (°C)")
+        ax2.set_title("Jahresmittel-Temperatur Nürnberg",
+                    fontsize=12, fontweight="bold")
+        ax2.grid(True, alpha=0.3)
+
+        # Unten: Prozentuale Veränderung
+        labels = list(veraenderungen.keys())
+        werte = [v[0] for v in veraenderungen.values()]
+        zeitraeume = [f"{v[1]}–{v[2]}" for v in veraenderungen.values()]
+
+        farben = ["#2ca02c" if w < 0 else "#d62728" for w in werte]
+        balken = ax3.barh(labels, werte, color=farben, alpha=0.85, edgecolor="black")
+        ax3.axvline(0, color="white", linewidth=0.8)
+        ax3.set_xlabel("Veränderung (%)")
+        ax3.set_title("Prozentuale Veränderung über den Beobachtungszeitraum",
+                    fontsize=12, fontweight="bold")
+        ax3.grid(True, alpha=0.3, axis="x")
+
+        # Beschriftung INNERHALB der Balken (nahe der Nulllinie)
+        for balken_obj, wert, zeitraum in zip(balken, werte, zeitraeume):
+            breite = balken_obj.get_width()
+            y_pos = balken_obj.get_y() + balken_obj.get_height() / 2
+            # Bei negativem Balken: Text knapp rechts der Nulllinie ausrichten
+            # Bei positivem Balken: Text knapp links der Nulllinie ausrichten
+            if breite < 0:
+                x_pos = 2
+                ha = "left"
+            else:
+                x_pos = -2
+                ha = "right"
+            ax3.text(x_pos, y_pos,
+                    f"{wert:+.1f}%  ({zeitraum})",
+                    va="center", ha=ha, fontsize=10, fontweight="bold",
+                    color="white")
+
+        # X-Achse symmetrisch und mit Puffer
+        max_abs = max(abs(min(werte)), abs(max(werte)))
+        ax3.set_xlim(-max_abs * 1.15, max_abs * 1.15)
+
+        plt.tight_layout()
+        st.pyplot(fig)
+
 
     elif schadstoff_auswahl == "Ozon (O₃)":
 
