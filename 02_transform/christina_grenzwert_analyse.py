@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Daten laden
-df = pd.read_csv("02_transform/Schadstoff_Wetter.csv")
+df = pd.read_csv("02_transform/alt_data_2.csv")
 
 # Datum umwandeln
 df["datum"] = pd.to_datetime(df["datum"])
@@ -20,7 +20,7 @@ df["datum"] = pd.to_datetime(df["datum"])
 
 # Schadstoff auswählen
 # Möglich: "o3", "no2", "pm10", "pm2x5"
-schadstoff = "pm10" 
+schadstoff = "pm2x5" 
 
 # LQI-Schwellenwert ab Klasse "Mäßig"
 # Werte ab dieser Grenze gelten nicht mehr als "gut" oder "sehr gut".
@@ -47,11 +47,15 @@ ueberschreitungen_jahr = daten.groupby("jahr")["ab_maessig"].sum()
 # Grafik erstellen
 plt.figure(figsize=(12, 6))
 plt.bar(
-    ueberschreitungen_jahr.index.astype(str),
+    ueberschreitungen_jahr.index,
     ueberschreitungen_jahr.values)
 plt.title(f"Anzahl Stunden mit mindestens mäßiger Luftqualität: {schadstoff.upper()}")
 plt.xlabel("Jahr")
 plt.ylabel("Anzahl belasteter Stunden")
-plt.xticks(rotation=45)
+
+# Nur ausgewählte Jahreszahlen anzeigen
+start_jahr = int(ueberschreitungen_jahr.index.min())
+end_jahr = int(ueberschreitungen_jahr.index.max())
+plt.xticks(range(start_jahr, end_jahr + 1, 5), rotation=45)
 plt.tight_layout()
 plt.show()
