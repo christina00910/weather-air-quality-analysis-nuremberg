@@ -142,7 +142,7 @@ def calcMeanSaisonYear(dfO, stoff):
 
 def rushHourEffekt (dfo, stoff):
     # Datentypen korrigieren und Zeitstempel bauen
-     # Datentypen korrigieren und Zeitstempel bauen
+    # Datentypen korrigieren und Zeitstempel bauen
     df = dfo.copy()
     df['datum'] = pd.to_datetime(df['datum'])
     df['timestamp'] = df['datum'] + pd.to_timedelta(df['stunde'], unit='h')
