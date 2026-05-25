@@ -1,0 +1,147 @@
+/* === Google Fonts: IBM Plex importieren === */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+/* === Basis-Container === */
+.tech-tab {
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    font-size: 10px;          /* Basis-Größe wie gewünscht */
+    line-height: 1.6;
+    color: #E0E0E0;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem 0;
+}
+
+/* === Überschriften (relativ zur 10px-Basis hochskaliert) === */
+.tech-tab h2 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1.8em;         /* = 18px */
+    font-weight: 600;
+    color: #03A9B0;
+    border-bottom: 2px solid rgba(3, 149, 176, 0.3);
+    padding-bottom: 0.4rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+}
+
+.tech-tab h3 {
+    font-size: 1.4em;         /* = 14px */
+    font-weight: 600;
+    color: #FAFAFA;
+    margin-top: 1.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.tech-tab h4 {
+    font-size: 1.2em;         /* = 12px */
+    font-weight: 500;
+    color: #03A9B0;
+    margin-top: 1rem;
+    margin-bottom: 0.4rem;
+}
+
+/* === Fließtext === */
+.tech-tab p {
+    font-size: 1.1em;         /* = 11px, knapp über Basis für Lesbarkeit */
+    color: #D0D0D0;
+    margin: 0.6rem 0;
+}
+
+.tech-tab strong {
+    color: #FAFAFA;
+    font-weight: 600;
+}
+
+.tech-tab em {
+    color: #C8C8C8;
+    font-style: italic;
+}
+
+/* === Code (inline + Blöcke) === */
+.tech-tab code {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 0.95em;        /* leicht kleiner als umgebender Text */
+    background-color: rgba(3, 149, 176, 0.12);
+    color: #03A9B0;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.tech-tab pre {
+    background-color: #1E1E1E;
+    border-left: 3px solid #03A9B0;
+    border-radius: 4px;
+    padding: 0.8rem 1rem;
+    overflow-x: auto;
+    margin: 0.8rem 0;
+    font-size: 1em;           /* = 10px, Code darf kompakt sein */
+}
+
+.tech-tab pre code {
+    background-color: transparent;
+    color: #FAFAFA;
+    padding: 0;
+    font-size: 1em;
+}
+
+/* === Blockquotes (Präsentations-Nutzen-Boxen) === */
+.tech-tab blockquote {
+    background-color: rgba(3, 149, 176, 0.08);
+    border-left: 4px solid #03A9B0;
+    padding: 0.8rem 1.2rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 1.05em;
+    color: #C8C8C8;
+}
+
+.tech-tab blockquote p {
+    margin: 0.3rem 0;
+}
+
+/* === Tabellen === */
+.tech-tab table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 1.05em;
+}
+
+.tech-tab th {
+    background-color: rgba(3, 149, 176, 0.2);
+    color: #FAFAFA;
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    border-bottom: 2px solid #03A9B0;
+    font-weight: 600;
+}
+
+.tech-tab td {
+    padding: 0.4rem 0.7rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #D0D0D0;
+}
+
+/* === Listen === */
+.tech-tab ul, .tech-tab ol {
+    font-size: 1.1em;
+    padding-left: 1.4rem;
+    margin: 0.5rem 0;
+}
+
+.tech-tab li {
+    margin-bottom: 0.3rem;
+    color: #D0D0D0;
+}
+
+.tech-tab li strong {
+    color: #FAFAFA;
+}
+
+/* === Horizontale Linien === */
+.tech-tab hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 2rem 0;
+}

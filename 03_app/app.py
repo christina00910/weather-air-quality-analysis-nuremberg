@@ -12,6 +12,10 @@ from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
 import time
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.patches as mpatches
 
 import analyse as a
 # ============================================================
@@ -211,6 +215,7 @@ with tab2:
         mean_no2  = df_year['no2'].mean()
         mean_pm10 = df_year['pm10'].mean()
         
+        
         diff_ozon = mean_ozon - 100
         diff_no2  = mean_no2 - 25
         diff_pm10 = mean_pm10 - 15
@@ -244,45 +249,153 @@ with tab2:
 
         stoff = 'o3'
         st.subheader("Ozon (O₃) – Detailanalyse")
-        st.write("Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht.")
-        showEDAPlots (dfOrginal, stoff)
+        st.info("Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht. Weitere wissenschaftliche Beschreibung ergänzen......")
+        #showEDAPlots (dfOrginal, stoff)
         
-        # Beispiel für eine dreispaltige Anordnung unter den Charts:
-        col1, col2, col3 = st.columns(3)
+        st.info("Chart 1: Ozon_Paradoxon: Wie Ozon trotz Hitze und Sonne im Stadtgebiet niedriger sein kann als auf dem Land")
+        # ==============================================================================================================
+        # Chart Titrationseffekt Rush-Hour vs. Wochenende (3 Tage) - Ozon-Paradoxon
+        # 1. Zeitfenster: Sonntag und Montag aus der Hitzewelle 2018
+        # ==========================================
+        tage = {
+            '2018-07-24': 'Dienstag, 24.07.2018',
+            '2018-08-19': 'Sonntag, 19.08.2018'
+        }
 
-        with col1:
-            # Hier die st.info Box rein
-            pass
+        # ==========================================
+        # 2. Nürnberg (Stadt) - Stundenwerte laden
+        # ==========================================
+        df_stadt = pd.read_csv('data/Schadstoff_Wetter.csv')
+        df_stadt['timestamp'] = pd.to_datetime(df_stadt['datum']) + pd.to_timedelta(df_stadt['stunde'] - 1, unit='h')
 
-        with col2:
-            # Hier die st.warning Box rein
-            pass
+        # Alle nötigen Spalten extrahieren (inkl. Sonnenscheindauer)
+        df_stadt = df_stadt[['timestamp', 'o3', 'no2', 'sonnenscheindauer_minuten']].copy()
+        df_stadt.rename(columns={'o3': 'o3_stadt', 'no2': 'no2_stadt'}, inplace=True)
 
-        with col3:
-            # Hier die st.success Box rein
-            pass
-        # --- INFOBOX FÜR GRAFIK 1 (Heatmap) ---
-        st.info("""
-        📊 **Erkenntnis 1: Die meteorologischen Triebkräfte der Ozonbildung**
-        * **Starker Hitze-Einfluss ($+0.61$):** Die Korrelationsmatrix zeigt einen deutlichen, positiven Zusammenhang zwischen der Temperatur und dem Ozonwert. Da bodennahes Ozon ein Sekundärschadstoff ist, beschleunigen hohe Temperaturen die photochemischen Prozesse in der Atmosphäre massiv.
-        * **Sonnenschein als Katalysator ($+0.36$):** Die solare Einstrahlung liefert die notwendige UV-Energie, um Stickstoffdioxid ($NO_2$) zu spalten und die Ozonbildung in Gang zu setzen.
-        * **Der inverse Abgas-Effekt:** Während das Wetter Ozon antreibt, zeigen die Schadstoffe $NO_2$ ($-0.40$) und insbesondere das frisch emittierte $NO$ ($-0.51$) eine stark negative Korrelation. Sie wirken im städtischen Raum als Ozon-Bremse.
-        """)
+        # Sonnenscheindauer (Minuten/h) in Prozent umrechnen für die Darstellung
+        df_stadt['sonne_prozent'] = df_stadt['sonnenscheindauer_minuten'] / 60 * 100
 
-        # --- INFOBOX FÜR GRAFIK 2 (Scatterplot / Ozon-Paradoxon) ---
-        st.warning("""
-        🧪 **Erkenntnis 2: Das Ozon-Paradoxon (Die chemische Titration)**
-        * **Direkter Ozon-Abbau durch Verkehr:** Der steile Abfall der Trendlinie im Scatterplot beweist das Ozon-Paradoxon für den Großraum Nürnberg. Sobald die Konzentration von Stickstoffmonoxid ($NO$) durch frische Autoabgase steigt, kollabiert der Ozonwert in Sekundenschnelle ($\text{NO} + \text{O}_3 \rightarrow \text{NO}_2 + \text{O}_2$).
-        * **Das Stadt-Land-Phänomen:** In stark verkehrsbelasteten Zonen (hohe $NO$- und $NO_2$-Werte, dargestellt durch die dunkleren Punkte) wird Ozon kontinuierlich abgebaut. Das führt dazu, dass die Ozonbelastung in der Nürnberger Innenstadt paradoxerweise oft niedriger ist als in angrenzenden, verkehrsarmen Reinluftgebieten oder Wäldern, wo kein frisches $NO$ für den Abbau zur Verfügung steht.
-        """)
+        # ==========================================
+        # 3. Tiefenbach (Land) - aus vorbereiteter Parquet
+        # ==========================================
+        df_land = pd.read_parquet('data/o3_stundenwerte_2018_station_tiefenbach.parquet')
 
-        # --- INFOBOX FÜR DIE KORRELATIONSMATRIX ---
-        st.success("""
-        🔢 **Quick Guide: Interpretation der Korrelationskoeffizienten**
-        * **Wert nahe $+1.0$ (Starker positiver Trend):** Ein Anstieg der einen Variable führt zu einem klaren Anstieg der anderen. In deinen Daten betrifft das vor allem den Zusammenhang zwischen **Temperatur und Ozon ($+0.61$)**. Je wärmer die Luft, desto mehr Ozon bildet sich.
-        * **Wert nahe $-1.0$ (Starker inverser/negativer Trend):** Steigt ein Wert, sinkt der andere spiegelbildlich. Das ist das statistische Herzstück des Ozon-Paradoxons: Die starke negative Korrelation von **Ozon zu Stickstoffmonoxid ($-0.51$)** und **Stickstoffdioxid ($-0.40$)**. Abgase fressen Ozon auf.
-        * **Wert nahe $0.0$ (Kein linearer Zusammenhang):** Die Variablen beeinflussen sich nicht direkt linear. Ein schwach positiver Wert wie zwischen **Sonnenschein und Ozon ($+0.36$)** zeigt zwar eine Tendenz, deutet aber auch darauf hin, dass Ozon eine komplexe Kettenreaktion ist, die nicht *nur* von Minuten an Sonnenschein abhängt, sondern auch von der gestauten Hitze des Tages.
-        """)
+        # ==========================================
+        # 4. Merge und Plotting
+        # ==========================================
+        df_merged = pd.merge(df_stadt, df_land, on='timestamp', how='inner')
+        df_merged.set_index('timestamp', inplace=True)
+        df_merged.sort_index(inplace=True)
+
+        # Subplots: zwei Tage nebeneinander, geteilte Y-Achse für Schadstoffe
+        fig, axes = plt.subplots(1, 2, figsize=(18, 8), sharey=True)
+
+        for ax, (tag, label) in zip(axes, tage.items()):
+            # Daten für diesen Tag filtern
+            mask = (df_merged.index >= tag) & (df_merged.index <= tag + ' 23:59:59')
+            df_tag = df_merged.loc[mask]
+            
+            if df_tag.empty:
+                ax.text(0.5, 0.5, f'Keine Daten für {label}', ha='center', va='center', transform=ax.transAxes)
+                continue
+            
+            # --- Sonnenscheindauer als Hintergrundfläche (zweite Y-Achse) ---
+            ax2 = ax.twinx()
+            ax2.fill_between(df_tag.index, 0, df_tag['sonne_prozent'],
+                            color='#ffb000', alpha=0.20, zorder=0, label='Sonnenschein (% der Stunde)')
+            ax2.set_ylim(0, 100)
+            ax2.set_ylabel('Sonnenscheindauer (% der Stunde)', fontsize=11, color='#cc8800')
+            ax2.tick_params(axis='y', colors='#cc8800')
+            
+            # --- Schadstoff-Linien (vordere Y-Achse) ---
+            ax.plot(df_tag.index, df_tag['o3_land'], label='Ozon (O3) Land - Tiefenbach',
+                    color='#2ca02c', linewidth=3, zorder=3)
+            ax.plot(df_tag.index, df_tag['o3_stadt'], label='Ozon (O3) Stadt - Nürnberg',
+                    color='#7f7f7f', linewidth=2.5, zorder=3)
+            ax.plot(df_tag.index, df_tag['no2_stadt'], label='Stickstoffdioxid (NO2) Stadt - Nürnberg',
+                    color='#d62728', linestyle='--', linewidth=2, zorder=3)
+            
+            # --- Berufsverkehr-Zonen nur am Werktag ---
+            is_werktag = pd.to_datetime(tag).weekday() < 5
+            if is_werktag:
+                day = pd.to_datetime(tag)
+                ax.axvspan(day + pd.Timedelta(hours=6, minutes=30),
+                        day + pd.Timedelta(hours=9, minutes=30),
+                        color='gray', alpha=0.20, zorder=1)
+                ax.axvspan(day + pd.Timedelta(hours=15, minutes=30),
+                        day + pd.Timedelta(hours=18, minutes=30),
+                        color='gray', alpha=0.20, zorder=1)
+            
+            # Achsen-Formatierung
+            ax.xaxis.set_major_locator(mdates.HourLocator(interval=3))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+            ax.set_xlabel(f'Uhrzeit am {label}', fontsize=12)
+            ax.set_ylim(0, 170)
+            ax.grid(True, linestyle=':', alpha=0.6, zorder=0)
+            ax.set_title(label, fontsize=13, fontweight='bold', pad=10)
+
+        # Y-Label nur einmal links
+        axes[0].set_ylabel('Konzentration (µg/m³)', fontsize=12)
+
+        # Gemeinsame Legende unten
+        handles, labels = axes[0].get_legend_handles_labels()
+        handles.append(mpatches.Patch(color='#ffb000', alpha=0.20, label='Sonnenschein (% der Stunde)'))
+        labels.append('Sonnenschein (% der Stunde)')
+        handles.append(mpatches.Patch(color='gray', alpha=0.20, label='Berufsverkehr (nur Werktag)'))
+        labels.append('Berufsverkehr (nur Werktag)')
+
+        fig.legend(handles=handles, labels=labels, loc='lower center',
+                bbox_to_anchor=(0.5, -0.02), ncol=5, frameon=False, fontsize=11)
+
+        # Übergeordneter Titel
+        fig.suptitle('Chart #2:Ozon-Photochemie: Sonntag vs. Werktag (August 2018)\n'
+                    'Wie Berufsverkehr und Sonneneinstrahlung den O3/NO2-Tagesgang prägen',
+                    fontsize=16, fontweight='bold', y=1.00)
+
+        fig.tight_layout(rect=[0, 0.04, 1, 0.97])
+        st.pyplot(fig)
+
+        # ============================================================
+        # Kennzahlen + Erklärung zum Chart
+        # ============================================================
+        
+        # --- Kennzahlen-Tabelle direkt unter dem Chart ---
+        kennzahlen = pd.DataFrame({
+            'Kennzahl': ['Sonnenscheindauer', 'Temperatur (max)', 'NO₂ (max)', 'O₃ Stadt (max)', 'O₃ Land (max)'],
+            'Di, 24.07.2018': ['822 Min', '30,1 °C', '117 µg/m³', '130 µg/m³', '130 µg/m³'],
+            'So, 19.08.2018': ['774 Min', '30,5 °C', '65 µg/m³', '129 µg/m³', '151 µg/m³'],
+        })
+        st.dataframe(kennzahlen, hide_index=True, use_container_width=True)
+        
+        # --- Ausführliche Erklärung im Expander ---
+        with st.expander("📊 Was zeigt dieser Vergleich?", expanded=False):
+            st.markdown("""
+            **Die Idee: Ein natürliches Experiment**
+            
+            Beide Tage hatten **fast identisches Wetter** – Sonnenscheindauer und
+            Temperatur unterscheiden sich nur minimal. Damit ist die Photochemie
+            als Treiber „kontrolliert", und der Hauptunterschied zwischen den
+            Tagen ist der **Berufsverkehr**.
+            
+            **Was man im Chart sieht:**
+            
+            - 🌅 **Morgens am Werktag** (graue Zone): Der Berufsverkehr drückt NO₂
+              hoch, gleichzeitig bleibt das Stadt-Ozon unterdrückt – das ist der
+              **Titrations-Effekt** (NO + O₃ → NO₂ + O₂).
+            - ☀️ **Mittags** zerlegt die UV-Strahlung das NO₂ wieder, neues Ozon
+              entsteht – Stadt- und Land-Ozon nähern sich an.
+            - 🌆 **Abendspitze** am Sonntag (~21 Uhr): Auch ohne Pendlerverkehr
+              gibt es einen NO₂-Peak (Freizeitverkehr, Heimkommen).
+            - 🌿 **Tiefenbach (Land)** bleibt konstant bei ~120 µg/m³ – fernab von
+              NO₂-Quellen wird das Ozon nicht „weggefressen".
+            
+            **Methodischer Hinweis:** Der direkte Werktag-Sonntag-Vergleich bei
+            gleichem Wetter ist eine einfache Form eines *Matched-Sample-Designs*
+            – damit lässt sich der Verkehrseffekt isolieren, ohne ein komplexes
+            Regressionsmodell zu rechnen.
+            """)
+
+
                    
     elif schadstoff_auswahl == "Stickstoffdioxid (NO₂)":
         stoff = 'no2'
@@ -335,15 +448,13 @@ with tab6:
 with tab7:
     st.header("Technische Insights")
     
-    st.info("Dieses Dokument beschreibt die architektonischen Kniffe und gelösten Fallstricke bei der Entwicklung des Umwelt-Dashboards (*Milestone 1: Nürnberg*). Die Punkte dienen als Kernkompetenz-Nachweis für die Abschlusspräsentation im Dezember 2025.")
-
-    # Pfad zur .md-Datei mit den technischen Insights
-    insights_pfad = Path(__file__).parent / 'data' / 'Technische_Insights_Lessons_Learned.md'  
-
-    # Prüfen, ob .md-Pfad existiert
-    if insights_pfad.exists():
-        with open(insights_pfad, 'r', encoding='utf-8') as file:
-            insights_inhalt = file.read()
-        st.markdown(insights_inhalt)
-    else:
-        st.warning("Die Datei mit den technischen Insights konnte nicht gefunden werden.")
+    def render_tech_tab():
+        # CSS laden und injizieren
+        css = Path("tech_tab.css").read_text(encoding="utf-8")
+        st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    
+        # HTML-Content laden und rendern
+        html = Path("tech_tab_content.html").read_text(encoding="utf-8")
+        st.html(html)   # st.html (Streamlit ≥ 1.33) rendert reines HTML sauber
+    
+    render_tech_tab()
