@@ -18,13 +18,15 @@ df = df[df["datum"].dt.year >= 2008]
 
 # Zielvariable festlegen
 # Möglich: "o3", "no2", "pm10", "pm2x5"
-schadstoff = "o3"
+schadstoff = "no2"
 
 # Zeitvariablen für historische Daten erstellen
 df["wochentag"] = df["datum"].dt.dayofweek
 df["monat"] = df["datum"].dt.month
 df["wochenende"] = df["wochentag"].isin([5, 6]).astype(int)
 df["rush_hour"] = df["stunde"].isin([6, 7, 8, 9, 16, 17, 18, 19]).astype(int)
+df["heizperiode"] = df["monat"].isin([10, 11, 12, 1, 2, 3]).astype(int)
+df["nacht"] = df["stunde"].isin([22, 23, 0, 1, 2, 3, 4, 5]).astype(int)
 df["silvester"] = (((df["datum"].dt.month == 12) & (df["datum"].dt.day == 31)) |
     ((df["datum"].dt.month == 1) & (df["datum"].dt.day == 1))).astype(int)
 
@@ -42,6 +44,8 @@ features = [
     "rush_hour",
     "wochenende",
     "monat",
+    "heizperiode",
+    "nacht",
     "silvester"]
 
 # Daten vorbereiten
@@ -109,6 +113,8 @@ wochentag = zeitpunkt.dayofweek
 monat = zeitpunkt.month
 wochenende = 1 if wochentag in [5, 6] else 0
 rush_hour = 1 if stunde in [6, 7, 8, 9, 16, 17, 18, 19] else 0
+heizperiode = 1 if monat in [10, 11, 12, 1, 2, 3] else 0
+nacht = 1 if stunde in [22, 23, 0, 1, 2, 3, 4, 5] else 0
 silvester = 1 if (
     (zeitpunkt.month == 12 and zeitpunkt.day == 31) or
     (zeitpunkt.month == 1 and zeitpunkt.day == 1)) else 0
@@ -130,6 +136,8 @@ live_daten = pd.DataFrame([{
     "rush_hour": rush_hour,
     "wochenende": wochenende,
     "monat": monat,
+    "heizperiode": heizperiode,
+    "nacht": nacht,
     "silvester": silvester}])
 
 print("\nLive-Wetterdaten für die Vorhersage:")
