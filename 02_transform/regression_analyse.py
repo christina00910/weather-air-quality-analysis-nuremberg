@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Daten Laden
-df = pd.read_csv("02_transform/Schadstoff_Wetter.csv")
+df = pd.read_csv("02_transform/data_2.csv")
 
 #Spalten anzeigen
 print(df.columns)
@@ -51,6 +51,8 @@ print(df["datum"].max())
 analyse_variablen = [
     "temperatur",
     "windgeschwindigkeit",
+    "windrichtung",
+    "luftdruck",
     "relative_luftfeuchtigkeit",
     "niederschlagshoehe_mm",
     "sonnenscheindauer_minuten",
@@ -102,6 +104,7 @@ plt.show()
 # Hinweis:
 # Korrelation zeigt nur Zusammenhänge, aber keine eindeutige Ursache-Wirkung.
 
+#---------------------------------------------------------------------------------
 # Multiple Lineare Regression
 # Die Regression zeigt, wie einzelne Wettervariablen die Luftschadstoffe beeinflussen 
 # und ob ein signifikanter positiver oder negativer Zusammenhang besteht. 
@@ -109,12 +112,14 @@ plt.show()
 # jedoch nicht direkt miteinander verglichen werden (z.B. Temperatur mit Niederschlag)
 
 # Zielvariable festlegen
-schadstoff = "o3"
+schadstoff = "no2"
 
 # Einflussvariablen (Wetterdaten)
 x = df[[
     "temperatur",
     "windgeschwindigkeit",
+    "windrichtung",
+    "luftdruck",
     "relative_luftfeuchtigkeit",
     "niederschlagshoehe_mm",
     "sonnenscheindauer_minuten",
@@ -129,6 +134,8 @@ regression_df = pd.concat([x, y], axis=1).dropna()
 x = regression_df[[
     "temperatur",
     "windgeschwindigkeit",
+    "windrichtung",
+    "luftdruck",
     "relative_luftfeuchtigkeit",
     "niederschlagshoehe_mm",
     "sonnenscheindauer_minuten",
@@ -142,3 +149,70 @@ x = sm.add_constant(x)
 # Regression durchführen
 modell = sm.OLS(y, x).fit()
 print(modell.summary())
+
+# ------------------------------------------------------------
+# Regressionsergebnisse übersichtlich darstellen
+# ------------------------------------------------------------
+
+# Ergebnisse aus dem Regressionsmodell extrahieren
+regression_ergebnisse = pd.DataFrame({
+    "Variable": modell.params.index,
+    "Koeffizient": modell.params.values,
+    "p-Wert": modell.pvalues.values})
+
+# Konstante entfernen, da sie für die Interpretation der Einflussvariablen weniger relevant ist
+regression_ergebnisse = regression_ergebnisse[
+    regression_ergebnisse["Variable"] != "const"]
+
+# Signifikanz bewerten
+regression_ergebnisse["Signifikant"] = regression_ergebnisse["p-Wert"].apply(
+    lambda p: "Ja" if p < 0.05 else "Nein")
+
+# Werte runden
+regression_ergebnisse["Koeffizient"] = regression_ergebnisse["Koeffizient"].round(3)
+regression_ergebnisse["p-Wert"] = regression_ergebnisse["p-Wert"].apply(lambda p: "< 0.001" if p < 0.001 else round(p, 4))
+
+# R² aus dem Modell auslesen
+r2 = modell.rsquared
+
+# Tabelle anzeigen
+print("\nÜbersicht Regressionsergebnisse")
+print(f"R²: {r2:.3f}")
+print(regression_ergebnisse)
+
+
+# ------------------------------------------------------------
+# Grafik als übersichtliche Tabelle erstellen
+# ------------------------------------------------------------
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.axis("off")
+
+ax.text(
+    0.5,
+    0.95,
+    f"Multiple lineare Regression für {schadstoff.upper()}",
+    ha="center",
+    fontsize=16,
+    fontweight="bold")
+
+ax.text(
+    0.5,
+    0.88,
+    f"R² = {r2:.3f} | Signifikanzniveau: p < 0.05",
+    ha="center",
+    fontsize=12)
+
+tabelle = ax.table(
+    cellText=regression_ergebnisse.values,
+    colLabels=regression_ergebnisse.columns,
+    cellLoc="center",
+    colLoc="center",
+    loc="center",
+    bbox=[0.05, 0.05, 0.9, 0.75])
+
+tabelle.auto_set_font_size(False)
+tabelle.set_fontsize(10)
+tabelle.scale(1, 1.3)
+plt.tight_layout()
+plt.show()
