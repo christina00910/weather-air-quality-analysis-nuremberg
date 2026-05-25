@@ -15,6 +15,7 @@ import time
 
 import analyse as a
 import randomForest as r
+import korrelation as k
 # ============================================================
 # 00 SEITENKONFIGURATION & CACHING
 # ============================================================
@@ -304,16 +305,15 @@ with tab2:
 # ============================================================
 with tab3:
     st.header("Korrelationen zwischen Wetter und Schadstoffen über die Jahre")
-    st.write("Lorem Ipsum")
-    st.info("Lorem Ipsum")
+    k.korrelation (dfOrginal, "no2")
+
 
 # ============================================================
 # TAB 4: MULTIPLE REGRESSION
 # ============================================================
 with tab4:
     st.header("Multiple Regression: Wetter als Prädiktor für Schadstoffbelastung")
-    st.write("Lorem Ipsum")
-    st.info("Lorem Ipsum")
+    k.multipleLinearRegression (dfOrginal, "no2")
 
 # ============================================================
 # TAB 5: RANDOM FOREST

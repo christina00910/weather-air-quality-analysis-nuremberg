@@ -2,10 +2,8 @@
 # Ziel: Vergleich zwischen einem erweiterten Wettermodell und einem Modell
 # mit zusätzlichen Zeitfaktoren wie Rush Hour, Wochenende und Monat.
 
-import streamlit as st
-
-
 # Bibliotheken laden
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns

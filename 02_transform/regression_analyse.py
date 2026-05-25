@@ -2,14 +2,18 @@
 # Gibt es einen statistisch signifikanten Zusammenhang zwischen Wetter und Luftschadstoffen?
 
 # Bibliotheken Laden
+import os
 import pandas as pd
 import statsmodels.api as sm
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Daten Laden
-df = pd.read_csv("02_transform/data_2.csv")
+# Ermittelt den Ordner, in dem die aktuelle app.py liegt
+skript_ordner = os.path.dirname(os.path.abspath(__file__))
 
+# Verbindet den Ordner sauber mit dem Dateinamen
+csv_pfad = os.path.join(skript_ordner, "data_2.csv")
+df = pd.read_csv(csv_pfad)
 #Spalten anzeigen
 print(df.columns)
 # Ersten Zeilen anzeigen 
