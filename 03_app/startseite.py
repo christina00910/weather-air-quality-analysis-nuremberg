@@ -29,7 +29,7 @@ Im Projekt werden insbesondere Ozon (O₃), Stickstoffdioxid (NO₂) sowie Feins
 (PM10 und PM2.5) untersucht.
 """)
 st.image(
-    "Bilder/Rolle der Luftschadstoffe für die Gesundheit.png",
+    "Bilder/gesundheit.png",
     caption="Quelle: Umweltbundesamt (2023)",
     use_container_width=True)
 
@@ -38,32 +38,44 @@ col1, col2, col3 = st.columns(3)
 
 #NO2-Box
 with col1:
-    st.subheader("NO₂")
+    st.subheader("Stickstoffdioxid (NO₂)")
     st.write("""
-    Entsteht hauptsächlich im Straßenverkehr.
-    
-    Kann Atemwege belasten und steht im Zusammenhang
-    mit Herz-Kreislauf-Erkrankungen.
+    Stickstoffdioxid (NO₂) entsteht hauptsächlich bei Verbrennungsprozessen,
+    insbesondere im Straßenverkehr. Deshalb treten erhöhte Konzentrationen vor allem
+    in Städten sowie entlang stark befahrener Straßen auf.
+             
+    Erhöhte NO₂-Konzentrationen können die Atemwege belasten und stehen unter anderem
+    im Zusammenhang mit Atemwegserkrankungen sowie Herz-Kreislauf-Erkrankungen.
+    Besonders empfindlich reagieren Asthmatikerinnen und Asthmatiker auf erhöhte Belastungen.
     """)
 
 #O3-Box
 with col2:
     st.subheader("O₃")
     st.write("""
-    Entsteht photochemisch unter Sonneneinstrahlung.
-    
-    Kann die Lungenfunktion beeinträchtigen
-    und Atemwegsbeschwerden verursachen.
+    Ozon (O₃) entsteht photochemisch aus Vorläufersubstanzen wie Stickoxiden
+    unter Einfluss von Sonnenlicht und tritt daher besonders bei warmem und sonnigem Wetter auf.
+
+    Erhöhte Ozonkonzentrationen können die Lungenfunktion beeinträchtigen,
+    entzündliche Reaktionen in den Atemwegen verursachen und zu Atemwegsbeschwerden führen.
+    Besonders empfindliche Personen, beispielsweise Asthmatikerinnen und Asthmatiker,
+    reagieren verstärkt auf hohe Ozonwerte.
     """)
 
 #Feinstaub-Box
 with col3:
     st.subheader("PM10 / PM2.5")
     st.write("""
-    Entsteht durch Verkehr, Heizungen und Industrie.
-    
-    Kleine Partikel können tief in die Lunge
-    und teilweise in den Blutkreislauf gelangen.
+    Feinstaub (PM10 und PM2.5) entsteht sowohl direkt bei Verbrennungsprozessen
+    als auch indirekt durch chemische Reaktionen in der Atmosphäre.
+    Wichtige Quellen sind insbesondere Verkehr, Heizungen sowie industrielle Prozesse.
+
+    Je kleiner die Partikel sind, desto tiefer können sie in den Körper eindringen.
+    Während PM10 hauptsächlich die oberen Atemwege belastet, kann PM2.5 bis in die
+    Lungenbläschen und teilweise sogar in den Blutkreislauf gelangen.
+
+    Feinstaub steht unter anderem im Zusammenhang mit Atemwegserkrankungen,
+    Entzündungsreaktionen sowie Herz-Kreislauf-Erkrankungen.
     """)
 
 #Datenquellen
@@ -75,29 +87,30 @@ st.markdown("""
 
 - **Bayerisches Landesamt für Umwelt (LfU)**  
   Luftschadstoffdaten für NO₂, O₃, PM10 und PM2.5
+
+- ??? API für Vorhersage ???
 """)
 
 #Datenaufbereitung
 st.header("⚙️ Datenaufbereitung")
 
 st.markdown("""
-Die Wetter- und Luftschadstoffdaten wurden:
+Im Rahmen der Datenaufbereitung wurden die Wetter- und Luftschadstoffdaten:
 
-- synchronisiert
-- bereinigt
-- zusammengeführt
+- zeitlich aufeinander abgestimmt
+- bereinigt und zusammengeführt
 - auf fehlende Werte überprüft
-- um zusätzliche Zeitvariablen ergänzt
+- um zusätzliche zeitliche Einflussfaktoren ergänzt
 """)
 
 st.subheader("Zusätzliche Zeitvariablen")
 
 zeitvariablen = [
-    "Stunde",
+    "Tageszeit (Stunde)",
     "Wochentag",
-    "Monat",
-    "Wochenende",
-    "Rush Hour",
+    "Monatszugehörigkeit",
+    "Wochenenden",
+    "Hauptverkehrszeiten (Rush Hour)",
     "Heizperiode",
     "Nachtstunden",
     "Silvestereffekt"
@@ -107,24 +120,29 @@ st.table(zeitvariablen)
 
 
 #Datensatzübersicht
+st.header("📊 Datensatzübersicht")
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Zeitraum", "1980–2024")
+    st.metric("Analysezeitraum", "1980 – 2024")
 
 with col2:
-    st.metric("Zeitauflösung", "Stündlich")
+    st.metric("Messintervall", "Stündlich")
 
 with col3:
     st.metric("PM2.5 verfügbar ab", "2008")
 
-col4, col5 = st.columns(2)
+col4, col5, col6 = st.columns(3)
 
 with col4:
-    st.metric("Anzahl Zeilen", "XXXX")
+    st.metric("Anzahl Datensätze", "XXXX")
 
 with col5:
-    st.metric("Anzahl Variablen", "XXXX")
+    st.metric("Anzahl Merkmale", "XXXX")
+
+with col6:
+    st.metric("Untersuchungsregion", "Nürnberg")
 
 
 # Dashboard-Struktur
@@ -133,10 +151,9 @@ st.header("🧭 Aufbau des Dashboards")
 st.markdown("""
 1. Projektüberblick  
 2. Explorative Datenanalyse  
-3. Zeitliche Analysen  
-4. Korrelationsanalyse  
-5. Multiple lineare Regression  
-6. Random-Forest-Analyse  
-7. Live-Luftschadstoffvorhersage  
-8. Fazit und Erkenntnisse
+3. Korrelationsanalyse  
+4. Multiple lineare Regression  
+5. Random-Forest-Analyse  
+6. Live-Luftschadstoffvorhersage  
+7. Fazit und Erkenntnisse
 """)
