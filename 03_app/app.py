@@ -17,9 +17,12 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
 import seaborn as sns
-import analyse as a
-import randomForest as r
-import korrelation as k
+import analyse as an
+import randomForest as ran
+import openMeteo as op
+import stPrognosis as pr
+
+import korrelation as kor
 import styling
 
 # Globales Styling für alle matplotlib/seaborn-Charts aktivieren
@@ -43,30 +46,48 @@ STOFF_MAP = {
     "Feinstaub (PM10)": "pm10",
 }
 
-def showEDAPlots(dfOrginal, stoff):
-    fig = a.calcMeanYear(dfOrginal, stoff)
-    st.pyplot(fig)
 
-    fig = a.calcMeanSaisonYear(dfOrginal, stoff)
-    st.pyplot(fig)
+def showEDAPlots (df_prepared, stoff):        
+    """
+    Zeigt alle EDA-Plots hochperformant in Streamlit an.
+    Wichtig: Übergeben Sie hier das zentral über 'prepare_base_data' 
+    vorbereitete DataFrame, nicht das rohe Original!
+    """
+    # 1. Jahrestrend (Läuft in Millisekunden aus dem Cache)
+    fig_year = an.calcMeanYear(df_prepared, stoff)
+    if fig_year: 
+        st.pyplot(fig_year)
 
-    fig = a.rushHourEffekt(dfOrginal, stoff)
-    st.pyplot(fig)
+    # 2. Saisonales Muster (Jahrzehntvergleich)
+    fig_saison = an.calcMeanSaisonYear(df_prepared, stoff)
+    if fig_saison: 
+        st.pyplot(fig_saison)
 
-    fig = a.inversionswetter(dfOrginal, stoff)
-    st.pyplot(fig)
+    # 3. Rush-Hour-Effekt (Tagesverlauf)
+    fig_rush = an.rushHourEffekt(df_prepared, stoff) 
+    if fig_rush: 
+        st.pyplot(fig_rush)
+        
+    # 4. Inversionswetterlage
+    fig_inversion = an.inversionswetter(df_prepared, stoff)
+    if fig_inversion: 
+        st.pyplot(fig_inversion)
 
-    fig = a.getExceedancesPerYear(dfOrginal, stoff)
-    st.pyplot(fig)
+    # 5. Jährliche LQI-Überschreitungen
+    fig_exceed = an.getExceedancesPerYear(df_prepared, stoff)
+    if fig_exceed: 
+        st.pyplot(fig_exceed)
 
-    fig_season, fig_weekend = a.analyzeSeasonAndWeekend(dfOrginal, stoff)
-    st.pyplot(fig_season)
-    st.pyplot(fig_weekend)
+    # 6. Jahreszeit & Werktag/Wochenende (Nimmt die zwei Grafiken sauber entgegen)
+    fig_season, fig_weekend = an.analyzeSeasonAndWeekend(df_prepared, stoff)
+    if fig_season: 
+        st.pyplot(fig_season)
+    if fig_weekend: 
+        st.pyplot(fig_weekend)
     return
 
-
 @st.cache_data
-def load():
+def load ():
     """
     Lädt die kombinierten Wetter- und Schadstoffdaten aus der CSV-Datei.
     """
@@ -77,100 +98,19 @@ def load():
 
     dfRead['datum'] = pd.to_datetime(dfRead['datum'])
     
-    dfRead['datumstunde'] = pd.to_datetime(
-        dfRead['datumstunde'].astype(str), 
+    dfRead ['datumstunde'] = pd.to_datetime(
+        dfRead ['datumstunde'].astype(str), 
         format='%Y%m%d%H', 
         errors='coerce'
     )
-    spaltenList = ['datum', 'stunde', 'temperatur', 'luftfeuchtigkeit', 'windgeschwindigkeit', 'windrichtung', 'luftdruck', 'niederschlagshoehe_mm', 'sonnenscheindauer_minuten', 'relative_luftfeuchtigkeit', 'gesamtbewoelkung', 'no2', 'o3', 'pm10', 'pm2x5']
-
+    spaltenList = ['datum', 'stunde', 'temperatur', 'luftfeuchtigkeit',  'windgeschwindigkeit', 'windrichtung',  'luftdruck', 'niederschlagshoehe_mm', 'sonnenscheindauer_minuten', 'relative_luftfeuchtigkeit', 'gesamtbewoelkung', 'no2', 'o3', 'pm10', 'pm2x5']
     dfO = dfRead[spaltenList].copy()
-    return dfO
+    return dfO 
 
-dfOrginal = load()
-
-# ============================================================
-# 01 SIDEBAR-KONFIGURATION
-# ============================================================
-with st.sidebar:
-    st.write("🌦️ Filter & Einstellungen")
-    st.markdown("---")
-
-    # Globale Schadstoff-Auswahl (wirkt in Tab 3, 4, 5, 6)
-    schadstoff_auswahl = st.radio(
-        "Schadstoff-Auswahl:",
-        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10)"],
-    )
-
-    # Spaltenname für Tabs, die einen einzelnen Stoff brauchen
-    # Fallback bei "Übersicht aller Stoffe" -> no2
-    stoff_spalte = STOFF_MAP.get(schadstoff_auswahl, "no2")
-
-    st.markdown("---")
-
-    with st.spinner("Loading..."):
-        time.sleep(2)
-
-    st.markdown(
-        f"""
-        <div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);">
-            <span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;">
-                ✅ Daten erfolgreich geladen: {len(dfOrginal):,} Zeilen!
-            </span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
-
-    # Sticky Footer
-    st.markdown(
-        """
-        <style>
-            .sidebar-footer {
-                position: absolute; 
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                background-color: #262730; 
-                padding: 15px 20px 20px 20px; 
-                text-align: left;
-                font-size: 12px;
-                color: #888888;
-                z-index: 999; 
-            }
-        </style>
-  
-        <div class="sidebar-footer">
-            <hr style="margin-top: 0; margin-bottom: 10px; border-color: #444444;">
-            <b>Projekt:</b> <br>Modulare Analyse von Wetter- und Luftqualitätsdaten<br>
-            <b>Milestone 1:</b> Nürnberg<br>
-            <b>Team:</b> Christina, Markus, Frank
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-# ============================================================
-# 02 TABS DEFINIEREN & SEITENSTRUKTUR
-# ============================================================
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(
-    ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
-     "Multiple Regression", "Random Forest", "Vorhersage", "📝 Technische Insights"]
-)
-
-# ------------------------------------------------------------
-# TAB 1: Einleitung & Überblick
-# ------------------------------------------------------------
-with tab1:
-    st.header("Startseite")
-    st.write("Willkommen zu unserer interaktiven Analyse von Wetter- und Luftqualitätsdaten für die Stadt Nürnberg! In diesem Dashboard können Sie verschiedene Aspekte der Daten erkunden, von grundlegenden Wetterstatistiken bis hin zu komplexen Analysen der Schadstoffbelastung. Nutzen Sie die Tabs oben, um durch die verschiedenen Bereiche zu navigieren und spannende Einblicke zu gewinnen.")
-
-# ------------------------------------------------------------
-# TAB 2: WETTERDATEN
-# ------------------------------------------------------------
-with tab2:
+    
+#######################################################
+@st.fragment
+def showTab2 ():
     st.header("Wetterdaten")
 
     # Jahres-Slider oberhalb der Metrics
@@ -229,11 +169,10 @@ with tab2:
         """,
         unsafe_allow_html=True
     )
-
-# ============================================================
-# TAB 3: EXPLORATIVE ANALYSE / LUFTQUALITÄT
-# ============================================================
-with tab3:
+    
+#######################################################
+@st.fragment
+def showTab3 ():
     # Slider auch hier - teilt sich den Wert mit Tab 2 über st.session_state.selected_year
     min_year_t3 = int(dfOrginal['datum'].dt.year.min())
     max_year_t3 = int(dfOrginal['datum'].dt.year.max())
@@ -319,67 +258,193 @@ with tab3:
         st.subheader(titel)
         st.info(info_text)
         showEDAPlots(dfOrginal, stoff_spalte)
-
-# ============================================================
-# TAB 4: KORRELATIONSANALYSE
-# ============================================================
-with tab4:
+    
+    
+#######################################################
+@st.fragment
+def showTab4 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Korrelationen zwischen Wetter und Schadstoffen – Übersicht")
         st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
                 "Wählen Sie links einen einzelnen Schadstoff, um die Korrelationsanalyse zu sehen.")
     else:
         st.header(f"Korrelationen zwischen Wetter und {schadstoff_auswahl} über die Jahre")
-        k.korrelation(dfOrginal, stoff_spalte)
-
-# ============================================================
-# TAB 5: MULTIPLE REGRESSION
-# ============================================================
-with tab5:
+        kor.korrelation(dfOrginal, stoff_spalte)
+    
+#######################################################
+@st.fragment
+def showTab5 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Multiple Regression – Übersicht")
         st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
                 "Wählen Sie links einen einzelnen Schadstoff, um die Regressionsanalyse zu sehen.")
     else:
         st.header(f"Multiple Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
-        k.multipleLinearRegression(dfOrginal, stoff_spalte)
-
-# ============================================================
-# TAB 6: RANDOM FOREST
-# ============================================================
-with tab6:
+        kor.multipleLinearRegression(dfOrginal, stoff_spalte)
+    
+#######################################################
+@st.fragment
+def showTab6 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Random Forest – Übersicht")
         st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
                 "Wählen Sie links einen einzelnen Schadstoff, um das Random-Forest-Modell zu sehen.")
     else:
         st.header(f"Random Forest: Wetter als Prädiktor für {schadstoff_auswahl}")
-        fig = r.showDiagrams(dfOrginal, stoff_spalte)
+        fig = ran.showDiagrams(dfOrginal, stoff_spalte)
+#######################################################
+@st.fragment
+def showTab7 ():
+    st.header("Vorhersage")
+    models = pr.prognosis (dfOrginal)
+
+#######################################################
+@st.fragment
+def showTab8 ():
+    st.header("Vorhersage")
+    op.calcWithOpenMeteo (dfOrginal, stoff_spalte)
+
+#######################################################
+
+dfOrginal = load()
 
 # ============================================================
-# TAB 7: VORHERSAGE
+# 01 SIDEBAR-KONFIGURATION
+# ============================================================
+with st.sidebar:
+    st.write("🌦️ Filter & Einstellungen")
+    st.markdown("---")
+
+    # Globale Schadstoff-Auswahl (wirkt in Tab 3, 4, 5, 6)
+    schadstoff_auswahl = st.radio(
+        "Schadstoff-Auswahl:",
+        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10)"],
+    )
+
+    # Spaltenname für Tabs, die einen einzelnen Stoff brauchen
+    # Fallback bei "Übersicht aller Stoffe" -> no2
+    stoff_spalte = STOFF_MAP.get(schadstoff_auswahl, "no2")
+
+    st.markdown("---")
+
+    with st.spinner("Loading..."):
+        time.sleep(2)
+
+    st.markdown(
+        f"""
+        <div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);">
+            <span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;">
+                ✅ Daten erfolgreich geladen: {len(dfOrginal):,} Zeilen!
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
+
+    # Sticky Footer
+    st.markdown(
+        """
+        <style>
+            .sidebar-footer {
+                position: absolute; 
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background-color: #262730; 
+                padding: 15px 20px 20px 20px; 
+                text-align: left;
+                font-size: 12px;
+                color: #888888;
+                z-index: 999; 
+            }
+        </style>
+  
+        <div class="sidebar-footer">
+            <hr style="margin-top: 0; margin-bottom: 10px; border-color: #444444;">
+            <b>Projekt:</b> <br>Modulare Analyse von Wetter- und Luftqualitätsdaten<br>
+            <b>Milestone 1:</b> Nürnberg<br>
+            <b>Team:</b> Christina, Markus, Frank
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# ============================================================
+# 02 TABS DEFINIEREN & SEITENSTRUKTUR
+# ============================================================
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(
+    ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
+     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "📝 Technische Insights"]
+)
+
+# ------------------------------------------------------------
+# TAB 1: Einleitung & Überblick
+# ------------------------------------------------------------
+with tab1:
+    st.header("Startseite")
+    st.write("Willkommen zu unserer interaktiven Analyse von Wetter- und Luftqualitätsdaten für die Stadt Nürnberg! In diesem Dashboard können Sie verschiedene Aspekte der Daten erkunden, von grundlegenden Wetterstatistiken bis hin zu komplexen Analysen der Schadstoffbelastung. Nutzen Sie die Tabs oben, um durch die verschiedenen Bereiche zu navigieren und spannende Einblicke zu gewinnen.")
+
+# ------------------------------------------------------------
+# TAB 2: WETTERDATEN
+# ------------------------------------------------------------
+with tab2:
+    showTab2 ()
+# ============================================================
+# TAB 3: EXPLORATIVE ANALYSE / LUFTQUALITÄT
+# ============================================================
+with tab3:
+    showTab3 ()
+
+# ============================================================
+# TAB 4: KORRELATIONSANALYSE
+# ============================================================
+with tab4:
+    showTab4 ()
+
+# ============================================================
+# TAB 5: MULTIPLE REGRESSION
+# ============================================================
+with tab5:
+    showTab5 ()
+
+# ============================================================
+# TAB 6: RANDOM FOREST
+# ============================================================
+with tab6:
+    showTab6 ()
+
+# ============================================================
+# TAB 7: VORHERSAGE1
 # ============================================================
 with tab7:
-    st.header("Vorhersage")
-    st.write("Lorem Ipsum")
-    st.info("Lorem Ipsum")
+    showTab7 ()
 
+# ============================================================
+# TAB 7: VORHERSAGE2
+# ============================================================
+with tab8:
+    showTab8 ()
 # ============================================================
 # TAB 8: TECHNISCHE INSIGHTS
 # ============================================================
-with tab8:
+with tab9:
     st.header("Technische Insights")
 
     def render_tech_tab():
-        css_datei = Path(__file__).parent / "tech_tab.css"
+        skript_ordner = Path(__file__).parent
+        css_datei = skript_ordner / "tech_tab.css"
+        html_datei = skript_ordner / "tech_tab_content.html"  # JETZT KORREKT
         try:
+            # 1. CSS laden und rendern
             css_inhalt = css_datei.read_text(encoding="utf-8")
             st.markdown(f"<style>{css_inhalt}</style>", unsafe_allow_html=True)
-
-            # HTML-Content laden und rendern
-            html = Path("tech_tab_content.html").read_text(encoding="utf-8")
-            st.html(html)   # st.html (Streamlit >= 1.33) rendert reines HTML sauber
+    
+            # 2. HTML-Content laden und rendern
+            html_inhalt = html_datei.read_text(encoding="utf-8")
+            st.html(html_inhalt)  # st.html rendert reines HTML sauber
         except FileNotFoundError:
-            st.error(f"Die Datei '{css_datei.name}' wurde nicht gefunden.")
+              st.error(f"Die Datei '{css_datei.name}' wurde nicht gefunden.")
 
     render_tech_tab()
