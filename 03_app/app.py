@@ -311,12 +311,15 @@ with tab7:
     st.header("Technische Insights")
     
     def render_tech_tab():
-        # CSS laden und injizieren
-        css = Path("tech_tab.css").read_text(encoding="utf-8")
-        st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+        css_datei = Path(__file__).parent / "tech_tab.css"
+        try:
+            css_inhalt = css_datei.read_text(encoding="utf-8")
+            st.markdown(f"<style>{css_inhalt}</style>", unsafe_allow_html=True)
     
         # HTML-Content laden und rendern
-        html = Path("tech_tab_content.html").read_text(encoding="utf-8")
-        st.html(html)   # st.html (Streamlit ≥ 1.33) rendert reines HTML sauber
-    
+            html = Path("tech_tab_content.html").read_text(encoding="utf-8")
+            st.html(html)   # st.html (Streamlit ≥ 1.33) rendert reines HTML sauber
+        except FileNotFoundError:
+              st.error(f"Die Datei '{css_datei.name}' wurde nicht gefunden.")
+              
     render_tech_tab()

@@ -51,16 +51,21 @@ def korrelation (dfO, stoff) :
     
     # Korrelationen berechnen
     korrelation = analyse_df.corr()
-    print(korrelation)
-    
+    # Zeigt die Tabelle mit farblicher Heatmap (von blau nach rot) an
+    st.subheader("Korrelationsmatrix")
+    st.dataframe(korrelation.style.background_gradient(cmap='coolwarm', axis=None).format("{:.2f}"))
+
+    plt.style.use("dark_background")
     # Heatmap für Streamlit erstellen
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(12, 8), facecolor='#0e1117')
+    ax.set_facecolor('#0e1117')
     sns.heatmap(
         korrelation,
         annot=True,
         cmap="coolwarm",
         fmt=".2f",
-        ax=ax  # Übergibt das Achsen-Objekt an Seaborn
+        ax=ax,  # Übergibt das Achsen-Objekt an Seaborn
+        cbar_kws={'label': 'Korrelationskoeffizient'} # Beschriftung der Farbleiste
     )
     ax.set_title("Korrelationsmatrix Wetterdaten und Luftschadstoffe")
     plt.tight_layout()
@@ -171,9 +176,9 @@ def multipleLinearRegression (dfO, stoff) :
     r2 = modell.rsquared
     
     # Tabelle anzeigen
-    print("\nÜbersicht Regressionsergebnisse")
-    print(f"R²: {r2:.3f}")
-    print(regression_ergebnisse)
+    st.subheader("\nÜbersicht Regressionsergebnisse")
+    st.write (f"R²: {r2:.3f}")
+    st.write (regression_ergebnisse)
     
     
     # ------------------------------------------------------------
