@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Daten laden
-df = pd.read_csv("02_transform/data_2.csv")
+df = pd.read_csv("02_transform/alt_data_2.csv")
 
 # Datum umwandeln
 df["datum"] = pd.to_datetime(df["datum"])

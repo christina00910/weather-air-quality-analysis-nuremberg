@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 # 1. Historische Daten laden und Modell trainieren
 # ------------------------------------------------------------
 
-df = pd.read_csv("02_transform/data_2.csv")
+df = pd.read_csv("02_transform/Schadstoff_Wetter.csv")
 
 df["datum"] = pd.to_datetime(df["datum"])
 df = df[df["datum"].dt.year >= 2008]
