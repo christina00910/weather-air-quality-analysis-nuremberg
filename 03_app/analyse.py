@@ -596,7 +596,7 @@ def getExceedancesPerYear(dfO, stoff):
     plt.rcParams.update(plt.rcParamsDefault)
 
     # Halbe Grafikgröße wählen (6x4) und schwarzer Hintergrund
-    fig, ax = plt.subplots(figsize=(6, 4), facecolor='black')
+    fig, ax = plt.subplots(figsize=(5, 3), facecolor='black')
     ax.set_facecolor('black')
 
     # Balkendiagramm zeichnen (Kräftiges Blau für guten Kontrast im Dark Mode)
@@ -618,7 +618,11 @@ def getExceedancesPerYear(dfO, stoff):
     
     # Achsenstriche und -beschriftungen weiß färben
     ax.tick_params(colors='white', which='both', labelsize=8)
-    ax.set_xticklabels(ueberschreitungen_jahr.index.astype(str), rotation=45, ha='right')
+    jahre = ueberschreitungen_jahr.index.astype(str)
+    # Setzt die Positionen der Ticks auf jeden 5. Eintrag
+    ax.set_xticks(range(0, len(jahre), 5))
+    # Setzt die Beschriftungen für jeden 5. Eintrag
+    ax.set_xticklabels(jahre[::5], rotation=45, ha='right')
     
     for spine in ax.spines.values():
         spine.set_color('white')
