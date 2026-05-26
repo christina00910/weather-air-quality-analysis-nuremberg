@@ -20,6 +20,11 @@ import seaborn as sns
 import analyse as a
 import randomForest as r
 import korrelation as k
+import styling
+
+# Globales Styling für alle matplotlib/seaborn-Charts aktivieren
+styling.apply_global_style()
+
 # ============================================================
 # 00 SEITENKONFIGURATION & CACHING
 # ============================================================
@@ -31,32 +36,37 @@ st.set_page_config(
     layout="wide"
 )
 
-def showEDAPlots (dfOrginal, stoff)  :        
-    fig = a.calcMeanYear (dfOrginal, stoff)
+# Mapping: Anzeige-Label im Radio -> Spaltenname im DataFrame
+STOFF_MAP = {
+    "Ozon (O₃)": "o3",
+    "Stickstoffdioxid (NO₂)": "no2",
+    "Feinstaub (PM10)": "pm10",
+}
+
+def showEDAPlots(dfOrginal, stoff):
+    fig = a.calcMeanYear(dfOrginal, stoff)
     st.pyplot(fig)
 
-    fig = a.calcMeanSaisonYear (dfOrginal, stoff)
+    fig = a.calcMeanSaisonYear(dfOrginal, stoff)
     st.pyplot(fig)
 
-    fig = a.rushHourEffekt (dfOrginal, stoff) 
-    st.pyplot(fig)
-        
-    fig = a.inversionswetter (dfOrginal, stoff)
+    fig = a.rushHourEffekt(dfOrginal, stoff)
     st.pyplot(fig)
 
-    fig = a.getExceedancesPerYear (dfOrginal, stoff)
+    fig = a.inversionswetter(dfOrginal, stoff)
     st.pyplot(fig)
 
-    fig_season, fig_weekend = a.analyzeSeasonAndWeekend (dfOrginal, stoff)
+    fig = a.getExceedancesPerYear(dfOrginal, stoff)
+    st.pyplot(fig)
+
+    fig_season, fig_weekend = a.analyzeSeasonAndWeekend(dfOrginal, stoff)
     st.pyplot(fig_season)
     st.pyplot(fig_weekend)
     return
 
 
-
-
 @st.cache_data
-def load ():
+def load():
     """
     Lädt die kombinierten Wetter- und Schadstoffdaten aus der CSV-Datei.
     """
@@ -67,17 +77,17 @@ def load ():
 
     dfRead['datum'] = pd.to_datetime(dfRead['datum'])
     
-    dfRead ['datumstunde'] = pd.to_datetime(
-        dfRead ['datumstunde'].astype(str), 
+    dfRead['datumstunde'] = pd.to_datetime(
+        dfRead['datumstunde'].astype(str), 
         format='%Y%m%d%H', 
         errors='coerce'
     )
-    spaltenList = ['datum', 'stunde', 'temperatur', 'luftfeuchtigkeit',  'windgeschwindigkeit', 'windrichtung',  'luftdruck', 'niederschlagshoehe_mm', 'sonnenscheindauer_minuten', 'relative_luftfeuchtigkeit', 'gesamtbewoelkung', 'no2', 'o3', 'pm10', 'pm2x5']
+    spaltenList = ['datum', 'stunde', 'temperatur', 'luftfeuchtigkeit', 'windgeschwindigkeit', 'windrichtung', 'luftdruck', 'niederschlagshoehe_mm', 'sonnenscheindauer_minuten', 'relative_luftfeuchtigkeit', 'gesamtbewoelkung', 'no2', 'o3', 'pm10', 'pm2x5']
 
     dfO = dfRead[spaltenList].copy()
-    return dfO  
+    return dfO
 
-dfOrginal  = load ()
+dfOrginal = load()
 
 # ============================================================
 # 01 SIDEBAR-KONFIGURATION
@@ -86,9 +96,21 @@ with st.sidebar:
     st.write("🌦️ Filter & Einstellungen")
     st.markdown("---")
 
+    # Globale Schadstoff-Auswahl (wirkt in Tab 3, 4, 5, 6)
+    schadstoff_auswahl = st.radio(
+        "Schadstoff-Auswahl:",
+        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10)"],
+    )
+
+    # Spaltenname für Tabs, die einen einzelnen Stoff brauchen
+    # Fallback bei "Übersicht aller Stoffe" -> no2
+    stoff_spalte = STOFF_MAP.get(schadstoff_auswahl, "no2")
+
+    st.markdown("---")
+
     with st.spinner("Loading..."):
         time.sleep(2)
-        
+
     st.markdown(
         f"""
         <div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);">
@@ -100,21 +122,6 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
-
-    min_year = int(dfOrginal['datum'].dt.year.min())
-    max_year = int(dfOrginal['datum'].dt.year.max())
-
-    selected_year = st.sidebar.slider(
-        "Wähle ein Jahr für die Analyse:",
-        min_value=min_year,
-        max_value=max_year,
-        value=2023 
-    )
-  
-    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year].copy()
-
-    st.sidebar.caption(f"📊 Datensätze im Jahr {selected_year}: {len(df_year):,}")
     st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
 
     # Sticky Footer
@@ -148,21 +155,52 @@ with st.sidebar:
 # ============================================================
 # 02 TABS DEFINIEREN & SEITENSTRUKTUR
 # ============================================================
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Startseite/Projektüberblick", "Explorative Analyse", "Korrelationsanalyse", "Multiple Regression", "Random Forest", "Vorhersage", "📝 Technische Insights"])    
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(
+    ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
+     "Multiple Regression", "Random Forest", "Vorhersage", "📝 Technische Insights"]
+)
 
 # ------------------------------------------------------------
-# TAB 1: WETTERDATEN
+# TAB 1: Einleitung & Überblick
 # ------------------------------------------------------------
 with tab1:
-    st.header(f"Wetterdaten für das Jahr {selected_year}")
-    
+    st.header("Startseite")
+    st.write("Willkommen zu unserer interaktiven Analyse von Wetter- und Luftqualitätsdaten für die Stadt Nürnberg! In diesem Dashboard können Sie verschiedene Aspekte der Daten erkunden, von grundlegenden Wetterstatistiken bis hin zu komplexen Analysen der Schadstoffbelastung. Nutzen Sie die Tabs oben, um durch die verschiedenen Bereiche zu navigieren und spannende Einblicke zu gewinnen.")
+
+# ------------------------------------------------------------
+# TAB 2: WETTERDATEN
+# ------------------------------------------------------------
+with tab2:
+    st.header("Wetterdaten")
+
+    # Jahres-Slider oberhalb der Metrics
+    # Wert wird in st.session_state.selected_year gespiegelt -> auch in Tab 3 verfügbar
+    min_year = int(dfOrginal['datum'].dt.year.min())
+    max_year = int(dfOrginal['datum'].dt.year.max())
+
+    if "selected_year" not in st.session_state:
+        st.session_state.selected_year = 2023
+
+    selected_year = st.slider(
+        "Wähle ein Jahr für die Analyse:",
+        min_value=min_year,
+        max_value=max_year,
+        value=st.session_state.selected_year,
+        key="year_slider_tab2"
+    )
+    st.session_state.selected_year = selected_year
+
+    # Daten filtern
+    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year].copy()
+
+    st.subheader(f"Übersicht für das Jahr {selected_year}")
+
     col1, col2, col3 = st.columns(3)
-    
+
     avg_temp = df_year['temperatur'].mean()
     max_wind = df_year['windgeschwindigkeit'].max()
     sun_hours = df_year['sonnenscheindauer_minuten'].fillna(0).sum() / 60
-    
-    # KORREKTUR: CSS wurde in den tab1-Block eingerückt
+
     st.markdown(
         """
         <style>
@@ -177,13 +215,12 @@ with tab1:
         unsafe_allow_html=True
     )
 
-    # KORREKTUR: Metrics wurden in den tab1-Block eingerückt
     col1.metric("Ø Temperatur", f"{avg_temp:.1f} °C", border=True)
     col2.metric("Max. Windgeschwindigkeit", f"{max_wind:.1f} m/s", border=True)
     col3.metric("Gesamte Sonnenstunden", f"{sun_hours:.0f} h", border=True)
-        
+
     st.dataframe(df_year, height=400, use_container_width=True, hide_index=True)
-    
+
     st.markdown(
         f"""
         <div style="background-color: rgba(0, 104, 249, 0.1); padding: 10px; border-radius: 0.3rem; border: 1px solid rgba(0, 104, 249, 0.2);">
@@ -194,132 +231,155 @@ with tab1:
     )
 
 # ============================================================
-# TAB 2: LUFTQUALITÄT
+# TAB 3: EXPLORATIVE ANALYSE / LUFTQUALITÄT
 # ============================================================
-with tab2:
-    st.header(f"Luftqualität & Schadstoffanalyse ({selected_year})")
-
-    schadstoff_auswahl = st.radio(
-        "Spezifische Schadstoff-Detailansicht:",
-        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10)"],
-        horizontal=True 
+with tab3:
+    # Slider auch hier - teilt sich den Wert mit Tab 2 über st.session_state.selected_year
+    min_year_t3 = int(dfOrginal['datum'].dt.year.min())
+    max_year_t3 = int(dfOrginal['datum'].dt.year.max())
+    selected_year_t3 = st.slider(
+        "Wähle ein Jahr für die Analyse:",
+        min_value=min_year_t3,
+        max_value=max_year_t3,
+        value=st.session_state.selected_year,
+        key="year_slider_tab3"
     )
-    
+    st.session_state.selected_year = selected_year_t3
+
+    # df_year neu auf Basis des aktuellen Slider-Werts berechnen
+    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year_t3].copy()
+
+    st.header(f"Luftqualität & Schadstoffanalyse ({selected_year_t3})")
     st.markdown("---")
 
-    # KORREKTUR: Gesamte if-elif Logik wurde sauber unter "with tab2" eingerückt
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.subheader("Gesamtübersicht der Luftbelastung vs. WHO-Grenzwerte")
         st.write("Die Dreiecke zeigen die Abweichung zu den offiziellen WHO-Jahresgrenzwerten an (Grün = Unter dem Limit, Rot = Überschreitung).")
-        
-        c1, c2, c3 = st.columns(3)
-        
-        mean_ozon = df_year['o3'].mean()
-        mean_no2  = df_year['no2'].mean()
-        mean_pm10 = df_year['pm10'].mean()
-        
-        
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        mean_ozon  = df_year['o3'].mean()
+        mean_no2   = df_year['no2'].mean()
+        mean_pm10  = df_year['pm10'].mean()
+        mean_pm25  = df_year['pm2x5'].mean()
+
+        # WHO-Jahresgrenzwerte (µg/m³)
         diff_ozon = mean_ozon - 100
         diff_no2  = mean_no2 - 25
         diff_pm10 = mean_pm10 - 15
-        
+        diff_pm25 = mean_pm25 - 5
+
         c1.metric(
-            label="Ø Ozon (Ziel: ≤100)", 
-            value=f"{mean_ozon:.1f} µg/m³", 
+            label="Ø Ozon (Ziel: ≤100)",
+            value=f"{mean_ozon:.1f} µg/m³",
             delta=f"{diff_ozon:+.1f} µg/m³ vs. WHO",
             delta_color="inverse"
         )
-        
+
         c2.metric(
-            label="Ø NO₂ (Ziel: ≤25)", 
-            value=f"{mean_no2:.1f} µg/m³", 
+            label="Ø NO₂ (Ziel: ≤25)",
+            value=f"{mean_no2:.1f} µg/m³",
             delta=f"{diff_no2:+.1f} µg/m³ vs. WHO",
             delta_color="inverse"
         )
-        
+
         c3.metric(
-            label="Ø PM10 (Ziel: ≤15)", 
-            value=f"{mean_pm10:.1f} µg/m³", 
+            label="Ø PM10 (Ziel: ≤15)",
+            value=f"{mean_pm10:.1f} µg/m³",
             delta=f"{diff_pm10:+.1f} µg/m³ vs. WHO",
             delta_color="inverse"
         )
-        
 
-        # Kleiner Platzhalter für die Trennung der Metrics von den Plots
+        c4.metric(
+            label="Ø PM2.5 (Ziel: ≤5)",
+            value=f"{mean_pm25:.1f} µg/m³",
+            delta=f"{diff_pm25:+.1f} µg/m³ vs. WHO",
+            delta_color="inverse"
+        )
+
         st.markdown("---")
-        
 
-
-    elif schadstoff_auswahl == "Ozon (O₃)":
-
-        stoff = 'o3'
-        st.subheader("Ozon (O₃) – Detailanalyse")
-        st.info("Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht. Weitere wissenschaftliche Beschreibung ergänzen......")
-        showEDAPlots (dfOrginal, stoff)
-        
-        
-
-
-                   
-    elif schadstoff_auswahl == "Stickstoffdioxid (NO₂)":
-        stoff = 'no2'
-        st.subheader("Stickstoffdioxid (NO₂) – Analysen")
-        st.write("NO₂ entsteht primär bei Verbrennungsprozessen (z. B. Dieselmotoren).")
-        showEDAPlots (dfOrginal, stoff)
-
-    elif schadstoff_auswahl == "Feinstaub (PM10)":
-        stoff = 'pm10'
-        st.subheader("Feinstaub (PM10) – Partikelanalyse")
-        st.write("Feinstaubpartikel dringen tief in die Atemwege ein. Quellen sind Industrie, Heizungen und Abrieb.")
-        st.info("Hier platzieren wir die Feinstaub-Statistiken.")
-        showEDAPlots (dfOrginal, stoff)
+    else:
+        # Einzelstoff-Ansicht (O₃, NO₂ oder PM10) - gemeinsamer Block
+        beschreibungen = {
+            "o3": (
+                "Ozon (O₃) – Detailanalyse",
+                "Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht. Weitere wissenschaftliche Beschreibung ergänzen......"
+            ),
+            "no2": (
+                "Stickstoffdioxid (NO₂) – Analysen",
+                "NO₂ entsteht primär bei Verbrennungsprozessen (z. B. Dieselmotoren)."
+            ),
+            "pm10": (
+                "Feinstaub (PM10) – Partikelanalyse",
+                "Feinstaubpartikel dringen tief in die Atemwege ein. Quellen sind Industrie, Heizungen und Abrieb."
+            ),
+        }
+        titel, info_text = beschreibungen[stoff_spalte]
+        st.subheader(titel)
+        st.info(info_text)
+        showEDAPlots(dfOrginal, stoff_spalte)
 
 # ============================================================
-# TAB 3: KORRELATIONSANALYSE
-# ============================================================
-with tab3:
-    st.header("Korrelationen zwischen Wetter und Schadstoffen über die Jahre")
-    k.korrelation (dfOrginal, "no2")
-
-
-# ============================================================
-# TAB 4: MULTIPLE REGRESSION
+# TAB 4: KORRELATIONSANALYSE
 # ============================================================
 with tab4:
-    st.header("Multiple Regression: Wetter als Prädiktor für Schadstoffbelastung")
-    k.multipleLinearRegression (dfOrginal, "no2")
+    if schadstoff_auswahl == "Übersicht aller Stoffe":
+        st.header("Korrelationen zwischen Wetter und Schadstoffen – Übersicht")
+        st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
+                "Wählen Sie links einen einzelnen Schadstoff, um die Korrelationsanalyse zu sehen.")
+    else:
+        st.header(f"Korrelationen zwischen Wetter und {schadstoff_auswahl} über die Jahre")
+        k.korrelation(dfOrginal, stoff_spalte)
 
 # ============================================================
-# TAB 5: RANDOM FOREST
+# TAB 5: MULTIPLE REGRESSION
 # ============================================================
 with tab5:
-    st.header("Random Forest: Wetter als Prädiktor für Schadstoffbelastung")
-    fig = r.showDiagrams (dfOrginal, "no2")
+    if schadstoff_auswahl == "Übersicht aller Stoffe":
+        st.header("Multiple Regression – Übersicht")
+        st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
+                "Wählen Sie links einen einzelnen Schadstoff, um die Regressionsanalyse zu sehen.")
+    else:
+        st.header(f"Multiple Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
+        k.multipleLinearRegression(dfOrginal, stoff_spalte)
 
 # ============================================================
-# TAB 4: VORHERSAGE
+# TAB 6: RANDOM FOREST
 # ============================================================
 with tab6:
+    if schadstoff_auswahl == "Übersicht aller Stoffe":
+        st.header("Random Forest – Übersicht")
+        st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
+                "Wählen Sie links einen einzelnen Schadstoff, um das Random-Forest-Modell zu sehen.")
+    else:
+        st.header(f"Random Forest: Wetter als Prädiktor für {schadstoff_auswahl}")
+        fig = r.showDiagrams(dfOrginal, stoff_spalte)
+
+# ============================================================
+# TAB 7: VORHERSAGE
+# ============================================================
+with tab7:
     st.header("Vorhersage")
     st.write("Lorem Ipsum")
     st.info("Lorem Ipsum")
 
 # ============================================================
-# TAB 4: TECHNISCHE INSIGHTS
+# TAB 8: TECHNISCHE INSIGHTS
 # ============================================================
-with tab7:
+with tab8:
     st.header("Technische Insights")
-    
+
     def render_tech_tab():
         css_datei = Path(__file__).parent / "tech_tab.css"
         try:
             css_inhalt = css_datei.read_text(encoding="utf-8")
             st.markdown(f"<style>{css_inhalt}</style>", unsafe_allow_html=True)
-    
-        # HTML-Content laden und rendern
+
+            # HTML-Content laden und rendern
             html = Path("tech_tab_content.html").read_text(encoding="utf-8")
-            st.html(html)   # st.html (Streamlit ≥ 1.33) rendert reines HTML sauber
+            st.html(html)   # st.html (Streamlit >= 1.33) rendert reines HTML sauber
         except FileNotFoundError:
-              st.error(f"Die Datei '{css_datei.name}' wurde nicht gefunden.")
-              
+            st.error(f"Die Datei '{css_datei.name}' wurde nicht gefunden.")
+
     render_tech_tab()
