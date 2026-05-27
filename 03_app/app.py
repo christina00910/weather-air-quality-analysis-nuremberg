@@ -120,7 +120,7 @@ def showEDAPlots (df_prepared, stoff):
         elif (stoff == "pm10") :
             st.info ("CHRISTINA3")
     if fig_weekend: 
-        st.pyplot(fig_weekend)
+        st.pyplot(fig_weekend, use_container_width=False)
         if (stoff == "o3") :
             st.info ("CHRISTINA1")
         elif (stoff == "no2") :
@@ -150,7 +150,6 @@ def load ():
     dfO = dfRead[spaltenList].copy()
     return dfO 
 
-    
 #######################################################
 
 @st.fragment
@@ -508,11 +507,8 @@ def showTab3 ():
 #######################################################
 @st.fragment
 def showTab4 ():
-    if schadstoff_auswahl == "Übersicht aller Stoffe":
-        st.header("Korrelationen zwischen Wetter und Schadstoffen – Übersicht")
-    else:
-        st.header(f"Korrelationen zwischen Wetter und {schadstoff_auswahl} über die Jahre")
-        kor.korrelation(dfOrginal, stoff_spalte)
+    st.header("Korrelationen zwischen Wetter und Schadstoffen – Übersicht")
+    kor.korrelation(dfOrginal, stoff_spalte)
     
 #######################################################
 @st.fragment
@@ -617,7 +613,7 @@ with st.sidebar:
 # ============================================================
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(
     ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
-     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "📝 Technische Insights"]
+     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "Technische Insights"]
 )
 
 # ------------------------------------------------------------

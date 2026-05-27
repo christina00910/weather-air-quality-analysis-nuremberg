@@ -60,7 +60,7 @@ def calcMeanYear(df, stoff):
             marker='s',       # Quadratische Punkte zur Unterscheidung            
             markerfacecolor='white',      
             markeredgecolor='#FF6B6B',
-            linewidth=2,
+            linewidth=1,
             linestyle='--',   # Gestrichelte Linie
             label='PM2.5 (pm2x5)'
         )
@@ -69,10 +69,10 @@ def calcMeanYear(df, stoff):
     
     # Layout & Design
     titel = f"Jahresmittelwert Trend für {stoff.upper()}" + (" & PM2.5" if hat_pm25 else "")
-    ax.set_title(titel, color='white', fontsize=11, fontweight="bold")
-    ax.set_xlabel("Jahr", color='white', fontsize=9)
-    ax.set_ylabel(r"Mittlere Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=9)
-    ax.tick_params(colors='white', which='both', labelsize=8)
+    ax.set_title(titel, color='white', fontsize=10, fontweight="bold")
+    ax.set_xlabel("Jahr", color='white', fontsize=5)
+    ax.set_ylabel(r"Mittlere Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=5)
+    ax.tick_params(colors='white', which='both', labelsize=5)
     
     for spine in ax.spines.values():
         spine.set_color('white')
@@ -133,7 +133,7 @@ def calcMeanSaisonYear(df, stoff):
                 color=farbe,
                 marker="o",
                 markersize=4,
-                linewidth=1.5
+                linewidth=1
             )
             
             # WICHTIG: Absicherung gegen leere Jahre, damit index[-1] nicht abstürzt
@@ -145,22 +145,22 @@ def calcMeanSaisonYear(df, stoff):
                 # Jahreszahl direkt rechts an das Ende der Linie schreiben
                 ax.text(
                     letzter_monat + 0.1, letzter_wert, str(jahr), 
-                    color=farbe, fontsize=8, va='center', fontweight='bold'
+                    color=farbe, fontsize=5, va='center', fontweight='bold'
                 )
 
     # Titel und Beschriftungen
     ax.set_title(
         f"Saisonales {stoff.upper()}-Muster im Jahrzehntvergleich", 
         color='white', 
-        fontsize=11, 
+        fontsize=10, 
         fontweight="bold"
     )
-    ax.set_xlabel("Monat", color='white', fontsize=9)
-    ax.set_ylabel(r"Mittlere Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=9)
+    ax.set_xlabel("Monat", color='white', fontsize=5)
+    ax.set_ylabel(r"Mittlere Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=5)
     
     # Achsen-Gestaltung
     ax.set_xticks(range(1, 13))
-    ax.tick_params(colors='white', which='both', labelsize=8)
+    ax.tick_params(colors='white', which='both', labelsize=6)
     
     for spine in ax.spines.values():
         spine.set_color('white')
@@ -228,7 +228,7 @@ def rushHourEffekt(df, stoff):
         marker="o", 
         markerfacecolor='white', 
         markeredgecolor='#4A90E2',
-        linewidth=2,
+        linewidth=1,
         label=stoff.upper()
     )
     
@@ -242,20 +242,20 @@ def rushHourEffekt(df, stoff):
             marker="s", # Quadrate
             markerfacecolor='white', 
             markeredgecolor='#FF6B6B',
-            linewidth=2,
+            linewidth=1,
             linestyle='--',
             label='PM2.5 (pm2x5)'
         )
-        ax.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=8)
+        ax.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=5)
     
     # Textelemente färben und beschriften
     titel = f"Mittlerer {stoff.upper()}-Tagesverlauf (Rush-Hour-Effekt)" + (" & PM2.5" if hat_pm25 else "")
-    ax.set_title(titel, color='white', fontsize=11, fontweight="bold", pad=10)
-    ax.set_xlabel("Uhrzeit (Stunde)", color='white', fontsize=9)
-    ax.set_ylabel(f"{stoff.upper()} [µg/m³]", color='white', fontsize=9)
+    ax.set_title(titel, color='white', fontsize=10, fontweight="bold", pad=10)
+    ax.set_xlabel("Uhrzeit (Stunde)", color='white', fontsize=5)
+    ax.set_ylabel(f"{stoff.upper()} [µg/m³]", color='white', fontsize=5)
     
     # Achsen-Design
-    ax.tick_params(colors='white', which='both', labelsize=8)
+    ax.tick_params(colors='white', which='both', labelsize=5)
     for spine in ax.spines.values():
         spine.set_color('white')
         
@@ -355,13 +355,13 @@ def getEinfluss(df, stoff):
 
         ax1.set_title(
             f"1. Einfluss der Windgeschwindigkeit auf {stoff.upper()}\n(Je mehr Wind, desto sauberer die Luft)",
-            fontsize=12, fontweight="bold"
+            fontsize=10, fontweight="bold"
         )
-        ax1.set_xlabel("Windgeschwindigkeit Klasse")
+        ax1.set_xlabel("Windgeschwindigkeit Klasse", color='white', fontsize=5)
         ax1.set_ylabel(fr"{stoff.upper()}-Konzentration [$\mathrm{{\mu g/m^3}}$]")
         ax1.grid(axis="y", linestyle="--", alpha=0.7)
     else:
-        ax1.text(0.5, 0.5, "Spalte 'windgeschwindigkeit' nicht im Datensatz.", ha='center', va='center', fontsize=12)
+        ax1.text(0.5, 0.5, "Spalte 'windgeschwindigkeit' nicht im Datensatz.", ha='center', va='center', fontsize=10)
 
     # --- DIAGRAMM 2: Temperatur & Inversions-Effekt ---
     temp_col = next((c for c in df.columns if c.lower() in ['temperatur', 'temp']), None)
@@ -380,19 +380,19 @@ def getEinfluss(df, stoff):
             x=temp_col,
             y=stoff_lower,
             scatter_kws={"alpha": 0.3, "color": "tab:orange", "s": 10},
-            line_kws={"color": "darkred", "linewidth": 2},
+            line_kws={"color": "darkred", "linewidth": 1},
             lowess=True,  # Läuft jetzt dank max. 3000 Punkten in Millisekunden
         )
         
         ax2.set_title(
             f"2. Einfluss der Temperatur auf {stoff.upper()}\n(Höhere Werte im kalten Winter / Heizperiode)",
-            fontsize=12, fontweight="bold"
+            fontsize=10, fontweight="bold"
         )
-        ax2.set_xlabel("Temperatur [°C]")
+        ax2.set_xlabel("Temperatur [°C]", color='white', fontsize=5)
         ax2.set_ylabel(fr"{stoff.upper()}-Konzentration [$\mathrm{{\mu g/m^3}}$]")
         ax2.grid(True, linestyle="--", alpha=0.7)
     else:
-        ax2.text(0.5, 0.5, "Spalte 'temperatur' nicht im Datensatz.", ha='center', va='center', fontsize=12)
+        ax2.text(0.5, 0.5, "Spalte 'temperatur' nicht im Datensatz.", ha='center', va='center', fontsize=10)
 
     plt.tight_layout()
     return fig
@@ -455,12 +455,12 @@ def inversionswetter(df, stoff):
         )
     else:
         ax.text(0.5, 0.5, f"Schadstoff '{stoff}' oder Wetterdaten\nfehlen im Datensatz", 
-                color='white', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+                color='white', ha='center', va='center', transform=ax.transAxes, fontsize=10)
 
     # Styling an Dark Mode anpassen
     ax.set_xlabel("")
-    ax.set_ylabel(r"Konzentration [$\mathrm{\mu g/m^3}$]", color='white')
-    ax.tick_params(colors='white', which='both')
+    ax.set_ylabel(r"Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=5)
+    ax.tick_params(colors='white', which='both', labelsize=5)
     
     for spine in ax.spines.values():
         spine.set_color('white')
@@ -469,17 +469,17 @@ def inversionswetter(df, stoff):
 
     # Dynamische LaTeX-Titelvergabe je nach gewähltem Schadstoff
     if stoff_lower == "no2":
-        ax.set_title(r"Stickstoffdioxid ($\mathrm{NO_2}$)" + "\n" + r"(Verkehrs- & Heizungsstau)", color='white', fontsize=12)
+        ax.set_title(r"Stickstoffdioxid ($\mathrm{NO_2}$)" + "\n" + r"(Verkehrs- & Heizungsstau)", color='white', fontsize=10)
     elif stoff_lower == "pm10":
-        ax.set_title(r"Feinstaub ($\mathrm{PM_{10}}$)" + "\n" + r"(Starke Akkumulation bei Inversion)", color='white', fontsize=12)
+        ax.set_title(r"Feinstaub ($\mathrm{PM_{10}}$)" + "\n" + r"(Starke Akkumulation bei Inversion)", color='white', fontsize=10)
     elif stoff_lower == "o3":
-        ax.set_title(r"Ozon ($\mathrm{O_3}$)" + "\n" + r"(Abbau am Boden bei Smog)", color='white', fontsize=12)
+        ax.set_title(r"Ozon ($\mathrm{O_3}$)" + "\n" + r"(Abbau am Boden bei Smog)", color='white', fontsize=10)
     else:
-        ax.set_title(f"{stoff.upper()}-Profil im Vergleich", color='white', fontsize=12)
+        ax.set_title(f"{stoff.upper()}-Profil im Vergleich", color='white', fontsize=10)
 
     plt.suptitle(
         f"Einfluss der Wetterlage auf {stoff.upper()}",
-        fontsize=13,
+        fontsize=5,
         fontweight="bold",
         color="white"
     )
@@ -580,9 +580,9 @@ def smogVSNormal(df, stoff):
         )
 
     # Achsen-Beschriftungen & Styling
-    ax.set_title(f"{stoff.upper()}-Belastung: Smog- vs. Normaltage", color='white', fontsize=11, fontweight="bold")
-    ax.set_xlabel("Jahrzehnt (Dekade)", color='white', fontsize=9)
-    ax.set_ylabel(r"Mittlere Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=9)
+    ax.set_title(f"{stoff.upper()}-Belastung: Smog- vs. Normaltage", color='white', fontsize=10, fontweight="bold")
+    ax.set_xlabel("Jahrzehnt (Dekade)", color='white', fontsize=5)
+    ax.set_ylabel(r"Mittlere Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=5)
     
     ax.set_xticks(x)
     ax.set_xticklabels(plot_data.index)
@@ -594,7 +594,7 @@ def smogVSNormal(df, stoff):
     ax.grid(axis="y", linestyle="--", alpha=0.3, color='dimgray')
     
     ax.legend(title="Typ des Tages", loc="upper right", 
-              facecolor='black', edgecolor='white', labelcolor='white', fontsize=8, title_fontsize=8)
+              facecolor='black', edgecolor='white', labelcolor='white', fontsize=5, title_fontsize=5)
 
     plt.tight_layout()
     
@@ -671,17 +671,20 @@ def analyzeSeasonAndWeekend(df, stoff):
     if hat_pm25:
         ax_season.bar(x_season - width/2, schadstoff_jahreszeit[stoff_lower], width, color="#4A90E2", label="PM10")
         ax_season.bar(x_season + width/2, schadstoff_jahreszeit['pm2x5'], width, color="#FF6B6B", label="PM2.5")
-        ax_season.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=8)
+        ax_season.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=5)
     else:
         ax_season.bar(schadstoff_jahreszeit.index, schadstoff_jahreszeit[stoff_lower], color="#4A90E2")
         
     titel_season = f"Mittlere {stoff.upper()}-Werte nach Jahreszeit" + (" & PM2.5" if hat_pm25 else "")
-    ax_season.set_title(titel_season, color='white', fontsize=10, fontweight="bold")
-    ax_season.set_xlabel("Jahreszeit", color='white', fontsize=9)
-    ax_season.set_ylabel(r"Durchschnittliche Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=9)
+    ax_season.set_title(titel_season, color='white', fontsize=9, fontweight="bold") # <-- GEÄNDERT: Von 10 auf 9
+    ax_season.set_xlabel("Jahreszeit", color='white', fontsize=5.5)                 # <-- GEÄNDERT: Von 5 auf 5.5
+    ax_season.set_ylabel(r"Durchschnittliche Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=5.5) # <-- Von 5 auf 5.5
+    
     ax_season.set_xticks(x_season)
-    ax_season.set_xticklabels(schadstoff_jahreszeit.index)
-    ax_season.tick_params(colors='white', which='both', labelsize=8)
+    # WICHTIG: fontsize direkt beim Setzen der Textlabels übergeben, damit es greift:
+    ax_season.set_xticklabels(schadstoff_jahreszeit.index, fontsize=4.5, color='white') 
+    
+    ax_season.tick_params(colors='white', which='both', labelsize=4.5)              # <-- GEÄNDERT: Von 8 auf winzige 4.5
     for spine in ax_season.spines.values(): spine.set_color('white')
     ax_season.grid(axis="y", linestyle="--", alpha=0.3, color='dimgray')
     fig_season.tight_layout()
@@ -689,7 +692,7 @@ def analyzeSeasonAndWeekend(df, stoff):
     # ========================================================
     # --- DIAGRAMM 2: WERKTAG VS. WOCHENENDE ---
     # ========================================================
-    fig_weekend, ax_weekend = plt.subplots(figsize=(5, 4), facecolor='black')
+    fig_weekend, ax_weekend = plt.subplots(figsize=(5, 3), facecolor='black')
     ax_weekend.set_facecolor('black')
     
     labels_weekend = ["Werktag", "Wochenende"]
@@ -698,21 +701,21 @@ def analyzeSeasonAndWeekend(df, stoff):
     if hat_pm25:
         ax_weekend.bar(x_weekend - width/2, schadstoff_wochenende[stoff_lower], width, color="#4A90E2", label="PM10")
         ax_weekend.bar(x_weekend + width/2, schadstoff_wochenende['pm2x5'], width, color="#FF6B6B", label="PM2.5")
-        ax_weekend.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=8)
+        ax_weekend.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=5)
     else:
-        # Falls einzelner Schadstoff, nutzen wir dein vordefiniertes Hellrot (#FF6B6B)
         ax_weekend.bar(labels_weekend, schadstoff_wochenende[stoff_lower], color="#FF6B6B")
         
     titel_weekend = f"{stoff.upper()}: Werktag vs. Wochenende" + (" & PM2.5" if hat_pm25 else "")
-    ax_weekend.set_title(titel_weekend, color='white', fontsize=10, fontweight="bold")
-    ax_weekend.set_ylabel(r"Durchschnittliche Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=9)
+    ax_weekend.set_title(titel_weekend, color='white', fontsize=9, fontweight="bold") # <-- GEÄNDERT: Von 10 auf 9
+    ax_weekend.set_ylabel(r"Durchschnittliche Konzentration [$\mathrm{\mu g/m^3}$]", color='white', fontsize=5.5) # <-- Von 5 auf 5.5
+    
     ax_weekend.set_xticks(x_weekend)
-    ax_weekend.set_xticklabels(labels_weekend)
-    ax_weekend.tick_params(colors='white', which='both', labelsize=8)
+    ax_weekend.set_xticklabels(labels_weekend, fontsize=4.5, color='white')          # <-- GEÄNDERT: Von 5 auf 4.5
+    
+    ax_weekend.tick_params(colors='white', which='both', labelsize=4.5)             # <-- GEÄNDERT: Von 7 auf winzige 4.5
     for spine in ax_weekend.spines.values(): spine.set_color('white')
     ax_weekend.grid(axis="y", linestyle="--", alpha=0.3, color='dimgray')
     fig_weekend.tight_layout()
-
     return fig_season, fig_weekend
 
 # ==============================================================================
@@ -762,10 +765,6 @@ def getExceedancesPerYear(df, stoff):
         st.warning(f"Schadstoff '{stoff.upper()}' wird nicht unterstützt oder Spalten fehlen.")
         return None
 
-    # Streamlit Text-Ausgaben (außerhalb der Plot-Logik)
-    st.write(f"### 📊 Jährliche Auswertung: LQI-Überschreitungen ({stoff.upper()})")
-    st.write(f"### 📈 Stunden mit mindestens mäßiger Luftqualität ({stoff.upper()})")
-
     plt.rcParams.update(plt.rcParamsDefault)
     fig, ax = plt.subplots(figsize=(5, 3), facecolor='black')
     ax.set_facecolor('black')
@@ -783,23 +782,23 @@ def getExceedancesPerYear(df, stoff):
         ax.bar(x - width/2, ueberschreitungen_jahr[stoff_lower], width, color="#4A90E2", label="PM10 (>= 28 µg/m³)")
         # Balken für pm2x5 (rechts)
         ax.bar(x + width/2, ueberschreitungen_jahr['pm2x5'], width, color="#FF6B6B", label="PM2.5 (>= 16 µg/m³)")
-        ax.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=8)
+        ax.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right', fontsize=5)
     else:
         # Einzelner Balken für o3 oder no2
         ax.bar(jahre_str, ueberschreitungen_jahr[stoff_lower], color="#4A90E2")
 
     # Layout & Achsen-Design
     titel = f"Stunden mit mindestens mäßiger Luftqualität: {stoff.upper()}" + (" & PM2.5" if hat_pm25 else "")
-    ax.set_title(titel, color='white', fontsize=11, fontweight="bold", pad=10)
-    ax.set_xlabel("Jahr", color='white', fontsize=9)
-    ax.set_ylabel("Anzahl belasteter Stunden", color='white', fontsize=9)
+    ax.set_title(titel, color='white', fontsize=10, fontweight="bold", pad=10)
+    ax.set_xlabel("Jahr", color='white', fontsize=5)
+    ax.set_ylabel("Anzahl belasteter Stunden", color='white', fontsize=5)
     
     ticks_to_show = list(range(0, len(jahre_str), 10))
     labels_to_show = [jahre_str[i] for i in ticks_to_show]
     
     ax.set_xticks(ticks_to_show)
     ax.set_xticklabels(labels_to_show, rotation=0, ha='center')
-    ax.tick_params(colors='white', which='both', labelsize=8)
+    ax.tick_params(colors='white', which='both', labelsize=5)
     
     for spine in ax.spines.values(): 
         spine.set_color('white')
