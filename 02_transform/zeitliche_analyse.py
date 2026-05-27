@@ -11,7 +11,7 @@ df = pd.read_csv("02_transform/Schadstoff_Wetter.csv")
 df["datum"] = pd.to_datetime(df["datum"])
 
 # Analysezeitraum ab 2008
-#df = df[df["datum"].dt.year >= 2008]
+df = df[df["datum"].dt.year >= 2008]
 
 # Zielvariable festlegen
 schadstoff = "no2"
