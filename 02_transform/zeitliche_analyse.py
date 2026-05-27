@@ -5,16 +5,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Daten laden
-df = pd.read_csv("02_transform/alt_data_2.csv")
+df = pd.read_csv("02_transform/Schadstoff_Wetter.csv")
 
 # Datum umwandeln
 df["datum"] = pd.to_datetime(df["datum"])
 
 # Analysezeitraum ab 2008
-df = df[df["datum"].dt.year >= 2008]
+#df = df[df["datum"].dt.year >= 2008]
 
 # Zielvariable festlegen
-schadstoff = "pm10"
+schadstoff = "no2"
 
 # Zeitvariablen erstellen
 df["wochentag"] = df["datum"].dt.dayofweek
@@ -105,4 +105,3 @@ plt.xticks(range(0, 24))
 plt.grid()
 plt.tight_layout()
 plt.show()
-
