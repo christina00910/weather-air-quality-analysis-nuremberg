@@ -217,22 +217,22 @@ def showTab2 ():
 @st.fragment
 def showTab3 ():
     # Slider auch hier - teilt sich den Wert mit Tab 2 über st.session_state.selected_year
-    min_year_t3 = int(dfOrginal['datum'].dt.year.min())
-    max_year_t3 = int(dfOrginal['datum'].dt.year.max())
-    selected_year_t3 = st.slider(
-        "Wähle ein Jahr für die Analyse:",
-        min_value=min_year_t3,
-        max_value=max_year_t3,
-        value=st.session_state.selected_year,
-        key="year_slider_tab3"
-    )
-    st.session_state.selected_year = selected_year_t3
+#    min_year_t3 = int(dfOrginal['datum'].dt.year.min())
+#    max_year_t3 = int(dfOrginal['datum'].dt.year.max())
+#    selected_year_t3 = st.slider(
+#        "Wähle ein Jahr für die Analyse:",
+#        min_value=min_year_t3,
+#        max_value=max_year_t3,
+#        value=st.session_state.selected_year,
+#        key="year_slider_tab3"
+#    )
+#    st.session_state.selected_year = selected_year_t3
 
     # df_year neu auf Basis des aktuellen Slider-Werts berechnen
-    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year_t3].copy()
+#    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year_t3].copy()
 
-    st.header(f"Luftqualität & Schadstoffanalyse ({selected_year_t3})")
-    st.markdown("---")
+#    st.header(f"Luftqualität & Schadstoffanalyse ({selected_year_t3})")
+#    st.markdown("---")
 
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.subheader("Gesamtübersicht der Luftbelastung vs. WHO-Grenzwerte")
@@ -308,8 +308,6 @@ def showTab3 ():
 def showTab4 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Korrelationen zwischen Wetter und Schadstoffen – Übersicht")
-        st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
-                "Wählen Sie links einen einzelnen Schadstoff, um die Korrelationsanalyse zu sehen.")
     else:
         st.header(f"Korrelationen zwischen Wetter und {schadstoff_auswahl} über die Jahre")
         kor.korrelation(dfOrginal, stoff_spalte)
@@ -319,8 +317,6 @@ def showTab4 ():
 def showTab5 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Multiple Regression – Übersicht")
-        st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
-                "Wählen Sie links einen einzelnen Schadstoff, um die Regressionsanalyse zu sehen.")
     else:
         st.header(f"Multiple Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
         kor.multipleLinearRegression(dfOrginal, stoff_spalte)
