@@ -757,64 +757,124 @@ dfOrginal = load()
 # 01 SIDEBAR-KONFIGURATION
 # ============================================================
 with st.sidebar:
-    st.write("🌦️ Filter & Einstellungen")
-    st.markdown("---")
+    st.markdown("""
+    <style>
+    section[data-testid="stSidebar"] > div {
+        padding-top: 1.2rem !important;
+    }
+    
+    .sidebar-item {
+    margin-bottom: 16px;
+    }
+                
+    .sidebar-title {
+        font-size: 25px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
 
-    # Globale Schadstoff-Auswahl (wirkt in Tab 3, 4, 5, 6)
+    .sidebar-section-title {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .sidebar-divider {
+        margin: 14px 0 14px 0;
+        border-top: 1px solid rgba(255,255,255,0.16);
+    }
+
+    div[role="radiogroup"] label {
+        padding: 0px 0 !important;
+        margin: 0px 0 !important;
+    }
+
+    div[role="radiogroup"] p {
+        font-size: 17px !important;
+        line-height: 1.2 !important;
+        font-weight: 600 !important;
+    }
+
+    .sidebar-text {
+        font-size: 16px;
+        line-height: 1.45;
+    }
+
+    .sidebar-text b {
+        font-size: 17px;
+    }
+
+    .sidebar-gap {
+        height: 10px;
+    }
+
+    .sidebar-data-box {
+        background-color: rgba(3, 149, 176, 0.1);
+        padding: 9px 11px;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(1, 132, 157, 0.8);
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        color: #FAFAFA;
+        line-height: 1.35;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='sidebar-title'>🌦️ Filter & Einstellungen</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='sidebar-section-title'>Schadstoff-Auswahl:</div>", unsafe_allow_html=True)
+
     schadstoff_auswahl = st.radio(
-        "Schadstoff-Auswahl:",
-        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10)"],
+        "",
+        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10 & PM2.5)"],
+        label_visibility="collapsed"
     )
 
-    # Spaltenname für Tabs, die einen einzelnen Stoff brauchen
-    # Fallback bei "Übersicht aller Stoffe" -> no2
     stoff_spalte = STOFF_MAP.get(schadstoff_auswahl, "no2")
 
-    st.markdown("---")
-
-    with st.spinner("Loading..."):
-        time.sleep(2)
+    st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
 
     st.markdown(
         f"""
-        <div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);">
-            <span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;">
-                ✅ Daten erfolgreich geladen: {len(dfOrginal):,} Zeilen!
-            </span>
+        <div class="sidebar-data-box">
+            ✅ Daten erfolgreich geladen:<br>
+            {len(dfOrginal):,} Zeilen
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
 
-    # Sticky Footer
-    st.markdown(
-        """
-        <style>
-            .sidebar-footer {
-                position: absolute; 
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                background-color: #262730; 
-                padding: 15px 20px 20px 20px; 
-                text-align: left;
-                font-size: 12px;
-                color: #888888;
-                z-index: 999; 
-            }
-        </style>
-  
-        <div class="sidebar-footer">
-            <hr style="margin-top: 0; margin-bottom: 10px; border-color: #444444;">
-            <b>Projekt:</b> <br>Modulare Analyse von Wetter- und Luftqualitätsdaten<br>
-            <b>Milestone 1:</b> Nürnberg<br>
-            <b>Team:</b> Christina, Markus, Frank
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+<div class="sidebar-text">
+
+<div class="sidebar-item">
+<b>Projekt:</b><br>
+Analyse und Vorhersage von Wetter- und Luftqualitätsdaten
+</div>
+
+<div class="sidebar-item">
+<b>Region:</b><br>
+Nürnberg
+</div>
+
+<div class="sidebar-item">
+<b>Zeitraum:</b><br>
+11.05.2026 – 29.05.2026
+</div>
+
+<div class="sidebar-item">
+<b>Projektteam:</b><br>
+Christina Dürbeck<br>
+Frank Hasdorf<br>
+Markus Edelhoff
+</div>
+
+</div>
+""", unsafe_allow_html=True)
 
 # ============================================================
 # TAB-DESIGN ANPASSEN
