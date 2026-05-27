@@ -17,14 +17,14 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
 import seaborn as sns
-import analyse as an
+import styling
+
+import analysePM as an
 import randomForest as ran
 import openMeteo as op
 import stPrognosis as pr
 import O3
-
 import korrelation as kor
-import styling
 
 # Globales Styling für alle matplotlib/seaborn-Charts aktivieren
 styling.apply_global_style()
@@ -216,25 +216,25 @@ def showTab2 ():
 #######################################################
 @st.fragment
 def showTab3 ():
-    # Slider auch hier - teilt sich den Wert mit Tab 2 über st.session_state.selected_year
-#    min_year_t3 = int(dfOrginal['datum'].dt.year.min())
-#    max_year_t3 = int(dfOrginal['datum'].dt.year.max())
-#    selected_year_t3 = st.slider(
-#        "Wähle ein Jahr für die Analyse:",
-#        min_value=min_year_t3,
-#        max_value=max_year_t3,
-#        value=st.session_state.selected_year,
-#        key="year_slider_tab3"
-#    )
-#    st.session_state.selected_year = selected_year_t3
-
-    # df_year neu auf Basis des aktuellen Slider-Werts berechnen
-#    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year_t3].copy()
-
-#    st.header(f"Luftqualität & Schadstoffanalyse ({selected_year_t3})")
-#    st.markdown("---")
-
     if schadstoff_auswahl == "Übersicht aller Stoffe":
+        # Slider auch hier - teilt sich den Wert mit Tab 2 über st.session_state.selected_year
+        min_year_t3 = int(dfOrginal['datum'].dt.year.min())
+        max_year_t3 = int(dfOrginal['datum'].dt.year.max())
+        selected_year_t3 = st.slider(
+            "Wähle ein Jahr für die Analyse:",
+            min_value=min_year_t3,
+            max_value=max_year_t3,
+            value=st.session_state.selected_year,
+            key="year_slider_tab3"
+        )
+        st.session_state.selected_year = selected_year_t3
+    
+        # df_year neu auf Basis des aktuellen Slider-Werts berechnen
+        df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year_t3].copy()
+    
+        st.header(f"Luftqualität & Schadstoffanalyse ({selected_year_t3})")
+        st.markdown("---")
+        
         st.subheader("Gesamtübersicht der Luftbelastung vs. WHO-Grenzwerte")
         st.write("Die Dreiecke zeigen die Abweichung zu den offiziellen WHO-Jahresgrenzwerten an (Grün = Unter dem Limit, Rot = Überschreitung).")
 
@@ -301,8 +301,9 @@ def showTab3 ():
         st.subheader(titel)
         st.info(info_text)
         showEDAPlots(dfOrginal, stoff_spalte)
-    
-    
+        if (stoff_spalte == "o3") :
+            O3.showO3EDAPlots ()
+   
 #######################################################
 @st.fragment
 def showTab4 ():
@@ -336,7 +337,6 @@ def showTab6 ():
 def showTab7 ():
     st.header("Vorhersage")
     models = pr.prognosis (dfOrginal)
-#    O3.showO3EDAPlots ()
 
 #######################################################
 @st.fragment

@@ -128,7 +128,6 @@ def showO3EDAPlots () :
     # ============================================================
     # Kennzahlen + Erklärung zum Chart
     # ============================================================
-    showEDAPlots (dfOrginal, stoff)
 
     # --- Kennzahlen-Tabelle direkt unter dem Chart ---
     kennzahlen = pd.DataFrame({
