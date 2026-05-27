@@ -634,7 +634,6 @@ def showTab3 ():
 #######################################################
 @st.fragment
 def showTab4():
-
     st.header("Korrelationenzwischen Wetter und Luftschadstoffen")
 
     st.markdown("""
@@ -678,7 +677,7 @@ def showTab4():
 def showTab5 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Multiple Regression – Übersicht")
-        st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Regression zu sehen.")
+        st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die multiple lineare Regression anzuzeigen.")
     else:
         st.header(f"Multiple lineare Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
         st.markdown("""
@@ -707,11 +706,8 @@ def showTab5 ():
 def showTab6():
 
     if schadstoff_auswahl == "Übersicht aller Stoffe":
-
         st.header("Random Forest – Übersicht")
-
-        st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Random-Forest-Modell zu sehen.")
-
+        st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um das Random-Forest-Modell anzuzeigen.")
     else:
 
         st.header(f"Random Forest: Wetter als Prädiktor für {schadstoff_auswahl}")
@@ -745,9 +741,13 @@ def showTab7 ():
 
 #######################################################
 @st.fragment
-def showTab8 ():
-    st.header("Vorhersage")
-    op.calcWithOpenMeteo (dfOrginal, stoff_spalte)
+def showTab8():
+    if schadstoff_auswahl == "Übersicht aller Stoffe":
+        st.header("Vorhersage Live")
+        st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die Live-Vorhersage anzuzeigen.")
+    else:
+        st.header(f"Vorhersage Live: {schadstoff_auswahl}")
+        op.calcWithOpenMeteo(dfOrginal, stoff_spalte)
 
 #######################################################
 
