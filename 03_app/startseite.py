@@ -1,3 +1,31 @@
+# Schadstoffe 
+col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.subheader("Stickstoffdioxid (NO₂)")
+        st.write("""
+        NO₂ entsteht vor allem bei Verbrennungsprozessen, insbesondere im Straßenverkehr.
+        Erhöhte Konzentrationen können die Atemwege belasten und stehen mit Atemwegs- sowie
+        Herz-Kreislauf-Erkrankungen in Verbindung.
+        """)
+
+    with col2:
+        st.subheader("Ozon (O₃)")
+        st.write("""
+        Ozon entsteht unter Sonneneinstrahlung aus Vorläufersubstanzen wie Stickoxiden.
+        Hohe Werte treten besonders bei warmem und sonnigem Wetter auf und können die
+        Lungenfunktion beeinträchtigen.
+        """)
+
+    with col3:
+        st.subheader("Feinstaub (PM10 / PM2.5)")
+        st.write("""
+        Feinstaub entsteht unter anderem durch Verkehr, Heizungen und Industrie.
+        Besonders kleine Partikel können tief in die Lunge eindringen und gesundheitliche
+        Belastungen verursachen.
+        """)
+#------------------------------------------------
+# Startseite
 st.title("🌍 Modulare Analyse und Vorhersage von Wetter- und Luftqualitätsdaten")
 
 st.markdown("""

@@ -426,9 +426,256 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(
 # ------------------------------------------------------------
 # TAB 1: Einleitung & Überblick
 # ------------------------------------------------------------
-with tab1:
-    st.header("Startseite")
-    st.write("Willkommen zu unserer interaktiven Analyse von Wetter- und Luftqualitätsdaten für die Stadt Nürnberg! In diesem Dashboard können Sie verschiedene Aspekte der Daten erkunden, von grundlegenden Wetterstatistiken bis hin zu komplexen Analysen der Schadstoffbelastung. Nutzen Sie die Tabs oben, um durch die verschiedenen Bereiche zu navigieren und spannende Einblicke zu gewinnen.")
+# =========================
+# TITEL & EINLEITUNG
+# =========================
+
+st.title("🌍 Analyse und Vorhersage von Wetter- und Luftqualitätsdaten")
+
+st.markdown("""
+Willkommen zu unserer interaktiven Analyse der Wetter- und Luftqualitätsdaten für die Stadt Nürnberg.
+
+Dieses Dashboard bietet einen Überblick über die verwendeten Daten, 
+die gesundheitliche Relevanz verschiedener Luftschadstoffe sowie die eingesetzten 
+statistischen Verfahren und Machine-Learning-Modelle.
+
+Die einzelnen Tabs führen durch die verschiedenen Analysebereiche – 
+von der explorativen Datenanalyse über Korrelations- und Regressionsverfahren 
+bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
+""")
+
+
+
+st.markdown("### 🔎 Analysebereiche")
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+with col1:
+
+    st.info("📊 Explorative Analyse")
+
+with col2:
+
+    st.info("📈 Korrelationen")
+
+with col3:
+
+    st.info("📉 Multiple Regression")
+
+with col4:
+
+    st.info("🌲 Random Forest")
+
+with col5:
+
+    st.info("🔮 Vorhersagemodelle")
+
+# =========================
+# PROJEKT-INFOS
+# =========================
+
+st.markdown("""
+<div style="
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    padding: 20px 10px 10px 10px;
+">
+
+<div>
+    <div style="font-size:16px; color:#9CA3AF;">
+        👥 Projektteam
+    </div>
+    <div style="font-size:20px; font-weight:600; line-height:1.6;">
+        Christina Dürbeck<br>
+        Frank Hasdorf<br>
+        Markus Edelhoff
+    </div>
+</div>
+
+<div>
+    <div style="font-size:16px; color:#9CA3AF;">
+        📅 Projektzeitraum
+    </div>
+    <div style="font-size:20px; font-weight:600; line-height:1.6;">
+        11.05. – 29.05.2026
+    </div>
+</div>
+
+<div>
+    <div style="font-size:16px; color:#9CA3AF;">
+        📍 Untersuchungsregion
+    </div>
+    <div style="font-size:20px; font-weight:600; line-height:1.6;">
+        Nürnberg
+    </div>
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+st.header("📌 Projektüberblick")
+
+st.write("""
+Ziel des Projekts ist die Untersuchung des Zusammenhangs zwischen meteorologischen 
+Einflussfaktoren und der Luftqualität in Nürnberg. Dafür werden historische Wetter- 
+und Luftschadstoffdaten zusammengeführt, aufbereitet und analysiert.
+
+Im Fokus stehen die Luftschadstoffe Ozon (O₃), Stickstoffdioxid (NO₂) sowie 
+Feinstaub (PM10 und PM2.5). Zur Auswertung werden explorative Analysen, 
+Korrelationsverfahren, multiple lineare Regressionen sowie Random-Forest-Modelle eingesetzt.
+
+Zusätzlich werden verschiedene Vorhersageansätze entwickelt, um Luftschadstoffkonzentrationen 
+auf Basis meteorologischer, zeitlicher und historischer Einflussgrößen prognostizieren zu können.
+""")
+
+st.header("🫁 Gesundheitliche Auswirkungen von Luftschadstoffen")
+
+st.write("""
+Luftschadstoffe zählen zu den bedeutendsten umweltbedingten Gesundheitsrisiken. 
+Sie können insbesondere die Atemwege und das Herz-Kreislauf-System beeinträchtigen 
+und stehen mit verschiedenen gesundheitlichen Erkrankungen in Zusammenhang.
+""")
+
+base_dir = Path(__file__).parent
+bild_pfad = base_dir / "Bilder" / "gesundheit.png"
+
+st.image(
+    str(bild_pfad),
+    width=900
+)
+
+st.info("""
+Die Grafik zeigt, dass Luftschadstoffe mit verschiedenen gesundheitlichen Belastungen verbunden sein können.
+""")
+
+st.header("📊 Verwendete Datenquellen")
+
+st.markdown("""
+- **Deutscher Wetterdienst (DWD)**  
+  Historische Wetterdaten der Messstation Nürnberg, Stations-ID 3668.
+
+- **Bayerisches Landesamt für Umwelt (LfU)**  
+  Historische Luftschadstoffdaten für NO₂, O₃, PM10 und PM2.5.
+
+- **Open-Meteo API**  
+  Aktuelle Wetterdaten für die Live-Vorhersage der Luftschadstoffwerte.
+""")
+
+st.header("⚙️ Datenaufbereitung")
+
+st.markdown("""
+Im Rahmen der Datenaufbereitung wurden die Wetter- und Luftschadstoffdaten in Python
+verarbeitet und für die Analyse vorbereitet.
+
+Dabei wurden die Daten:
+- zeitlich aufeinander abgestimmt
+- bereinigt und zusammengeführt
+- auf fehlende Werte überprüft
+- um zusätzliche zeitliche Einflussfaktoren ergänzt
+""")
+
+with st.expander("Verwendete Wetter- und Schadstoffvariablen anzeigen"):
+
+    variablen_df = pd.DataFrame({
+        "Kategorie": [
+            "Wetterdaten",
+            "Wetterdaten",
+            "Wetterdaten",
+            "Wetterdaten",
+            "Wetterdaten",
+            "Wetterdaten",
+            "Wetterdaten",
+            "Wetterdaten",
+            "Luftschadstoffe",
+            "Luftschadstoffe",
+            "Luftschadstoffe",
+            "Luftschadstoffe"
+        ],
+
+        "Variable": [
+            "Temperatur",
+            "Windgeschwindigkeit",
+            "Windrichtung",
+            "Luftdruck",
+            "Relative Luftfeuchtigkeit",
+            "Niederschlagshöhe",
+            "Sonnenscheindauer",
+            "Gesamtbewölkung",
+            "Ozon (O₃)",
+            "Stickstoffdioxid (NO₂)",
+            "Feinstaub PM10",
+            "Feinstaub PM2.5"
+        ]
+    })
+
+    st.dataframe(
+        variablen_df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+with st.expander("Zusätzliche Zeitvariablen anzeigen"):
+
+    zeitvariablen = pd.DataFrame({
+        "Zeitvariable": [
+            "Tageszeit",
+            "Wochentag",
+            "Monat",
+            "Wochenende",
+            "Hauptverkehrszeit",
+            "Heizperiode",
+            "Nachtstunden",
+            "Silvestereffekt"
+        ],
+        "Beschreibung": [
+            "Stunde des Tages zur Analyse typischer Tagesverläufe",
+            "Unterscheidung einzelner Wochentage",
+            "Erfassung saisonaler Muster",
+            "Unterscheidung zwischen Werktagen und Wochenende",
+            "Typische Berufsverkehrszeiten am Morgen und Abend",
+            "Monate mit potenziell erhöhtem Heizverhalten",
+            "Zeiten mit geringerer Sonneneinstrahlung und stabileren Luftschichten",
+            "Sondereffekt rund um den Jahreswechsel"
+        ]
+    })
+
+    st.dataframe(
+        zeitvariablen,
+        use_container_width=True,
+        hide_index=True
+    )
+st.header("📊 Datensatzübersicht")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("Analysezeitraum", "1980 – 2024")
+
+with col2:
+    st.metric("Messintervall", "stündlich")
+
+with col3:
+    st.metric("PM2.5 verfügbar ab", "2008")
+
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    st.metric("Anzahl Datensätze", f"{len(dfOrginal):,}".replace(",", "."))
+
+with col5:
+    st.metric("Anzahl Variablen", dfOrginal.shape[1])
+
+with col6:
+    st.metric("Untersuchungsregion", "Nürnberg")
+
+st.info("""
+Da PM2.5-Daten erst ab 2008 vollständig verfügbar sind, wurden alle vergleichenden Analysen 
+zwischen den Luftschadstoffen (z. B. Korrelationsanalyse, Multiple Regression, 
+Random Forest sowie Vorhersagemodelle) einheitlich ab dem Jahr 2008 durchgeführt.
+""")
 
 # ------------------------------------------------------------
 # TAB 2: WETTERDATEN
