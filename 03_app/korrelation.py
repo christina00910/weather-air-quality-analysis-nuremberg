@@ -11,47 +11,109 @@ plt.style.use("dark_background")
 # 1. OPTIMIERUNG: Caching für die rechenintensive Korrelationsmatrix und Grafik
 @st.cache_data(show_spinner="Berechne Korrelationsmatrix...")
 def berechne_und_plotte_korrelation(df, analyse_variablen):
-    # Filterung direkt auf dem DataFrame ohne vorheriges teures Kopieren
     df_filtered = df[df["datum"].dt.year >= 2008]
     analyse_df = df_filtered[analyse_variablen]
-    
-    # Korrelation berechnen
+
     korrelation_matrix = analyse_df.corr()
-    
-    # Heatmap-Grafik erstellen und im Cache speichern
-    fig, ax = plt.subplots(figsize=(12, 8), facecolor='#0e1117')
-    ax.set_facecolor('#0e1117')
+
+    label_map = {
+        "temperatur": "Temperatur",
+        "windgeschwindigkeit": "Windgeschw.",
+        "windrichtung": "Windrichtung",
+        "luftdruck": "Luftdruck",
+        "relative_luftfeuchtigkeit": "rel. Luftfeuchte",
+        "niederschlagshoehe_mm": "Niederschlag",
+        "sonnenscheindauer_minuten": "Sonnenschein",
+        "gesamtbewoelkung": "Bewölkung",
+        "o3": "O₃",
+        "no2": "NO₂",
+        "pm10": "PM10",
+        "pm2x5": "PM2.5"
+    }
+
+    korrelation_matrix = korrelation_matrix.rename(
+        index=label_map,
+        columns=label_map
+    )
+
+    fig, ax = plt.subplots(figsize=(15, 9), facecolor="#0e1117")
+    ax.set_facecolor("#0e1117")
+
     sns.heatmap(
         korrelation_matrix,
         annot=True,
         cmap="coolwarm",
+        center=0,
+        vmin=-1,
+        vmax=1,
         fmt=".2f",
-        ax=ax,
-        cbar_kws={'label': 'Korrelationskoeffizient'}
+        linewidths=0.5,
+        linecolor="#1f2937",
+        annot_kws={"size": 10},
+        cbar_kws={"label": "Korrelationskoeffizient"},
+        ax=ax
     )
-    ax.set_title("Korrelationsmatrix Wetterdaten und Luftschadstoffe")
+
+    ax.set_title(
+        "Korrelationsmatrix: Wettervariablen und Luftschadstoffe",
+        fontsize=18,
+        color="white",
+        pad=22
+    )
+
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+
+    ax.tick_params(axis="x", labelrotation=45, labelsize=10, colors="white")
+    ax.tick_params(axis="y", labelrotation=0, labelsize=10, colors="white")
+
+    # Trennlinie zwischen Wetterdaten und Luftschadstoffen
+    trennlinie = 8
+    ax.axhline(trennlinie, color="white", linewidth=2.5)
+    ax.axvline(trennlinie, color="white", linewidth=2.5)
+
+    # Gruppenbeschriftung
+    ax.text(
+        4, -0.8,
+        "Wettervariablen",
+        ha="center",
+        va="center",
+        fontsize=12,
+        color="white",
+        fontweight="bold"
+    )
+
+    ax.text(
+        10, -0.8,
+        "Luftschadstoffe",
+        ha="center",
+        va="center",
+        fontsize=12,
+        color="white",
+        fontweight="bold"
+    )
+
+    # Colorbar lesbarer machen
+    cbar = ax.collections[0].colorbar
+    cbar.ax.yaxis.label.set_color("white")
+    cbar.ax.tick_params(colors="white")
+
     plt.tight_layout()
-    
+
     return korrelation_matrix, fig
 
 
 def korrelation(dfO, stoff):
-    # Relevante Variablen für die Korrelationsanalyse
     analyse_variablen = [
         "temperatur", "windgeschwindigkeit", "windrichtung", "luftdruck",
         "relative_luftfeuchtigkeit", "niederschlagshoehe_mm", 
         "sonnenscheindauer_minuten", "gesamtbewoelkung", "o3", "no2", "pm10", "pm2x5"
     ]
     
-    # Nutzt die gecachte Funktion (Verhindert sekundenlanges Laden bei Klicks)
     korrelation_matrix, fig = berechne_und_plotte_korrelation(dfO, analyse_variablen)
     
-    # Zeigt die Tabelle mit farblicher Heatmap an
     st.subheader("Korrelationsmatrix")
-    st.dataframe(korrelation_matrix.style.background_gradient(cmap='coolwarm', axis=None).format("{:.2f}"))
-    
-    # Grafik direkt in Streamlit anzeigen
-    st.pyplot(fig)
+    st.pyplot(fig, use_container_width=True)
 
 
 # 2. OPTIMIERUNG: Caching der Statistischen Regression (Verhindert OLS-Neuberechnung bei Reruns)
