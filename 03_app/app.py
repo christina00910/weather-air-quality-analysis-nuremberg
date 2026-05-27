@@ -152,67 +152,268 @@ def load ():
 
     
 #######################################################
+
 @st.fragment
-def showTab2 ():
+def showTab2():
     st.header("Wetterdaten")
 
-    # Jahres-Slider oberhalb der Metrics
-    # Wert wird in st.session_state.selected_year gespiegelt -> auch in Tab 3 verfügbar
-    min_year = int(dfOrginal['datum'].dt.year.min())
-    max_year = int(dfOrginal['datum'].dt.year.max())
+    st.markdown("""
+    Dieser Bereich bietet einen Überblick über die meteorologischen Eingangsdaten des Projekts. 
+    Die Wetterdaten bilden die Grundlage für die Analyse der Luftqualität sowie für die späteren 
+    Vorhersagemodelle.
+    """)
+
+    # Jahres-Slider
+    min_year = int(dfOrginal["datum"].dt.year.min())
+    max_year = int(dfOrginal["datum"].dt.year.max())
 
     if "selected_year" not in st.session_state:
         st.session_state.selected_year = 2023
 
     selected_year = st.slider(
-        "Wähle ein Jahr für die Analyse:",
+        "Wähle ein Jahr für die Jahresübersicht:",
         min_value=min_year,
         max_value=max_year,
         value=st.session_state.selected_year,
         key="year_slider_tab2"
     )
+
     st.session_state.selected_year = selected_year
 
-    # Daten filtern
-    df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year].copy()
+    # Daten für ausgewähltes Jahr filtern
+    df_year = dfOrginal[dfOrginal["datum"].dt.year == selected_year].copy()
 
-    st.subheader(f"Übersicht für das Jahr {selected_year}")
+    st.subheader(f"Wetterübersicht für das Jahr {selected_year}")
+
+    # Kennzahlen für ausgewähltes Jahr
+    avg_temp = df_year["temperatur"].mean()
+    avg_wind = df_year["windgeschwindigkeit"].mean()
+    avg_humidity = df_year["relative_luftfeuchtigkeit"].mean()
+    sum_rain = df_year["niederschlagshoehe_mm"].fillna(0).sum()
+    sun_hours = df_year["sonnenscheindauer_minuten"].fillna(0).sum() / 60
+    avg_clouds = df_year["gesamtbewoelkung"].mean()
 
     col1, col2, col3 = st.columns(3)
 
-    avg_temp = df_year['temperatur'].mean()
-    max_wind = df_year['windgeschwindigkeit'].max()
-    sun_hours = df_year['sonnenscheindauer_minuten'].fillna(0).sum() / 60
+    with col1:
+        st.metric("Ø Temperatur", f"{avg_temp:.1f} °C", border=True)
 
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stMetricLabel"] p {
-            font-size: 14px !important;
+    with col2:
+        st.metric("Ø Windgeschwindigkeit", f"{avg_wind:.1f} m/s", border=True)
+
+    with col3:
+        st.metric("Ø relative Luftfeuchtigkeit", f"{avg_humidity:.1f} %", border=True)
+
+    col4, col5, col6 = st.columns(3)
+
+    with col4:
+        st.metric("Niederschlag gesamt", f"{sum_rain:.0f} mm", border=True)
+
+    with col5:
+        st.metric("Sonnenstunden gesamt", f"{sun_hours:.0f} h", border=True)
+
+    with col6:
+        st.metric("Ø Gesamtbewölkung", f"{avg_clouds:.1f}", border=True)
+
+    st.markdown("---")
+
+    # Langfristige Entwicklung einzelner Wettervariablen
+    st.subheader("Langfristige Entwicklung der Wettervariablen")
+
+    st.markdown("""
+    Die folgende Grafik zeigt die langfristige Entwicklung einer ausgewählten Wettervariable 
+    über den gesamten verfügbaren Zeitraum. Dadurch lassen sich Trends und Veränderungen 
+    über die Jahre hinweg besser einordnen.
+    """)
+
+    wetter_variablen = {
+        "Temperatur": {
+            "spalte": "temperatur",
+            "aggregation": "mean",
+            "titel": "Jahresmitteltemperatur",
+            "y_label": "Temperatur [°C]",
+            "plot_typ": "line"
+        },
+        "Windgeschwindigkeit": {
+            "spalte": "windgeschwindigkeit",
+            "aggregation": "mean",
+            "titel": "Durchschnittliche Windgeschwindigkeit",
+            "y_label": "Windgeschwindigkeit [m/s]",
+            "plot_typ": "line"
+        },
+        "Relative Luftfeuchtigkeit": {
+            "spalte": "relative_luftfeuchtigkeit",
+            "aggregation": "mean",
+            "titel": "Durchschnittliche relative Luftfeuchtigkeit",
+            "y_label": "Relative Luftfeuchtigkeit [%]",
+            "plot_typ": "line"
+        },
+        "Niederschlagshöhe": {
+            "spalte": "niederschlagshoehe_mm",
+            "aggregation": "sum",
+            "titel": "Jährliche Niederschlagshöhe",
+            "y_label": "Niederschlag [mm]",
+            "plot_typ": "bar"
+        },
+        "Sonnenscheindauer": {
+            "spalte": "sonnenscheindauer_minuten",
+            "aggregation": "sum",
+            "titel": "Jährliche Sonnenscheindauer",
+            "y_label": "Sonnenscheindauer [Minuten]",
+            "plot_typ": "bar"
+        },
+        "Gesamtbewölkung": {
+            "spalte": "gesamtbewoelkung",
+            "aggregation": "mean",
+            "titel": "Durchschnittliche Gesamtbewölkung",
+            "y_label": "Gesamtbewölkung [Achtel]",
+            "plot_typ": "line"
         }
-        div[data-testid="stMetricValue"] {
-            font-size: 24px !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
+    }
+
+    auswahl = st.selectbox(
+        "Wähle eine Wettervariable für den langfristigen Verlauf:",
+        options=list(wetter_variablen.keys()),
+        key="weather_trend_select"
     )
 
-    col1.metric("Ø Temperatur", f"{avg_temp:.1f} °C", border=True)
-    col2.metric("Max. Windgeschwindigkeit", f"{max_wind:.1f} m/s", border=True)
-    col3.metric("Gesamte Sonnenstunden", f"{sun_hours:.0f} h", border=True)
+    einstellung = wetter_variablen[auswahl]
+    spalte = einstellung["spalte"]
+    aggregation = einstellung["aggregation"]
+    titel = einstellung["titel"]
+    y_label = einstellung["y_label"]
+    plot_typ = einstellung["plot_typ"]
 
-    st.dataframe(df_year, height=400, use_container_width=True, hide_index=True)
+    df_trend = dfOrginal.copy()
+    df_trend["jahr"] = df_trend["datum"].dt.year
+
+    if aggregation == "sum":
+        trend = (
+            df_trend
+            .groupby("jahr")[spalte]
+            .sum(min_count=1)
+            .reset_index()
+        )
+    else:
+        trend = (
+            df_trend
+            .groupby("jahr")[spalte]
+            .mean()
+            .reset_index()
+        )
+
+    trend = trend.dropna(subset=[spalte])
+
+    start_jahr = int(trend["jahr"].min())
+    end_jahr = int(trend["jahr"].max())
+
+    if plot_typ == "bar":
+        fig_trend = px.bar(
+            trend,
+            x="jahr",
+            y=spalte,
+            title=f"{titel} {start_jahr}–{end_jahr}",
+            labels={
+                "jahr": "Jahr",
+                spalte: y_label
+            }
+        )
+    else:
+        fig_trend = px.line(
+            trend,
+            x="jahr",
+            y=spalte,
+            markers=True,
+            title=f"{titel} {min_year}–{max_year}",
+            labels={
+                "jahr": "Jahr",
+                spalte: y_label
+            }
+        )
+
+        fig_trend.update_traces(
+            line=dict(width=3),
+            marker=dict(size=6)
+        )
+
+    fig_trend.update_layout(
+        template="plotly_dark",
+        height=520,
+        title=dict(
+            font=dict(size=22),
+            x=0.02,
+            xanchor="left"
+        ),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=14),
+        xaxis=dict(
+            title="Jahr",
+            showgrid=True,
+            gridcolor="rgba(255,255,255,0.12)",
+            zeroline=False
+        ),
+        yaxis=dict(
+            title=y_label,
+            showgrid=True,
+            gridcolor="rgba(255,255,255,0.12)",
+            zeroline=False
+        ),
+        margin=dict(l=40, r=30, t=80, b=50),
+        hovermode="x unified"
+    )
+
+    fig_trend.update_xaxes(
+        tickmode="linear",
+        dtick=5
+    )
+
+    if plot_typ == "bar":
+        fig_trend.update_traces(
+            marker_line_width=0,
+            opacity=0.85
+        )
+
+    st.plotly_chart(fig_trend, use_container_width=True)
+
+    st.caption("""
+    Hinweis: Für Temperatur, Windgeschwindigkeit, relative Luftfeuchtigkeit und Gesamtbewölkung 
+    werden Jahresmittelwerte dargestellt. Niederschlag und Sonnenscheindauer werden als Jahressummen ausgewiesen.
+    """)
+
+    # Rohdaten einklappbar
+    with st.expander("Rohdaten anzeigen"):
+        st.dataframe(
+            df_year,
+            height=400,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    # Technische Datensatzinfos einklappbar
+    with st.expander("Technische Datensatzinformationen anzeigen"):
+        dtypes_df = pd.DataFrame({
+            "Spalte": df_year.dtypes.index,
+            "Datentyp": df_year.dtypes.values.astype(str),
+            "Fehlende Werte": df_year.isna().sum().values
+        })
+
+        st.dataframe(
+            dtypes_df,
+            use_container_width=True,
+            hide_index=True
+        )
 
     st.markdown(
         f"""
         <div style="background-color: rgba(0, 104, 249, 0.1); padding: 10px; border-radius: 0.3rem; border: 1px solid rgba(0, 104, 249, 0.2);">
-            <b>Hinweis zur Datenbasis:</b> Dieser Tab nutzt die im RAM liegende gefilterte Variable <code>df_year</code> für das Jahr {selected_year}.
+            <b>Hinweis zur Datenbasis:</b> Die Kennzahlen beziehen sich auf das ausgewählte Jahr <code>{selected_year}</code>. 
+            Die langfristige Grafik zeigt die Entwicklung der ausgewählten Wettervariable über den gesamten verfügbaren Zeitraum.
         </div>
         """,
         unsafe_allow_html=True
     )
-    
+
 #######################################################
 @st.fragment
 def showTab3 ():
