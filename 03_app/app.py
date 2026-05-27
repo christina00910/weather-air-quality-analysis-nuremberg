@@ -323,7 +323,7 @@ def showTab2():
             x="jahr",
             y=spalte,
             markers=True,
-            title=f"{titel} {min_year}–{max_year}",
+            title=f"{titel} {start_jahr}–{end_jahr}",
             labels={
                 "jahr": "Jahr",
                 spalte: y_label
@@ -363,15 +363,22 @@ def showTab2():
     )
 
     fig_trend.update_xaxes(
+        title_font=dict(size=20),
+        tickfont=dict(size=14),
         tickmode="linear",
         dtick=5
+    )
+
+    fig_trend.update_yaxes(
+        title_font=dict(size=20),
+        tickfont=dict(size=14)
     )
 
     if plot_typ == "bar":
         fig_trend.update_traces(
             marker_line_width=0,
             opacity=0.85
-        )
+    )
 
     st.plotly_chart(fig_trend, use_container_width=True)
 
