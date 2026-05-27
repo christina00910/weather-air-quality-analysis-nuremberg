@@ -241,18 +241,20 @@ def rushHourEffekt(df, stoff):
 @st.cache_data
 def get_cached_correlation(df):
     """Berechnet die Korrelationsmatrix exakt EINMALIG im Hintergrund."""
-    # Hilfs- oder Stringspalten vorab filtern, um Berechnung zu beschleunigen
     exclude_cols = ['datum', 'stunde', 'hour', 'timestamp', 'windklasse', 'wettertyp', 'season']
-    valid_cols = [c for c in df.columns if c.lower() not in exclude_cols and np.issubdtype(df[c].dtype, np.number)]
+    valid_cols = [
+        c for c in df.columns
+        if c.lower() not in exclude_cols and np.issubdtype(df[c].dtype, np.number)]
     return df[valid_cols].corr(numeric_only=True)
+
 
 def getKorrelation(df, stoff):
     """Reine Darstellungsfunktion für die Korrelationsmatrix."""
     stoff_lower = stoff.lower()
-    
+
     # 1. Gecachte Matrix abrufen
     corr_matrix = get_cached_correlation(df)
-    
+
     if corr_matrix.empty:
         st.warning("Keine numerischen Spalten für eine Korrelation vorhanden.")
         return None
@@ -260,16 +262,35 @@ def getKorrelation(df, stoff):
     # 2. Spezifische Stoff-Korrelation herausholen & anzeigen
     if stoff_lower in corr_matrix.columns:
         korrelationen = corr_matrix[stoff_lower].sort_values(ascending=False)
-        st.dataframe(korrelationen.to_frame(name="Korrelationskoeffizient"), use_container_width=True)
+
+        with st.expander(f"Korrelationen mit {stoff.upper()} anzeigen"):
+            st.dataframe(
+                korrelationen.to_frame(name="Korrelationskoeffizient"),
+                use_container_width=True)
     else:
         st.warning(f"Schadstoff '{stoff}' wurde in der Korrelationsmatrix nicht gefunden.")
 
     # 3. Visuelle Heatmap
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
-    ax.set_title("Korrelationsmatrix der Messreihe")
-    plt.tight_layout()
-    return fig
+    fig, ax = plt.subplots(figsize=(15, 9))
+
+    sns.heatmap(
+        corr_matrix,
+        annot=True,
+        cmap="coolwarm",
+        fmt=".2f",
+        annot_kws={"size": 9},
+        linewidths=0.4,
+        linecolor="white",
+        cbar_kws={"shrink": 0.75, "label": "Korrelationskoeffizient"},
+        ax=ax)
+    ax.set_title(
+        "Korrelationsmatrix Wetterdaten und Luftschadstoffe",
+        fontsize=18,
+        pad=20)
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+    ax.tick_params(axis="x", labelrotation=45, labelsize=10)
+    ax.tick_params(axis="y", labelrotation=0, labelsize=10)
 
 
 # ==============================================================================

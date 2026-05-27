@@ -593,9 +593,45 @@ def showTab3 ():
    
 #######################################################
 @st.fragment
-def showTab4 ():
-    st.header("Korrelationen zwischen Wetter und Schadstoffen")
+def showTab4():
+
+    st.header("Korrelationen zwischen Wetter und Luftschadstoffen")
+
+    st.markdown("""
+    Die Korrelationsanalyse zeigt, ob und wie stark Wetterbedingungen mit der Luftqualität zusammenhängen. 
+    Sie hilft dabei zu erkennen, welche Wettervariablen einen positiven oder negativen Einfluss auf die Luftschadstoffe Ozon (O₃), Stickstoffdioxid (NO₂) und Feinstaub (PM10/PM2.5) haben. 
+    So lässt sich beispielsweise analysieren, ob hohe Temperaturen, Sonnenschein oder Windgeschwindigkeiten bestimmte Schadstoffkonzentrationen begünstigen oder reduzieren.
+    """)
+
+    st.markdown("""
+    <div style="margin-top: 50px;"></div>
+    """, unsafe_allow_html=True
+    )
+
+    st.write("")
     kor.korrelation(dfOrginal, stoff_spalte)
+    st.write("")
+
+    with st.expander("Interpretation der Korrelationsanalyse"):
+
+        st.markdown("""
+        • Ozon (O₃) zeigt eine positive Korrelation mit Temperatur (0.63) und Sonnenscheindauer (0.39).  
+        → Hohe Ozonwerte treten häufiger bei warmem und sonnigem Wetter auf.
+
+        • NO₂ korreliert negativ mit Ozon (-0.46).  
+        → Hohe NO₂-Werte gehen oft mit niedrigeren Ozonwerten einher.
+
+        • PM10 und PM2.5 weisen eine starke positive Korrelation auf (0.73).  
+        → Beide Feinstaubarten treten häufig gemeinsam auf.
+
+        • Höhere Windgeschwindigkeiten hängen mit niedrigeren Luftschadstoffwerten zusammen.  
+        → Wind verbessert die Durchmischung der Luft und reduziert Schadstoffkonzentrationen.
+
+        • Die relative Luftfeuchtigkeit korreliert stark negativ mit Ozon (-0.72).  
+        → Trockene und sonnige Wetterlagen fördern höhere Ozonkonzentrationen.
+
+        • Niederschlag zeigt insgesamt nur schwache Zusammenhänge mit den Luftschadstoffwerten.
+        """)
     
 #######################################################
 @st.fragment
