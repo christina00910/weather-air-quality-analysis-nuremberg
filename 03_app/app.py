@@ -796,12 +796,12 @@ with st.sidebar:
     }
 
     .sidebar-text {
-        font-size: 16px;
+        font-size: 14px;
         line-height: 1.45;
     }
 
     .sidebar-text b {
-        font-size: 17px;
+        font-size: 15px;
     }
 
     .sidebar-gap {
