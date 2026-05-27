@@ -21,6 +21,7 @@ import analyse as an
 import randomForest as ran
 import openMeteo as op
 import stPrognosis as pr
+import O3
 
 import korrelation as kor
 import styling
@@ -57,33 +58,75 @@ def showEDAPlots (df_prepared, stoff):
     fig_year = an.calcMeanYear(df_prepared, stoff)
     if fig_year: 
         st.pyplot(fig_year)
+        if (stoff == "o3") :
+            st.info ("CHRISTINA1")
+        elif (stoff == "no2") :
+            st.info ("CHRISTINA2")
+        elif (stoff == "pm10") :
+            st.info ("CHRISTINA3")
 
     # 2. Saisonales Muster (Jahrzehntvergleich)
     fig_saison = an.calcMeanSaisonYear(df_prepared, stoff)
     if fig_saison: 
         st.pyplot(fig_saison)
-
+        if (stoff == "o3") :
+            st.info ("CHRISTINA1")
+        elif (stoff == "no2") :
+            st.info ("CHRISTINA2")
+        elif (stoff == "pm10") :
+            st.info ("CHRISTINA3")
+            
     # 3. Rush-Hour-Effekt (Tagesverlauf)
     fig_rush = an.rushHourEffekt(df_prepared, stoff) 
     if fig_rush: 
         st.pyplot(fig_rush)
-        
+        if (stoff == "o3") :
+            st.info ("CHRISTINA1")
+        elif (stoff == "no2") :
+            st.info ("CHRISTINA2")
+        elif (stoff == "pm10") :
+            st.info ("CHRISTINA3")
+            
     # 4. Inversionswetterlage
     fig_inversion = an.inversionswetter(df_prepared, stoff)
     if fig_inversion: 
         st.pyplot(fig_inversion)
+        if (stoff == "o3") :
+            st.info ("CHRISTINA1")
+        elif (stoff == "no2") :
+            st.info ("CHRISTINA2")
+        elif (stoff == "pm10") :
+            st.info ("CHRISTINA3")
 
     # 5. Jährliche LQI-Überschreitungen
     fig_exceed = an.getExceedancesPerYear(df_prepared, stoff)
     if fig_exceed: 
         st.pyplot(fig_exceed)
+        if (stoff == "o3") :
+            st.info ("CHRISTINA1")
+        elif (stoff == "no2") :
+            st.info ("CHRISTINA2")
+        elif (stoff == "pm10") :
+            st.info ("CHRISTINA3")
 
     # 6. Jahreszeit & Werktag/Wochenende (Nimmt die zwei Grafiken sauber entgegen)
     fig_season, fig_weekend = an.analyzeSeasonAndWeekend(df_prepared, stoff)
     if fig_season: 
         st.pyplot(fig_season)
+        if (stoff == "o3") :
+            st.info ("CHRISTINA1")
+        elif (stoff == "no2") :
+            st.info ("CHRISTINA2")
+        elif (stoff == "pm10") :
+            st.info ("CHRISTINA3")
     if fig_weekend: 
         st.pyplot(fig_weekend)
+        if (stoff == "o3") :
+            st.info ("CHRISTINA1")
+        elif (stoff == "no2") :
+            st.info ("CHRISTINA2")
+        elif (stoff == "pm10") :
+            st.info ("CHRISTINA3")
     return
 
 @st.cache_data
@@ -297,6 +340,7 @@ def showTab6 ():
 def showTab7 ():
     st.header("Vorhersage")
     models = pr.prognosis (dfOrginal)
+#    O3.showO3EDAPlots ()
 
 #######################################################
 @st.fragment
