@@ -566,30 +566,70 @@ def showTab3 ():
         # Einzelstoff-Ansicht (O₃, NO₂ oder PM10) - gemeinsamer Block
         beschreibungen = {
             "o3": (
-                "Ozon (O₃) – Detailanalyse",
-                "Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht. Weitere wissenschaftliche Beschreibung ergänzen......"
-            ),
+            "Ozon (O₃)",
+            """
+            Ozon (O₃) ist ein gasförmiger Luftschadstoff, der nicht direkt ausgestoßen wird,
+            sondern sich in der Atmosphäre aus sogenannten Vorläufersubstanzen bildet.
+            Dazu gehören vor allem Stickoxide (NOₓ) und flüchtige organische Verbindungen,
+            die beispielsweise durch Verkehr, Industrie oder Verbrennungsprozesse entstehen.
+
+            Besonders an warmen und sonnigen Tagen kommt es durch intensive Sonneneinstrahlung
+            zu chemischen Reaktionen in der Luft, wodurch die Ozonkonzentration ansteigt.
+            Deshalb treten erhöhte Ozonwerte häufig im Frühjahr und Sommer auf.
+
+            Hohe Ozonkonzentrationen können die Atemwege reizen, die Lungenfunktion beeinträchtigen
+            und insbesondere für Kinder, ältere Menschen sowie Personen mit Atemwegserkrankungen
+            gesundheitsschädlich sein.
+            """
+         ),
             "no2": (
-                "Stickstoffdioxid (NO₂) – Analysen",
-                "NO₂ entsteht primär bei Verbrennungsprozessen (z. B. Dieselmotoren)."
+            "Stickstoffdioxid (NO₂) – Detailanalyse",
+            """
+            Stickstoffdioxid (NO₂) ist ein gasförmiger Luftschadstoff, der hauptsächlich bei
+            Verbrennungsprozessen entsteht. Besonders hohe Konzentrationen treten im Straßenverkehr,
+            insbesondere durch Dieselfahrzeuge, Industrieanlagen und Heizsysteme auf.
+
+            NO₂ kann die Atemwege reizen und steht in Zusammenhang mit Atemwegserkrankungen sowie
+            einer verminderten Lungenfunktion. Hohe Werte treten häufig in stark befahrenen
+            Stadtgebieten auf.
+
+            Zusätzlich spielt Stickstoffdioxid eine wichtige Rolle bei der Bildung von bodennahem
+            Ozon und sekundärem Feinstaub.
+            """
             ),
             "pm10": (
-                "Feinstaub (PM10) – Partikelanalyse",
-                "Feinstaubpartikel dringen tief in die Atemwege ein. Quellen sind Industrie, Heizungen und Abrieb."
+            "Feinstaub (PM10 & PM2.5) – Detailanalyse",
+            """
+            Feinstaub umfasst sehr kleine Partikel in der Luft, die unter anderem durch Verkehr,
+            Industrie, Heizungen, Reifen- und Bremsabrieb sowie natürliche Quellen entstehen.
+
+            PM10 beschreibt Partikel mit einem Durchmesser von weniger als 10 Mikrometern,
+            während PM2.5 noch deutlich kleinere und feinere Partikel umfasst.
+            Aufgrund ihrer geringen Größe können die Partikel tief in die Atemwege eindringen.
+            Besonders PM2.5 kann sogar bis in die Lungenbläschen gelangen.
+
+            Hohe Feinstaubkonzentrationen können die Atemwege belasten und stehen in Zusammenhang
+            mit Herz-Kreislauf- sowie Atemwegserkrankungen.
+
+            Erhöhte PM10- und PM2.5-Werte treten häufig bei trockener Witterung,
+            wenig Wind oder Inversionslagen auf, da sich die Schadstoffe dann schlechter
+            in der Atmosphäre verteilen können.
+            """
             ),
         }
-        titel, info_text = beschreibungen[stoff_spalte]
-        st.subheader(titel)
-        st.info(info_text)
-        showEDAPlots(dfOrginal, stoff_spalte)
-        if (stoff_spalte == "o3") :
-            O3.showO3EDAPlots ()
+
+    titel, info_text = beschreibungen[stoff_spalte]
+    st.subheader(titel)
+    st.markdown(info_text)
+    showEDAPlots(dfOrginal, stoff_spalte)
+    if stoff_spalte == "o3":
+        O3.showO3EDAPlots()
    
 #######################################################
 @st.fragment
 def showTab4():
 
-    st.header("Korrelationen zwischen Wetter und Luftschadstoffen")
+    st.header("Korrelationenzwischen Wetter und Luftschadstoffen")
 
     st.markdown("""
     Die Korrelationsanalyse zeigt, ob und wie stark Wetterbedingungen mit der Luftqualität zusammenhängen. 
