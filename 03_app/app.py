@@ -589,7 +589,7 @@ def showTab3 ():
             """
          ),
             "no2": (
-            "Stickstoffdioxid (NO₂) – Detailanalyse",
+            "Stickstoffdioxid (NO₂)",
             """
             Stickstoffdioxid (NO₂) ist ein gasförmiger Luftschadstoff, der hauptsächlich bei
             Verbrennungsprozessen entsteht. Besonders hohe Konzentrationen treten im Straßenverkehr,
@@ -604,7 +604,7 @@ def showTab3 ():
             """
             ),
             "pm10": (
-            "Feinstaub (PM10 & PM2.5) – Detailanalyse",
+            "Feinstaub (PM10 & PM2.5)",
             """
             Feinstaub umfasst sehr kleine Partikel in der Luft, die unter anderem durch Verkehr,
             Industrie, Heizungen, Reifen- und Bremsabrieb sowie natürliche Quellen entstehen.
@@ -680,17 +680,62 @@ def showTab5 ():
         st.header("Multiple Regression – Übersicht")
         st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Regression zu sehen.")
     else:
-        st.header(f"Multiple Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
+        st.header(f"Multiple lineare Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
+        st.markdown("""
+        Die multiple lineare Regression wurde verwendet, um den Einfluss verschiedener Wettervariablen 
+        auf die Luftschadstoffkonzentrationen statistisch zu untersuchen.
+        Dabei wird geprüft, ob zwischen Wetterfaktoren und Schadstoffwerten signifikante Zusammenhänge bestehen. 
+
+        Ein p-Wert kleiner als 0.05 deutet auf einen statistisch signifikanten Zusammenhang hin.
+        Die Regression bestätigt damit die bereits in der Korrelationsanalyse erkennbaren Zusammenhänge 
+        zwischen Wetterbedingungen und Luftschadstoffen.
+
+        Da die Variablen unterschiedliche Einheiten besitzen (z. B. °C, km/h oder Millimeter), 
+        sind die Koeffizienten jedoch nur eingeschränkt direkt miteinander vergleichbar.
+
+        Das R² zeigt zusätzlich, wie gut die Wettervariablen die Schadstoffkonzentrationen insgesamt 
+        erklären können. Das vergleichsweise niedrige R², vorallem beim Stickstoffdioxid (NO₂) und Feinstaub (PM10/PM2.5), deutet darauf hin, dass neben dem Wetter auch 
+        weitere Faktoren wie Verkehr, Tageszeit, Industrie, Heizungen oder saisonale Effekte einen Einfluss 
+        auf die Luftschadstoffbelastung haben.
+        """)
+
+        st.write("")
+
         kor.multipleLinearRegression(dfOrginal, stoff_spalte)
-    
 #######################################################
 @st.fragment
-def showTab6 ():
+def showTab6():
+
     if schadstoff_auswahl == "Übersicht aller Stoffe":
+
         st.header("Random Forest – Übersicht")
+
         st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Random-Forest-Modell zu sehen.")
+
     else:
+
         st.header(f"Random Forest: Wetter als Prädiktor für {schadstoff_auswahl}")
+
+        st.markdown("""
+        Der Random-Forest-Algorithmus wurde verwendet, um den Einfluss von Wetter- und Zeitfaktoren 
+        auf die Schadstoffkonzentrationen zu analysieren. Die Feature Importance zeigt dabei, 
+        welche Variablen besonders relevant für die Vorhersage der jeweiligen Luftschadstoffe sind.
+
+        Modell 1 verwendet ausschließlich Wettervariablen, um deren Einfluss auf die Schadstoffwerte zu untersuchen.
+
+        Modell 2 ergänzt zusätzlich Zeitfaktoren wie Stunde, Monat, Wochenende und Rush Hour. 
+        Dadurch verbessert sich das Modell deutlich (höheres R²), was darauf hinweist, dass zeitliche Muster 
+        einen wichtigen Einfluss auf die Luftschadstoffbelastung haben.
+
+        Im Gegensatz zur multiplen linearen Regression können beim Random Forest auch Variablen mit 
+        unterschiedlichen Einheiten (z. B. °C, km/h oder Millimeter) besser gemeinsam verarbeitet und verglichen werden.
+
+        Die Ergebnisse zeigen insgesamt, dass sowohl Wetterbedingungen als auch Verkehrs- und Tageszeitmuster 
+        relevant für die Entstehung und Verteilung der Luftschadstoffe sind.
+        """)
+
+        st.write("")
+
         fig = ran.showDiagrams(dfOrginal, stoff_spalte)
 #######################################################
 @st.fragment
@@ -834,9 +879,9 @@ button[data-baseweb="tab"]:hover {
 # ============================================================
 # 02 TABS DEFINIEREN & SEITENSTRUKTUR
 # ============================================================
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
     ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
-     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "Technische Insights"]
+     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "Fazit", "Technische Insights"]
 )
 
 # ------------------------------------------------------------
@@ -885,7 +930,7 @@ bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
         st.info("🔮 Vorhersagemodelle")
 
     # =========================
-    # PROJEKT-INFOS
+    # PROJEKTINFOS & DATENQUELLEN
     # =========================
 
     st.markdown(
@@ -1163,14 +1208,115 @@ with tab7:
     showTab7 ()
 
 # ============================================================
-# TAB 7: VORHERSAGE2
+# TAB 8: VORHERSAGE2
 # ============================================================
 with tab8:
     showTab8 ()
+
 # ============================================================
-# TAB 8: TECHNISCHE INSIGHTS
+# TAB 9: Fazit
+# ============================================================
+# ============================================================
+# TAB 9: FAZIT
 # ============================================================
 with tab9:
+    st.header("Fazit und Ausblick")
+
+    st.markdown("""
+    Die Analyse zeigt, dass Wetterbedingungen einen messbaren Einfluss auf die Luftqualität in Nürnberg haben. 
+    Besonders deutlich werden die Zusammenhänge bei Ozon, während Stickstoffdioxid und Feinstaub zusätzlich stark 
+    durch weitere Einflussfaktoren geprägt werden.
+    """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("### 🌞 Ozon (O₃)")
+        st.metric(
+            label="Trend",
+            value="tendenziell steigend",
+            delta="warme & sonnige Wetterlagen"
+        )
+
+    with col2:
+        st.markdown("### 🚗 Stickstoffdioxid (NO₂)")
+        st.metric(
+            label="Trend",
+            value="tendenziell sinkend",
+            delta="- Verkehrsemissionen"
+        )
+
+    with col3:
+        st.markdown("### 🌫️ Feinstaub (PM10 & PM2.5)")
+        st.metric(
+            label="Trend",
+            value="tendenziell sinkend",
+            delta="- Feinstaubbelastung"
+        )
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    st.subheader("Zentrale Erkenntnisse")
+
+    st.markdown("""
+    - **Ozon (O₃)** steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
+      Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen.
+
+    - **Stickstoffdioxid (NO₂)** zeigt langfristig eher sinkende Werte.  
+      Dies kann unter anderem auf technische Entwicklungen, strengere Emissionsvorgaben und Veränderungen im Verkehrssektor hindeuten.
+
+    - **Feinstaub (PM10 und PM2.5)** weist ebenfalls rückläufige Tendenzen auf.  
+      Gleichzeitig zeigen die Analysen, dass Feinstaub besonders bei Inversionslagen, geringer Luftdurchmischung und verkehrsnahen Situationen erhöht auftreten kann.
+
+    - **Wetterdaten allein erklären die Luftqualität nur teilweise.**  
+      Die multiple Regression zeigt, dass meteorologische Variablen zwar signifikante Zusammenhänge aufweisen, die Erklärungskraft jedoch begrenzt bleibt.
+
+    - **Zeitliche Variablen verbessern die Vorhersage deutlich.**  
+      Durch Faktoren wie Stunde, Monat, Wochenende oder Rush Hour können typische Tages- und Jahresmuster besser abgebildet werden.
+    """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.subheader("Ausblick")
+
+    st.markdown("""
+    Für noch genauere Prognosen sollten künftig zusätzliche Einflussfaktoren integriert werden. 
+    Dazu zählen insbesondere Verkehrsdaten, industrielle Emissionen, Heizverhalten, Baustellen, Ferienzeiten 
+    sowie besondere Ereignisse wie Silvester oder Wetterlagen mit geringer Luftdurchmischung.
+
+    Insgesamt zeigt das Projekt, dass datenbasierte Verfahren wie Korrelationsanalysen, multiple lineare Regression 
+    und Random-Forest-Modelle geeignet sind, Zusammenhänge zwischen Wetter und Luftqualität sichtbar zu machen. 
+    Gleichzeitig wird deutlich, dass Luftqualität ein komplexes Zusammenspiel aus meteorologischen, zeitlichen 
+    und menschlich verursachten Faktoren ist.
+    """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.expander("💡 Mögliche Erweiterungen für zukünftige Analysen"):
+
+        st.markdown("""
+        - Einbindung von Verkehrsdaten, z. B. Verkehrsaufkommen oder Staubereiche  
+        - Berücksichtigung von Industrie- und Heizemissionen  
+        - Einbindung detaillierter Wetterlagen wie Inversion, Windrichtung oder Luftaustausch  
+        - Modellierung besonderer Ereignisse wie Silvester, Ferien oder Baustellen  
+        - Vergleich mehrerer Messstationen innerhalb Nürnbergs oder Bayerns  
+        - Einsatz weiterer Machine-Learning-Modelle wie Gradient Boosting oder neuronale Netze  
+        - Entwicklung eines Live-Warnsystems für erhöhte Schadstoffbelastungen  
+        """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.success("""
+    Zusammenfassend zeigt das Dashboard: Wetter- und Zeitfaktoren liefern wichtige Hinweise auf die Entwicklung der Luftqualität. 
+    Für präzisere Vorhersagen müssen jedoch zusätzliche Emissionsquellen und lokale Einflussfaktoren berücksichtigt werden.
+    """)
+
+# ============================================================
+# TAB 10: TECHNISCHE INSIGHTS
+# ============================================================
+with tab10:
     st.header("Technische Insights")
 
     def render_tech_tab():
