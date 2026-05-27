@@ -25,6 +25,7 @@ import openMeteo as op
 import stPrognosis as pr
 import O3
 import korrelation as kor
+import silvester as sil
 
 # Globales Styling für alle matplotlib/seaborn-Charts aktivieren
 styling.apply_global_style()
@@ -212,6 +213,11 @@ def showEDAPlots (df_prepared, stoff):
             st.caption("""
             Die Grafik zeigt höhere PM10- und PM2.5-Konzentrationen an Werktagen im Vergleich zum Wochenende. Dies deutet darauf hin, dass vor allem Verkehr und andere menschliche Aktivitäten während der Arbeitswoche zur erhöhten Feinstaubbelastung beitragen. Am Wochenende fallen die Konzentrationen dagegen insgesamt etwas niedriger aus.
             """)
+
+    if (stoff =="pm10") :
+        fig_silvester = sil.analyseSilvesterTime (df_prepared, stoff)
+        if fig_silvester is not None:
+            st.pyplot(fig_silvester, use_container_width=False)
     return
 
 @st.cache_data
@@ -596,6 +602,7 @@ def showTab4 ():
 def showTab5 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Multiple Regression – Übersicht")
+        st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Regression zu sehen.")
     else:
         st.header(f"Multiple Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
         kor.multipleLinearRegression(dfOrginal, stoff_spalte)
@@ -605,8 +612,7 @@ def showTab5 ():
 def showTab6 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Random Forest – Übersicht")
-        st.info("🚧 Diese Übersichtsseite wird zu einem späteren Zeitpunkt befüllt. "
-                "Wählen Sie links einen einzelnen Schadstoff, um das Random-Forest-Modell zu sehen.")
+        st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Random-Forest-Modell zu sehen.")
     else:
         st.header(f"Random Forest: Wetter als Prädiktor für {schadstoff_auswahl}")
         fig = ran.showDiagrams(dfOrginal, stoff_spalte)
