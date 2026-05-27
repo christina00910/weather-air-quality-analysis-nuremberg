@@ -18,12 +18,12 @@ def berechne_und_plotte_korrelation(df, analyse_variablen):
 
     label_map = {
         "temperatur": "Temperatur",
-        "windgeschwindigkeit": "Windgeschw.",
+        "windgeschwindigkeit": "Windgeschwindigkeit",
         "windrichtung": "Windrichtung",
         "luftdruck": "Luftdruck",
         "relative_luftfeuchtigkeit": "rel. Luftfeuchte",
         "niederschlagshoehe_mm": "Niederschlag",
-        "sonnenscheindauer_minuten": "Sonnenschein",
+        "sonnenscheindauer_minuten": "Sonnenscheindauer",
         "gesamtbewoelkung": "Bewölkung",
         "o3": "O₃",
         "no2": "NO₂",
@@ -36,7 +36,7 @@ def berechne_und_plotte_korrelation(df, analyse_variablen):
         columns=label_map
     )
 
-    fig, ax = plt.subplots(figsize=(15, 9), facecolor="#0e1117")
+    fig, ax = plt.subplots(figsize=(11.5, 7.2), facecolor="#0e1117")
     ax.set_facecolor("#0e1117")
 
     sns.heatmap(
@@ -47,58 +47,103 @@ def berechne_und_plotte_korrelation(df, analyse_variablen):
         vmin=-1,
         vmax=1,
         fmt=".2f",
-        linewidths=0.5,
-        linecolor="#1f2937",
-        annot_kws={"size": 10},
-        cbar_kws={"label": "Korrelationskoeffizient"},
+        linewidths=0.35,
+        linecolor="#2a2f3a",
+        annot_kws={
+        "size": 9,
+        "weight": "normal"
+        },
+        cbar_kws={
+        "label": "Korrelationskoeffizient",
+        "shrink": 0.85,
+        "pad": 0.09
+        },
         ax=ax
     )
 
+    # Titel
     ax.set_title(
         "Korrelationsmatrix: Wettervariablen und Luftschadstoffe",
-        fontsize=18,
+        fontsize=14,
         color="white",
-        pad=22
+        fontweight="semibold",
+        pad=43
     )
 
     ax.set_xlabel("")
     ax.set_ylabel("")
 
-    ax.tick_params(axis="x", labelrotation=45, labelsize=10, colors="white")
-    ax.tick_params(axis="y", labelrotation=0, labelsize=10, colors="white")
+    # Achsenbeschriftungen
+    ax.tick_params(
+        axis="x",
+        labelrotation=38,
+        labelsize=10,
+        colors="white",
+        pad=2
+    )
 
-    # Trennlinie zwischen Wetterdaten und Luftschadstoffen
+    ax.tick_params(
+        axis="y",
+        labelrotation=0,
+        labelsize=10,
+        colors="white",
+        pad=2
+    )
+
+    # Trennlinien
     trennlinie = 8
-    ax.axhline(trennlinie, color="white", linewidth=2.5)
-    ax.axvline(trennlinie, color="white", linewidth=2.5)
 
-    # Gruppenbeschriftung
+    ax.axhline(
+        trennlinie,
+        color="white",
+        linewidth=1.8,
+        alpha=0.8
+    )
+
+    ax.axvline(
+        trennlinie,
+        color="white",
+        linewidth=1.8,
+        alpha=0.8
+    )
+
+    # Gruppenüberschriften
     ax.text(
-        4, -0.8,
+        4,
+        -0.55,
         "Wettervariablen",
         ha="center",
         va="center",
-        fontsize=12,
-        color="white",
-        fontweight="bold"
+        fontsize=11,
+        color="#d1d5db",
+        fontweight="semibold"
     )
 
     ax.text(
-        10, -0.8,
+        10,
+        -0.55,
         "Luftschadstoffe",
         ha="center",
         va="center",
-        fontsize=12,
-        color="white",
-        fontweight="bold"
+        fontsize=11,
+        color="#d1d5db",
+        fontweight="semibold"
     )
 
-    # Colorbar lesbarer machen
+    # Colorbar optimieren
     cbar = ax.collections[0].colorbar
-    cbar.ax.yaxis.label.set_color("white")
-    cbar.ax.tick_params(colors="white")
 
-    plt.tight_layout()
+    cbar.ax.yaxis.label.set_color("white")
+    cbar.ax.yaxis.label.set_size(11)
+    cbar.ax.yaxis.label.set_weight("semibold")
+    cbar.ax.yaxis.labelpad = 18
+    cbar.ax.tick_params(
+        colors="white",
+        labelsize=9
+    )
+
+    # Außenabstände
+    plt.tight_layout(pad=2.8)
 
     return korrelation_matrix, fig
 
