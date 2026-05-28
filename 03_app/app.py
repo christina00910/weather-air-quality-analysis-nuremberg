@@ -48,7 +48,6 @@ STOFF_MAP = {
     "Feinstaub (PM10 & PM2.5)": "pm10",
 }
 
-
 def showEDAPlots (df_prepared, stoff):        
     """
     Zeigt alle EDA-Plots hochperformant in Streamlit an.
@@ -628,8 +627,8 @@ def showTab3 ():
     st.subheader(titel)
     st.markdown(info_text)
     showEDAPlots(dfOrginal, stoff_spalte)
-    if stoff_spalte == "o3":
-        O3.showO3EDAPlots()
+    #if stoff_spalte == "o3":
+        #O3.showO3EDAPlots()
    
 #######################################################
 @st.fragment
@@ -828,7 +827,7 @@ with st.sidebar:
 
     schadstoff_auswahl = st.radio(
         "",
-        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10 & PM2.5)"],
+        ["Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10 & PM2.5)"],
         label_visibility="collapsed"
     )
 
@@ -941,7 +940,7 @@ button[data-baseweb="tab"]:hover {
 # ============================================================
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
     ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
-     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "Fazit", "Technische Insights"]
+     "Multiple Regression", "Random Forest", "Vorhersage Live", "Vorhersage", "Fazit", "Technische Insights"]
 )
 
 # ------------------------------------------------------------
@@ -995,55 +994,6 @@ bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
 
     st.markdown(
         "<div style='margin-top: 50px;'></div>",
-        unsafe_allow_html=True
-    )
-
-    st.header("📋 Projektinfos")
-
-    st.markdown("""
-<div style="
-    display: flex;
-    justify-content: flex-start;
-    gap: 80px;
-    margin-top: 25px;
-    margin-bottom: 10px;
-    padding: 20px 10px 10px 10px;
-">
-
-<div>
-    <div style="font-size:16px; color:#9CA3AF;">
-        👥 Projektteam
-    </div>
-    <div style="font-size:20px; font-weight:600; line-height:1.6;">
-        Christina Dürbeck<br>
-        Frank Hasdorf<br>
-        Markus Edelhoff
-    </div>
-</div>
-
-<div>
-    <div style="font-size:16px; color:#9CA3AF;">
-        📅 Projektzeitraum
-    </div>
-    <div style="font-size:20px; font-weight:600; line-height:1.6;">
-        11.05. – 29.05.2026
-    </div>
-</div>
-
-<div>
-    <div style="font-size:16px; color:#9CA3AF;">
-        📍 Untersuchungsregion
-    </div>
-    <div style="font-size:20px; font-weight:600; line-height:1.6;">
-        Nürnberg
-    </div>
-</div>
-
-</div>
-""", unsafe_allow_html=True)
-
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
         unsafe_allow_html=True
     )
 
@@ -1265,13 +1215,13 @@ with tab6:
 # TAB 7: VORHERSAGE1
 # ============================================================
 with tab7:
-    showTab7 ()
+    showTab8 ()
 
 # ============================================================
 # TAB 8: VORHERSAGE2
 # ============================================================
 with tab8:
-    showTab8 ()
+    showTab7 ()
 
 # ============================================================
 # TAB 9: Fazit
