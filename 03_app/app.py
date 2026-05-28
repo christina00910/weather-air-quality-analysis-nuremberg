@@ -860,8 +860,8 @@ Nürnberg
 <div class="sidebar-item">
 <b>Projektteam:</b><br>
 Christina Dürbeck<br>
-Frank Hasdorf<br>
-Markus Edelhoff
+Markus Edelhoff<br>
+Frank Hasdorf                
 </div>
 
 </div>
@@ -1241,9 +1241,11 @@ with tab9:
     st.subheader("Zentrale Erkenntnisse")
 
     st.markdown("""
-    ### 🌞 Ozon (O₃)
+    #### 🌞 Ozon (O₃)
     Steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
-    Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen und zunehmender Hitzeperioden könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen.
+    Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen und zunehmender Hitzeperioden könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen. 
+    
+    Zusätzlich kann der Rückgang von Stickstoffdioxid dazu beitragen, dass Ozon in Bodennähe weniger abgebaut wird, da Stickstoffoxide Ozon teilweise wieder aus der Atmosphäre entfernen – ein Zusammenhang, der teilweise auch als sogenanntes „Ozonparadoxon“ beschrieben wird.
 
     ### 🚗 Stickstoffdioxid (NO₂)
     Zeigt langfristig eher sinkende Werte.  
