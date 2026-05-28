@@ -217,6 +217,12 @@ def showEDAPlots (df_prepared, stoff):
         fig_silvester = sil.analyseSilvesterTime (df_prepared, stoff)
         if fig_silvester is not None:
             st.pyplot(fig_silvester, use_container_width=False)
+            st.caption("""
+            Die Grafik zeigt den Verlauf der PM10-Konzentrationen rund um den Jahreswechsel. 
+            Während der Weihnachtstage (24.12.–26.12.) sinken die Feinstaubwerte zunächst, was unter anderem auf geringeres Verkehrsaufkommen und reduzierte Aktivitäten während der Feiertage hinweisen könnte.
+
+            Ab dem 27.12. steigen die Werte wieder an. Besonders auffällig ist der starke Peak am 01.01., der wahrscheinlich auf Feuerwerkskörper und erhöhte Feinstaubemissionen in der Silvesternacht zurückzuführen ist. Bereits kurz danach sinken die Werte wieder deutlich ab.
+            """)
     return
 
 @st.cache_data
@@ -745,7 +751,21 @@ def showTab8():
         st.header("Vorhersage Live")
         st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die Live-Vorhersage anzuzeigen.")
     else:
-        st.header(f"Vorhersage Live: {schadstoff_auswahl}")
+        st.header(f"Vorhersage Live: {schadstoff_auswahl}")  
+        st.markdown("""
+        Die Live-Luftschadstoffvorhersage basiert auf einem erweiterten Random-Forest-Modell, 
+        das historische Luftqualitätsdaten mit aktuellen Wetterdaten der Open-Meteo API kombiniert. 
+        Neben klassischen Wettervariablen wurden zusätzlich zeitliche Einflussfaktoren wie Rush Hour, 
+        Wochenende, Nachtstunden, Heizperiode oder Silvester integriert, damit das Modell typische Muster 
+        der Luftschadstoffbelastung besser erkennen kann.
+
+        Die besten Vorhersageergebnisse erzielt das Modell aktuell für Ozon (O₃), was sich anhand des höheren R²-Werts erkennen lässt. 
+        Die Vorhersage von Stickstoffdioxid (NO₂) sowie Feinstaub (PM10 / PM2.5) ist hingegen schwieriger, 
+        da diese Schadstoffe zusätzlich stark durch Verkehr, Industrie, Heizungen oder kurzfristige Ereignisse beeinflusst werden.
+
+        Für eine noch präzisere Live-Vorhersage könnten künftig weitere Datenquellen wie aktuelle Verkehrsdaten, 
+        historische Schadstoffwerte der letzten Stunden oder zusätzliche Umwelteinflüsse ergänzt werden.
+        """)
         op.calcWithOpenMeteo(dfOrginal, stoff_spalte)
 
 #######################################################
@@ -861,7 +881,7 @@ Nürnberg
 </div>
 
 <div class="sidebar-item">
-<b>Zeitraum:</b><br>
+<b>Projektzeitraum:</b><br>
 11.05.2026 – 29.05.2026
 </div>
 

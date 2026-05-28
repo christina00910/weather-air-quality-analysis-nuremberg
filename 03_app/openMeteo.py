@@ -68,18 +68,19 @@ def calcWithOpenMeteo (dfO, stoff) :
         n_jobs=-1)
     
     modell.fit(x_train, y_train)
-    
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # Modellbewertung
     vorhersage_test = modell.predict(x_test)
     
     r2 = r2_score(y_test, vorhersage_test)
     mae = mean_absolute_error(y_test, vorhersage_test)
     
-    st.write ("Modellbewertung")
-    st.write ("R²:", r2)
-    st.write ("MAE:", mae)
-    
-    
+    st.subheader("Modellbewertung")
+    st.subheader(f"R²: {r2:.3f}")
+    st.subheader(f"MAE: {mae:.2f}")
+
     # ------------------------------------------------------------
     # 2. Aktuelle Wetterdaten über API abrufen
     # ------------------------------------------------------------
@@ -142,16 +143,22 @@ def calcWithOpenMeteo (dfO, stoff) :
         "nacht": nacht,
         "silvester": silvester}])
     
-    st.write ("\nLive-Wetterdaten für die Vorhersage:")
-    st.write (live_daten)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.subheader("Live-Wetterdaten für die Vorhersage")
+    st.dataframe(live_daten, use_container_width=True)
     
     # ------------------------------------------------------------
     # 4. Luftschadstoff vorhersagen
     # ------------------------------------------------------------
     
+    st.markdown("<br>", unsafe_allow_html=True)
+
     vorhersage_live = modell.predict(live_daten)
-    st.write (f"\nVorhergesagter {schadstoff.upper()}-Wert:")
-    st.write (vorhersage_live[0])
+    st.subheader(f"Vorhergesagter {schadstoff.upper()}-Wert")
+    st.markdown(
+        f"## **{vorhersage_live[0]:.2f} µg/m³**"
+    )
     
     # ------------------------------------------------------------
     # 5. Live-Wetterdaten grafisch darstellen
@@ -301,6 +308,9 @@ def calcWithOpenMeteo (dfO, stoff) :
     plt.tight_layout()
     
     # --- STREAMLIT ERSETZUNG FÜR plt.show() ---
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+
     st.header("📊 Grafische Auswertung & Wetterübersicht")
     
     # Rendert die Matplotlib-Grafik sauber auf der Webseite.
