@@ -48,7 +48,6 @@ STOFF_MAP = {
     "Feinstaub (PM10 & PM2.5)": "pm10",
 }
 
-
 def showEDAPlots (df_prepared, stoff):        
     """
     Zeigt alle EDA-Plots hochperformant in Streamlit an.
@@ -218,6 +217,12 @@ def showEDAPlots (df_prepared, stoff):
         fig_silvester = sil.analyseSilvesterTime (df_prepared, stoff)
         if fig_silvester is not None:
             st.pyplot(fig_silvester, use_container_width=False)
+            st.caption("""
+            Die Grafik zeigt den Verlauf der PM10-Konzentrationen rund um den Jahreswechsel. 
+            Während der Weihnachtstage (24.12.–26.12.) sinken die Feinstaubwerte zunächst, was unter anderem auf geringeres Verkehrsaufkommen und reduzierte Aktivitäten während der Feiertage hinweisen könnte.
+
+            Ab dem 27.12. steigen die Werte wieder an. Besonders auffällig ist der starke Peak am 01.01., der wahrscheinlich auf Feuerwerkskörper und erhöhte Feinstaubemissionen in der Silvesternacht zurückzuführen ist. Bereits kurz danach sinken die Werte wieder deutlich ab.
+            """)
     return
 
 @st.cache_data
@@ -477,29 +482,6 @@ def showTab2():
     werden Jahresmittelwerte dargestellt. Niederschlag und Sonnenscheindauer werden als Jahressummen ausgewiesen.
     """)
 
-    # Rohdaten einklappbar
-    with st.expander("Rohdaten anzeigen"):
-        st.dataframe(
-            df_year,
-            height=400,
-            use_container_width=True,
-            hide_index=True
-        )
-
-    # Technische Datensatzinfos einklappbar
-    with st.expander("Technische Datensatzinformationen anzeigen"):
-        dtypes_df = pd.DataFrame({
-            "Spalte": df_year.dtypes.index,
-            "Datentyp": df_year.dtypes.values.astype(str),
-            "Fehlende Werte": df_year.isna().sum().values
-        })
-
-        st.dataframe(
-            dtypes_df,
-            use_container_width=True,
-            hide_index=True
-        )
-
 #######################################################
 @st.fragment
 def showTab3 ():
@@ -628,8 +610,8 @@ def showTab3 ():
     st.subheader(titel)
     st.markdown(info_text)
     showEDAPlots(dfOrginal, stoff_spalte)
-    if stoff_spalte == "o3":
-        O3.showO3EDAPlots()
+    #if stoff_spalte == "o3":
+        #O3.showO3EDAPlots()
    
 #######################################################
 @st.fragment
@@ -642,10 +624,7 @@ def showTab4():
     So lässt sich beispielsweise analysieren, ob hohe Temperaturen, Sonnenschein oder Windgeschwindigkeiten bestimmte Schadstoffkonzentrationen begünstigen oder reduzieren.
     """)
 
-    st.markdown("""
-    <div style="margin-top: 50px;"></div>
-    """, unsafe_allow_html=True
-    )
+    st.divider()
 
     st.write("")
     kor.korrelation(dfOrginal, stoff_spalte)
@@ -700,6 +679,8 @@ def showTab5 ():
 
         st.write("")
 
+        st.divider()
+
         kor.multipleLinearRegression(dfOrginal, stoff_spalte)
 #######################################################
 @st.fragment
@@ -717,12 +698,6 @@ def showTab6():
         auf die Schadstoffkonzentrationen zu analysieren. Die Feature Importance zeigt dabei, 
         welche Variablen besonders relevant für die Vorhersage der jeweiligen Luftschadstoffe sind.
 
-        Modell 1 verwendet ausschließlich Wettervariablen, um deren Einfluss auf die Schadstoffwerte zu untersuchen.
-
-        Modell 2 ergänzt zusätzlich Zeitfaktoren wie Stunde, Monat, Wochenende und Rush Hour. 
-        Dadurch verbessert sich das Modell deutlich (höheres R²), was darauf hinweist, dass zeitliche Muster 
-        einen wichtigen Einfluss auf die Luftschadstoffbelastung haben.
-
         Im Gegensatz zur multiplen linearen Regression können beim Random Forest auch Variablen mit 
         unterschiedlichen Einheiten (z. B. °C, km/h oder Millimeter) besser gemeinsam verarbeitet und verglichen werden.
 
@@ -731,6 +706,8 @@ def showTab6():
         """)
 
         st.write("")
+
+        st.divider()
 
         fig = ran.showDiagrams(dfOrginal, stoff_spalte)
 #######################################################
@@ -746,7 +723,21 @@ def showTab8():
         st.header("Vorhersage Live")
         st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die Live-Vorhersage anzuzeigen.")
     else:
-        st.header(f"Vorhersage Live: {schadstoff_auswahl}")
+        st.header(f"Vorhersage Live: {schadstoff_auswahl}")  
+        st.markdown("""
+        Die Live-Luftschadstoffvorhersage basiert auf einem erweiterten Random-Forest-Modell, 
+        das historische Luftqualitätsdaten mit aktuellen Wetterdaten der Open-Meteo API kombiniert. 
+        Neben klassischen Wettervariablen wurden zusätzlich zeitliche Einflussfaktoren wie Rush Hour, 
+        Wochenende, Nachtstunden, Heizperiode oder Silvester integriert, damit das Modell typische Muster 
+        der Luftschadstoffbelastung besser erkennen kann.
+
+        Die besten Vorhersageergebnisse erzielt das Modell aktuell für Ozon (O₃), was sich anhand des höheren R²-Werts erkennen lässt. 
+        Die Vorhersage von Stickstoffdioxid (NO₂) sowie Feinstaub (PM10 / PM2.5) ist hingegen schwieriger, 
+        da diese Schadstoffe zusätzlich stark durch Verkehr, Industrie, Heizungen oder kurzfristige Ereignisse beeinflusst werden.
+
+        Für eine noch präzisere Live-Vorhersage könnten künftig weitere Datenquellen wie aktuelle Verkehrsdaten, 
+        historische Schadstoffwerte der letzten Stunden oder zusätzliche Umwelteinflüsse ergänzt werden.
+        """)
         op.calcWithOpenMeteo(dfOrginal, stoff_spalte)
 
 #######################################################
@@ -828,7 +819,7 @@ with st.sidebar:
 
     schadstoff_auswahl = st.radio(
         "",
-        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10 & PM2.5)"],
+        ["Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10 & PM2.5)"],
         label_visibility="collapsed"
     )
 
@@ -862,15 +853,15 @@ Nürnberg
 </div>
 
 <div class="sidebar-item">
-<b>Zeitraum:</b><br>
+<b>Projektzeitraum:</b><br>
 11.05.2026 – 29.05.2026
 </div>
 
 <div class="sidebar-item">
 <b>Projektteam:</b><br>
 Christina Dürbeck<br>
-Frank Hasdorf<br>
-Markus Edelhoff
+Markus Edelhoff<br>
+Frank Hasdorf                
 </div>
 
 </div>
@@ -941,7 +932,7 @@ button[data-baseweb="tab"]:hover {
 # ============================================================
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
     ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
-     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "Fazit", "Technische Insights"]
+     "Multiple Regression", "Random Forest", "Vorhersage Live", "Vorhersage", "Fazit", "Technische Insights"]
 )
 
 # ------------------------------------------------------------
@@ -964,11 +955,7 @@ Die einzelnen Tabs führen durch die verschiedenen Analysebereiche –
 von der explorativen Datenanalyse über Korrelations- und Regressionsverfahren 
 bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
 """)
-
-    st.markdown(
-        "<div style='margin-top: 50px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("🔎 Analysebereiche")
 
@@ -993,59 +980,7 @@ bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
     # PROJEKTINFOS & DATENQUELLEN
     # =========================
 
-    st.markdown(
-        "<div style='margin-top: 50px;'></div>",
-        unsafe_allow_html=True
-    )
-
-    st.header("📋 Projektinfos")
-
-    st.markdown("""
-<div style="
-    display: flex;
-    justify-content: flex-start;
-    gap: 80px;
-    margin-top: 25px;
-    margin-bottom: 10px;
-    padding: 20px 10px 10px 10px;
-">
-
-<div>
-    <div style="font-size:16px; color:#9CA3AF;">
-        👥 Projektteam
-    </div>
-    <div style="font-size:20px; font-weight:600; line-height:1.6;">
-        Christina Dürbeck<br>
-        Frank Hasdorf<br>
-        Markus Edelhoff
-    </div>
-</div>
-
-<div>
-    <div style="font-size:16px; color:#9CA3AF;">
-        📅 Projektzeitraum
-    </div>
-    <div style="font-size:20px; font-weight:600; line-height:1.6;">
-        11.05. – 29.05.2026
-    </div>
-</div>
-
-<div>
-    <div style="font-size:16px; color:#9CA3AF;">
-        📍 Untersuchungsregion
-    </div>
-    <div style="font-size:20px; font-weight:600; line-height:1.6;">
-        Nürnberg
-    </div>
-</div>
-
-</div>
-""", unsafe_allow_html=True)
-
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("📌 Projektüberblick")
 
@@ -1062,10 +997,7 @@ Zusätzlich werden verschiedene Vorhersageansätze entwickelt, um Luftschadstoff
 auf Basis meteorologischer, zeitlicher und historischer Einflussgrößen prognostizieren zu können.
 """)
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("🫁 Gesundheitliche Auswirkungen von Luftschadstoffen")
 
@@ -1087,10 +1019,7 @@ und stehen mit verschiedenen gesundheitlichen Erkrankungen in Zusammenhang.
     Die Grafik zeigt, dass Luftschadstoffe mit verschiedenen gesundheitlichen Belastungen verbunden sein können.
     """)
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("📊 Verwendete Datenquellen")
 
@@ -1105,10 +1034,7 @@ und stehen mit verschiedenen gesundheitlichen Erkrankungen in Zusammenhang.
   Aktuelle Wetterdaten für die Live-Vorhersage der Luftschadstoffwerte.
 """)
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("⚙️ Datenaufbereitung")
 
@@ -1194,10 +1120,7 @@ Dabei wurden die Daten:
             hide_index=True
         )
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("📊 Datensatzübersicht")
 
@@ -1222,6 +1145,31 @@ Dabei wurden die Daten:
 
     with col6:
         st.metric("Untersuchungsregion", "Nürnberg")
+
+
+    # Technische Datensatzinfos einklappbar
+    # Rohdaten anzeigen
+    with st.expander("Rohdaten anzeigen"):
+        st.dataframe(
+            dfOrginal,
+            height=400,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    # Technische Infos anzeigen
+    with st.expander("Technische Datensatzinformationen anzeigen"):
+        dtypes_df = pd.DataFrame({
+            "Spalte": dfOrginal.columns,
+            "Datentyp": dfOrginal.dtypes.astype(str),
+            "Null-Werte": dfOrginal.isna().sum().values
+        })
+
+        st.dataframe(
+            dtypes_df,
+            use_container_width=True,
+            hide_index=True
+        )
 
     st.info("""
     Da PM2.5-Daten erst ab 2008 vollständig verfügbar sind, wurden alle vergleichenden Analysen 
@@ -1265,13 +1213,13 @@ with tab6:
 # TAB 7: VORHERSAGE1
 # ============================================================
 with tab7:
-    showTab7 ()
+    showTab8 ()
 
 # ============================================================
 # TAB 8: VORHERSAGE2
 # ============================================================
 with tab8:
-    showTab8 ()
+    showTab7 ()
 
 # ============================================================
 # TAB 9: Fazit
@@ -1288,82 +1236,65 @@ with tab9:
     durch weitere Einflussfaktoren geprägt werden.
     """)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("### 🌞 Ozon (O₃)")
-        st.metric(
-            label="Trend",
-            value="tendenziell steigend",
-            delta="warme & sonnige Wetterlagen"
-        )
-
-    with col2:
-        st.markdown("### 🚗 Stickstoffdioxid (NO₂)")
-        st.metric(
-            label="Trend",
-            value="tendenziell sinkend",
-            delta="- Verkehrsemissionen"
-        )
-
-    with col3:
-        st.markdown("### 🌫️ Feinstaub (PM10 & PM2.5)")
-        st.metric(
-            label="Trend",
-            value="tendenziell sinkend",
-            delta="- Feinstaubbelastung"
-        )
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.divider()
 
     st.subheader("Zentrale Erkenntnisse")
 
     st.markdown("""
-    - **Ozon (O₃)** steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
-      Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen.
+    #### 🌞 Ozon (O₃)
+    Steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
+    Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen und zunehmender Hitzeperioden könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen. 
+    
+    Zusätzlich kann der Rückgang von Stickstoffdioxid dazu beitragen, dass Ozon in Bodennähe langsamer abgebaut wird, da Stickstoffoxide unter bestimmten Bedingungen am Abbau von Ozon beteiligt sind. Dieser Zusammenhang wird teilweise auch als „Ozonparadoxon“ beschrieben.
 
-    - **Stickstoffdioxid (NO₂)** zeigt langfristig eher sinkende Werte.  
-      Dies kann unter anderem auf technische Entwicklungen, strengere Emissionsvorgaben und Veränderungen im Verkehrssektor hindeuten.
+    ### 🚗 Stickstoffdioxid (NO₂)
+    Zeigt langfristig eher sinkende Werte.  
+    Dies kann unter anderem auf technische Entwicklungen, strengere Emissionsvorgaben und Veränderungen im Verkehrssektor hindeuten.
 
-    - **Feinstaub (PM10 und PM2.5)** weist ebenfalls rückläufige Tendenzen auf.  
-      Gleichzeitig zeigen die Analysen, dass Feinstaub besonders bei Inversionslagen, geringer Luftdurchmischung und verkehrsnahen Situationen erhöht auftreten kann.
+    ### 🌫️ Feinstaub (PM10 und PM2.5)
+    Weist ebenfalls rückläufige Tendenzen auf.  
+    Gleichzeitig zeigen die Analysen, dass Feinstaub besonders bei Inversionslagen, geringer Luftdurchmischung und verkehrsnahen Situationen erhöht auftreten kann.
 
-    - **Wetterdaten allein erklären die Luftqualität nur teilweise.**  
-      Die multiple Regression zeigt, dass meteorologische Variablen zwar signifikante Zusammenhänge aufweisen, die Erklärungskraft jedoch begrenzt bleibt.
+    ### ❤️ Gesundheitliche Bedeutung
+    Trotz teilweise sinkender Schadstoffwerte bleibt Luftverschmutzung weiterhin ein relevantes Gesundheitsthema. Besonders erhöhte Ozonwerte können die Atemwege belasten und stehen in Zusammenhang mit gesundheitlichen Risiken für empfindliche Personengruppen.
 
-    - **Zeitliche Variablen verbessern die Vorhersage deutlich.**  
-      Durch Faktoren wie Stunde, Monat, Wochenende oder Rush Hour können typische Tages- und Jahresmuster besser abgebildet werden.
+    ### 🌍 Regionale Unterschiede
+    Die Analyse verdeutlicht außerdem, dass Luftqualität regional sehr unterschiedlich ausfallen kann. Während in Nürnberg teilweise rückläufige Entwicklungen erkennbar sind, können Luftschadstoffbelastungen in anderen Regionen oder Großstädten deutlich stärker ausfallen.
+
+    ### 📊 Grenzen der Wetterdaten
+    Wetterdaten allein erklären die Luftqualität nur teilweise. Die multiple Regression zeigt, dass meteorologische Variablen zwar signifikante Zusammenhänge aufweisen, die Erklärungskraft jedoch begrenzt bleibt.
+
+    ### ⏱️ Zeitliche Muster
+    Zeitliche Variablen verbessern die Vorhersage deutlich. Durch Faktoren wie Stunde, Monat, Wochenende oder Rush Hour können typische Tages- und Jahresmuster besser abgebildet werden.
     """)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.divider()
 
     st.subheader("Ausblick")
 
     st.markdown("""
-    Für noch genauere Prognosen sollten künftig zusätzliche Einflussfaktoren integriert werden. 
-    Dazu zählen insbesondere Verkehrsdaten, industrielle Emissionen, Heizverhalten, Baustellen, Ferienzeiten 
-    sowie besondere Ereignisse wie Silvester oder Wetterlagen mit geringer Luftdurchmischung.
-
-    Insgesamt zeigt das Projekt, dass datenbasierte Verfahren wie Korrelationsanalysen, multiple lineare Regression 
-    und Random-Forest-Modelle geeignet sind, Zusammenhänge zwischen Wetter und Luftqualität sichtbar zu machen. 
-    Gleichzeitig wird deutlich, dass Luftqualität ein komplexes Zusammenspiel aus meteorologischen, zeitlichen 
-    und menschlich verursachten Faktoren ist.
+    * Das Projekt zeigt, dass datenbasierte Verfahren wie Korrelationsanalysen, multiple lineare Regression und Random-Forest-Modelle geeignet sind, Zusammenhänge zwischen Wetter und Luftqualität sichtbar zu machen.
+                
+    * Die Analyse bezieht sich ausschließlich auf die Region Nürnberg. Für zukünftige Untersuchungen könnten weitere Städte, Regionen oder internationale Datensätze integriert werden, um Unterschiede zwischen verschiedenen Umwelt- und Klimabedingungen besser vergleichen zu können.
+                
+    * Für präzisere Vorhersagen sollten zusätzlich weitere Einflussfaktoren wie Verkehrsdaten, Industrieemissionen, Heizverhalten oder historische Schadstoffwerte ergänzt werden. Dadurch könnten insbesondere die Vorhersagen von Stickstoffdioxid und Feinstaub weiter verbessert werden.
+                
+    * Insgesamt verdeutlicht das Projekt, dass Luftqualität ein komplexes Zusammenspiel aus Wetter, menschlichen Aktivitäten und zeitlichen Mustern darstellt und weiterhin eine wichtige Rolle für Umwelt und Gesundheit spielt.
     """)
 
-    st.markdown("<br>", unsafe_allow_html=True)
 
     with st.expander("💡 Mögliche Erweiterungen für zukünftige Analysen"):
 
         st.markdown("""
-        - Einbindung von Verkehrsdaten, z. B. Verkehrsaufkommen oder Staubereiche  
-        - Berücksichtigung von Industrie- und Heizemissionen  
-        - Einbindung detaillierter Wetterlagen wie Inversion, Windrichtung oder Luftaustausch  
-        - Modellierung besonderer Ereignisse wie Silvester, Ferien oder Baustellen  
-        - Vergleich mehrerer Messstationen innerhalb Nürnbergs oder Bayerns  
+        - Einbindung zusätzlicher Verkehrsdaten, z. B. Verkehrsaufkommen, Staubereiche oder Echtzeit-Verkehrsflüsse  
+        - Berücksichtigung weiterer Emissionsquellen wie Industrie, Heizungen oder Baustellen  
+        - Integration vorheriger Schadstoffmesswerte der letzten Stunden oder Tage zur besseren Erkennung kurzfristiger Belastungsmuster  
+        - Erweiterung der Analyse auf weitere Städte, Regionen oder internationale Datensätze  
+        - Vergleich verschiedener Messstationen innerhalb Nürnbergs oder Bayerns  
+        - Einbindung detaillierter Wetterlagen wie Inversion, Luftaustausch oder Windströmungen  
         - Einsatz weiterer Machine-Learning-Modelle wie Gradient Boosting oder neuronale Netze  
-        - Entwicklung eines Live-Warnsystems für erhöhte Schadstoffbelastungen  
+        - Entwicklung eines Live-Warnsystems für erhöhte Luftschadstoffbelastungen und gesundheitliche Risiken  
+        - Kombination von Luftqualitäts- und Gesundheitsdaten zur Analyse möglicher gesundheitlicher Auswirkungen  
         """)
 
     st.markdown("<br>", unsafe_allow_html=True)

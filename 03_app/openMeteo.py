@@ -68,18 +68,31 @@ def calcWithOpenMeteo (dfO, stoff) :
         n_jobs=-1)
     
     modell.fit(x_train, y_train)
-    
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # Modellbewertung
     vorhersage_test = modell.predict(x_test)
     
     r2 = r2_score(y_test, vorhersage_test)
     mae = mean_absolute_error(y_test, vorhersage_test)
     
-    st.write ("Modellbewertung")
-    st.write ("R²:", r2)
-    st.write ("MAE:", mae)
-    
-    
+    st.subheader("Modellbewertung")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            label="MAE",
+            value=f"{mae:.2f}"
+        )
+
+    with col2:
+        st.metric(
+            label="R²-Wert",
+            value=f"{r2:.2f}"
+        )
+    st.divider()
     # ------------------------------------------------------------
     # 2. Aktuelle Wetterdaten über API abrufen
     # ------------------------------------------------------------
@@ -142,16 +155,23 @@ def calcWithOpenMeteo (dfO, stoff) :
         "nacht": nacht,
         "silvester": silvester}])
     
-    st.write ("\nLive-Wetterdaten für die Vorhersage:")
-    st.write (live_daten)
-    
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.subheader("Live-Wetterdaten für die Vorhersage")
+    st.dataframe(live_daten, use_container_width=True)
+    st.divider()
     # ------------------------------------------------------------
     # 4. Luftschadstoff vorhersagen
     # ------------------------------------------------------------
     
+    st.markdown("<br>", unsafe_allow_html=True)
+
     vorhersage_live = modell.predict(live_daten)
-    st.write (f"\nVorhergesagter {schadstoff.upper()}-Wert:")
-    st.write (vorhersage_live[0])
+    st.subheader(f"Vorhergesagter {schadstoff.upper()}-Wert")
+    st.markdown(
+        f"## **{vorhersage_live[0]:.2f} µg/m³**"
+    )
+    st.divider()
     
     # ------------------------------------------------------------
     # 5. Live-Wetterdaten grafisch darstellen
@@ -232,76 +252,120 @@ def calcWithOpenMeteo (dfO, stoff) :
     lqi_farbe = lqi_farben[lqi_klasse]
 
     # Grafik / Übersicht erstellen (dein Original-Code bleibt fast identisch)
-    fig, ax = plt.subplots(figsize=(9, 7))
+    # Kompaktere Grafik / Übersicht erstellen
+    # ============================================================
+    # Grafik / Übersicht erstellen
+    # ============================================================
+
+    fig, ax = plt.subplots(figsize=(6.0, 4.2))
     ax.axis("off")
-    
+
+    # ------------------------------------------------------------
+    # Titel
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
         0.95,
         "Stündliche Live-Luftschadstoffvorhersage",
         ha="center",
-        fontsize=18,
+        fontsize=14,
         fontweight="bold",
     )
-    
+
+    # ------------------------------------------------------------
+    # Ort + Uhrzeit
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
         0.90,
         f"{stadt} | {datum_anzeige} | {uhrzeit_anzeige} Uhr",
         ha="center",
-        fontsize=11,
+        fontsize=9,
         color="gray",
     )
-    
+
+    # ------------------------------------------------------------
+    # Vorhergesagter Wert
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
-        0.84,
-        f"Vorhergesagter {schadstoff.upper()}-Wert: {wert:.1f} µg/m³",
+        0.83,
+        f"{schadstoff.upper()}: {wert:.1f} µg/m³",
         ha="center",
-        fontsize=16,
+        fontsize=13,
         fontweight="bold",
     )
-    
-    # LQI farbig hinterlegen
+
+    # ------------------------------------------------------------
+    # Luftqualitätsindex
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
-        0.76,
+        0.74,
         f"Luftqualitätsindex: {lqi_klasse}",
         ha="center",
-        fontsize=15,
+        fontsize=11,
         fontweight="bold",
         bbox=dict(
-            boxstyle="round,pad=0.4",
+            boxstyle="round,pad=0.3",
             facecolor=lqi_farbe,
             edgecolor="black",
-            linewidth=1.2,
+            linewidth=1,
         ),
     )
-    
+
+    # ------------------------------------------------------------
     # Tabelle mit Wetterdaten
+    # ------------------------------------------------------------
+
     tabelle = ax.table(
         cellText=anzeige_daten,
         colLabels=["Wettervariable", "Aktueller Wert"],
         cellLoc="left",
         colLoc="left",
         loc="center",
-        bbox=[0.15, 0.05, 0.7, 0.62],
+        bbox=[0.16, 0.06, 0.68, 0.54],
     )
-    
+
+    # Schriftgröße Tabelle
     tabelle.auto_set_font_size(False)
-    tabelle.set_fontsize(11)
-    tabelle.scale(1, 1.3)
-    
-    # Tabellenkopf fett machen
+    tabelle.set_fontsize(8.5)
+
+    # Tabellenhöhe kompakter
+    tabelle.scale(1, 1.0)
+
+    # ------------------------------------------------------------
+    # Tabellenkopf hervorheben
+    # ------------------------------------------------------------
+
     for spalte in range(2):
         zelle = tabelle[(0, spalte)]
         zelle.set_text_props(weight="bold")
         zelle.set_facecolor("#EAEAEA")
-    
-    plt.tight_layout()
+
+    # ------------------------------------------------------------
+    # Dünnere Linien für moderneres Design
+    # ------------------------------------------------------------
+
+    for key, zelle in tabelle.get_celld().items():
+        zelle.set_edgecolor("#444444")
+        zelle.set_linewidth(0.8)
+
+    # ------------------------------------------------------------
+    # Layout
+    # ------------------------------------------------------------
+
+    plt.tight_layout(pad=0.8)
     
     # --- STREAMLIT ERSETZUNG FÜR plt.show() ---
-    st.header("📊 Grafische Auswertung & Wetterübersicht")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.subheader("📊 Grafische Auswertung & Wetterübersicht")
     
     # Rendert die Matplotlib-Grafik sauber auf der Webseite.
     # 'use_container_width=True' sorgt dafür, dass sich das Bild automatisch an die Bildschirmbreite anpasst.

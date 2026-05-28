@@ -65,6 +65,11 @@ def showDiagrams (dfO, stoff) :
         features_wetter,
         "Modell 1: Wettervariablen")
     st.pyplot(fig)
+    st.caption("""
+    Hinweis: Modell 1 verwendet ausschließlich Wettervariablen zur Vorhersage der Luftschadstoffkonzentrationen.
+    """)
+
+    st.divider()
 
     # Modell 2: Wettervariablen und Zeitfaktoren
     fig = random_forest_analyse(
@@ -73,6 +78,9 @@ def showDiagrams (dfO, stoff) :
         features_erweitert,
         "Modell 2: Wettervariablen und Zeitfaktoren")
     st.pyplot(fig)
+    st.caption("""
+    Hinweis: Modell 2 ergänzt zusätzlich Zeitvariablen wie Stunde, Monat, Wochenende und Rush Hour, wodurch zeitliche Muster der Luftschadstoffbelastung besser erkannt werden können.
+    """)
     return
 
 # Funktion für Random-Forest-Modell
