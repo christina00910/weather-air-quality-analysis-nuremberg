@@ -482,29 +482,6 @@ def showTab2():
     werden Jahresmittelwerte dargestellt. Niederschlag und Sonnenscheindauer werden als Jahressummen ausgewiesen.
     """)
 
-    # Rohdaten einklappbar
-    with st.expander("Rohdaten anzeigen"):
-        st.dataframe(
-            df_year,
-            height=400,
-            use_container_width=True,
-            hide_index=True
-        )
-
-    # Technische Datensatzinfos einklappbar
-    with st.expander("Technische Datensatzinformationen anzeigen"):
-        dtypes_df = pd.DataFrame({
-            "Spalte": df_year.dtypes.index,
-            "Datentyp": df_year.dtypes.values.astype(str),
-            "Fehlende Werte": df_year.isna().sum().values
-        })
-
-        st.dataframe(
-            dtypes_df,
-            use_container_width=True,
-            hide_index=True
-        )
-
 #######################################################
 @st.fragment
 def showTab3 ():
@@ -647,10 +624,7 @@ def showTab4():
     So lässt sich beispielsweise analysieren, ob hohe Temperaturen, Sonnenschein oder Windgeschwindigkeiten bestimmte Schadstoffkonzentrationen begünstigen oder reduzieren.
     """)
 
-    st.markdown("""
-    <div style="margin-top: 50px;"></div>
-    """, unsafe_allow_html=True
-    )
+    st.divider()
 
     st.write("")
     kor.korrelation(dfOrginal, stoff_spalte)
@@ -705,6 +679,8 @@ def showTab5 ():
 
         st.write("")
 
+        st.divider()
+
         kor.multipleLinearRegression(dfOrginal, stoff_spalte)
 #######################################################
 @st.fragment
@@ -722,12 +698,6 @@ def showTab6():
         auf die Schadstoffkonzentrationen zu analysieren. Die Feature Importance zeigt dabei, 
         welche Variablen besonders relevant für die Vorhersage der jeweiligen Luftschadstoffe sind.
 
-        Modell 1 verwendet ausschließlich Wettervariablen, um deren Einfluss auf die Schadstoffwerte zu untersuchen.
-
-        Modell 2 ergänzt zusätzlich Zeitfaktoren wie Stunde, Monat, Wochenende und Rush Hour. 
-        Dadurch verbessert sich das Modell deutlich (höheres R²), was darauf hinweist, dass zeitliche Muster 
-        einen wichtigen Einfluss auf die Luftschadstoffbelastung haben.
-
         Im Gegensatz zur multiplen linearen Regression können beim Random Forest auch Variablen mit 
         unterschiedlichen Einheiten (z. B. °C, km/h oder Millimeter) besser gemeinsam verarbeitet und verglichen werden.
 
@@ -736,6 +706,8 @@ def showTab6():
         """)
 
         st.write("")
+
+        st.divider()
 
         fig = ran.showDiagrams(dfOrginal, stoff_spalte)
 #######################################################
@@ -983,11 +955,7 @@ Die einzelnen Tabs führen durch die verschiedenen Analysebereiche –
 von der explorativen Datenanalyse über Korrelations- und Regressionsverfahren 
 bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
 """)
-
-    st.markdown(
-        "<div style='margin-top: 50px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("🔎 Analysebereiche")
 
@@ -1012,10 +980,7 @@ bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
     # PROJEKTINFOS & DATENQUELLEN
     # =========================
 
-    st.markdown(
-        "<div style='margin-top: 50px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("📌 Projektüberblick")
 
@@ -1032,10 +997,7 @@ Zusätzlich werden verschiedene Vorhersageansätze entwickelt, um Luftschadstoff
 auf Basis meteorologischer, zeitlicher und historischer Einflussgrößen prognostizieren zu können.
 """)
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("🫁 Gesundheitliche Auswirkungen von Luftschadstoffen")
 
@@ -1057,10 +1019,7 @@ und stehen mit verschiedenen gesundheitlichen Erkrankungen in Zusammenhang.
     Die Grafik zeigt, dass Luftschadstoffe mit verschiedenen gesundheitlichen Belastungen verbunden sein können.
     """)
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("📊 Verwendete Datenquellen")
 
@@ -1075,10 +1034,7 @@ und stehen mit verschiedenen gesundheitlichen Erkrankungen in Zusammenhang.
   Aktuelle Wetterdaten für die Live-Vorhersage der Luftschadstoffwerte.
 """)
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("⚙️ Datenaufbereitung")
 
@@ -1164,10 +1120,7 @@ Dabei wurden die Daten:
             hide_index=True
         )
 
-    st.markdown(
-        "<div style='margin-top: 30px;'></div>",
-        unsafe_allow_html=True
-    )
+    st.divider()
 
     st.header("📊 Datensatzübersicht")
 
@@ -1192,6 +1145,31 @@ Dabei wurden die Daten:
 
     with col6:
         st.metric("Untersuchungsregion", "Nürnberg")
+
+
+    # Technische Datensatzinfos einklappbar
+    # Rohdaten anzeigen
+    with st.expander("Rohdaten anzeigen"):
+        st.dataframe(
+            dfOrginal,
+            height=400,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    # Technische Infos anzeigen
+    with st.expander("Technische Datensatzinformationen anzeigen"):
+        dtypes_df = pd.DataFrame({
+            "Spalte": dfOrginal.columns,
+            "Datentyp": dfOrginal.dtypes.astype(str),
+            "Null-Werte": dfOrginal.isna().sum().values
+        })
+
+        st.dataframe(
+            dtypes_df,
+            use_container_width=True,
+            hide_index=True
+        )
 
     st.info("""
     Da PM2.5-Daten erst ab 2008 vollständig verfügbar sind, wurden alle vergleichenden Analysen 
