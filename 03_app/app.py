@@ -45,7 +45,7 @@ st.set_page_config(
 STOFF_MAP = {
     "Ozon (O₃)": "o3",
     "Stickstoffdioxid (NO₂)": "no2",
-    "Feinstaub (PM10)": "pm10",
+    "Feinstaub (PM10 & PM2.5)": "pm10",
 }
 
 
