@@ -365,7 +365,7 @@ def calcWithOpenMeteo (dfO, stoff) :
     
     st.markdown("<br>", unsafe_allow_html=True)
 
-    st.header("📊 Grafische Auswertung & Wetterübersicht")
+    st.subheader("📊 Grafische Auswertung & Wetterübersicht")
     
     # Rendert die Matplotlib-Grafik sauber auf der Webseite.
     # 'use_container_width=True' sorgt dafür, dass sich das Bild automatisch an die Bildschirmbreite anpasst.
