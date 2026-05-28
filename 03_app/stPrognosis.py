@@ -13,8 +13,8 @@ from xgboost import XGBRegressor
 # 1. TRAININGS-PHASE (GECACHET: Läuft nur 1x)
 # ==========================================
 @st.cache_resource
-def trainiere_modelle(dfO):
-    """Trainiert die Modelle einmalig und speichert sie im Cache."""
+def trainiere_modelle(dfO, mit_lags=True):
+    """Trainiert Modelle für NO2, O3 und PM10 – wahlweise mit oder ohne Lag-Features."""
     spaltenList = [
         "datum",
         "stunde",
@@ -30,15 +30,17 @@ def trainiere_modelle(dfO):
     ]
     df = dfO[spaltenList].copy()
 
-    # Daten vorbereiten & sortieren
-    df = df[df["datum"] >= "2008-10-01"]
+    # Daten vorbereiten & chronologisch sortieren
     df["timestamp"] = pd.to_datetime(df["datum"]) + pd.to_timedelta(
         df["stunde"], unit="h"
     )
     df.set_index("timestamp", inplace=True)
     df = df.sort_index()
 
-    # Featuring
+    # Filter nach Sortierung anwenden (wichtig für die ersten Lags)
+    df = df[df.index >= "2008-10-01"]
+
+    # Feature Engineering (Kalender)
     df["monat"] = df.index.month
     df["wochentag"] = df.index.dayofweek
     df["ist_wochenende"] = df["wochentag"].isin([5, 6]).astype(int)
@@ -56,39 +58,47 @@ def trainiere_modelle(dfO):
     ]
     stoffList = ["no2", "o3", "pm10"]
 
-    lag_cols = []
-    for stoff in stoffList:
-        df[f"{stoff}_lag_1h"] = df[stoff].shift(1)
-        df[f"{stoff}_lag_2h"] = df[stoff].shift(2)
-        df[f"{stoff}_lag_24h"] = df[stoff].shift(24)
-        df[f"{stoff}_roll_mean_6h"] = (
-            df[stoff].shift(1).rolling(window=6).mean()
-        )
-        lag_cols.extend([
-            f"{stoff}_lag_1h",
-            f"{stoff}_lag_2h",
-            f"{stoff}_lag_24h",
-            f"{stoff}_roll_mean_6h",
-        ])
+    # Lags nur generieren, wenn der Schalter AKTIV ist
+    if mit_lags:
+        for stoff in stoffList:
+            df[f"{stoff}_lag_1h"] = df[stoff].shift(1)
+            df[f"{stoff}_lag_2h"] = df[stoff].shift(2)
+            df[f"{stoff}_lag_24h"] = df[stoff].shift(24)
+            df[f"{stoff}_roll_mean_6h"] = (
+                df[stoff].shift(1).rolling(window=6).mean()
+            )
 
-    feature_cols = base_features + lag_cols
     ergebnisse = {}
     models = {}
 
     for stoff in stoffList:
-        benoetigte_spalten = [stoff] + lag_cols
-        df_clean = df.dropna(subset=benoetigte_spalten)
-        df_clean = df_clean.replace([np.inf, -np.inf], np.nan).dropna(
-            subset=benoetigte_spalten
+        # Features für diesen Durchlauf festlegen
+        if mit_lags:
+            stoff_spezifische_lags = [
+                f"{stoff}_lag_1h",
+                f"{stoff}_lag_2h",
+                f"{stoff}_lag_24h",
+                f"{stoff}_roll_mean_6h",
+            ]
+            feature_cols = base_features + stoff_spezifische_lags
+        else:
+            feature_cols = base_features.copy()
+
+        # Sauberes Cleaning: Nur Zeilen löschen, die für DIESES Modell wichtig sind
+        relevante_spalten = feature_cols + [stoff]
+        df_clean = df.replace([np.inf, -np.inf], np.nan).dropna(
+            subset=relevante_spalten
         )
 
         X_stoff = df_clean[feature_cols]
         y_stoff = df_clean[stoff]
 
+        # Chronologischer Split
         split_idx = int(len(df_clean) * 0.8)
         X_train, X_test = X_stoff.iloc[:split_idx], X_stoff.iloc[split_idx:]
         y_train, y_test = y_stoff.iloc[:split_idx], y_stoff.iloc[split_idx:]
 
+        # Modell-Training
         model = XGBRegressor(
             n_estimators=300,
             learning_rate=0.05,
@@ -96,11 +106,12 @@ def trainiere_modelle(dfO):
             subsample=0.8,
             colsample_bytree=0.8,
             random_state=42,
+            n_jobs=-1,
         )
         model.fit(X_train, y_train)
         models[stoff] = model
 
-        # Metriken berechnen
+        # Validierung
         y_pred = model.predict(X_test)
         ergebnisse[stoff] = {
             "MAE": mean_absolute_error(y_test, y_pred),
@@ -110,30 +121,68 @@ def trainiere_modelle(dfO):
     return models, ergebnisse
 
 
+
+    
+
 def prognosis(dfO):
     """Zeigt das Trainingsergebnis an und startet die App-Struktur."""
     st.subheader("⚙️ Trainingsphase & Modellqualität")
 
     # Schneller Abruf aus dem Cache
-    models, ergebnisse = trainiere_modelle(dfO)
+    """Ruft das Training zweimal auf (mit und ohne Lags)
 
-    # Ergebnisse anzeigen (Metriken)
-    for stoff, metrics in ergebnisse.items():
-        st.markdown(f"#### Ergebnisse für **{stoff.upper()}**")
-        col1, col2 = st.columns(2)
-        col1.metric(label="MAE", value=f"{metrics['MAE']:.2f}")
-        col2.metric(label="R²-Wert", value=f"{metrics['R²']:.2f}")
-        st.divider()
+    und liefert einen übersichtlichen Vergleich aller Ergebnisse.
+    """
+    print("Starte Training MIT Lags...")
+    _, ergebnisse_mit = trainiere_modelle(dfO, mit_lags=True)
 
-    st.header("📊 Zusammenfassung aller Modelle")
-    df_ergebnisse = pd.DataFrame.from_dict(ergebnisse, orient="index")
-    df_ergebnisse.index.name = "Stoff"
-    st.dataframe(df_ergebnisse.style.format("{:.2f}"))
-    st.success("Modelle erfolgreich geladen!")
-    st.divider()
+    print("Starte Training OHNE Lags...")
+    _, ergebnisse_ohne = trainiere_modelle(dfO, mit_lags=False)
 
+    vergleichs_daten = []
+
+    # Daten für die Tabelle aufbereiten
+    for stoff in ["no2", "o3", "pm10"]:
+        vergleichs_daten.append({
+            "Variante": "Ohne Lags (Nur Wetter)",
+            "Schadstoff": stoff.upper(),
+            "R²-Score": ergebnisse_ohne[stoff]["R²"],
+        })
+        vergleichs_daten.append({
+            "Variante": "Mit Lags (Historie)",
+            "Schadstoff": stoff.upper(),
+            "R²-Score": ergebnisse_mit[stoff]["R²"],
+        })
+
+
+    with st.expander("Lags"):
+        st.write ("""Lags sind historische Messwerte aus früheren Zeitschritten, die für aktuelle Vorhersagen genutzt werden. Wenn wir die Luftqualität für morgen berechnen, ist der Wert von heute der erste Lag  und der von gestern der zweite.
+Der Einsatz von Lags ist notwendig, weil die meisten Prozesse eine Trägheit besitzen und sich aus ihrer eigenen Vergangenheit heraus entwickeln. Da Schadstoffe oder Wetterfronten nicht abrupt verschwinden, liefern diese historischen Daten dem Machine-Learning-Modell das nötige Fundament, um Trends und Zyklen präzise fortzuschreiben.""")
+    # Als Pandas DataFrame für eine schöne Darstellung speichern
+    df_vergleich = pd.DataFrame(vergleichs_daten)
+    st.dataframe(
+    df_vergleich, 
+    use_container_width=True, # Nutzt die volle Bildschirmbreite
+    hide_index=True           # Versteckt die unschöne Zeilennummerierung
+    )
+
+    with st.expander("Was bedeutet das Bestimmtheitsmaß R²?"):
+        st.markdown("""
+        Das **Bestimmtheitsmaß $R^2$** zeigt an, wie viel Prozent der echten Daten-Schwankungen das Modell mathematisch versteht. Es vergleicht die Vorhersage mit einem simplen Mittelwert.
+        
+        **Die Qualitätsstufen im Überblick:**
+        * 🟢 **Exzellent ($R^2 > 0.8$):** Das Modell arbeitet hochpräzise. Die Vorhersagen sind extrem nah an den echten Werten.
+        * 🟡 **Gut bis Akzeptabel ($0.5$ bis $0.8$):** Wichtige Trends werden richtig erkannt, kleinere Abweichungen kommen vor.
+        * 🟠 **Schwach ($R^2 < 0.5$):** Das Modell erkennt nur wenige Muster. Die Vorhersage ist ungenau.
+        * 🔴 **Nutzlos ($R^2 \le 0$):** Das Modell rät blind oder schneidet schlechter ab als der reine Durchschnitt.
+        
+        **Kurz gesagt:** Je höher der $R^2$-Wert, desto verlässlicher ist die Prognose.
+        """)    
     # Aufruf der Prognose-Oberfläche
-    assessProperties(models)
+    assessProperties(ergebnisse_mit)
+
+    return df_vergleich
+
 
 
 # ==========================================
@@ -141,7 +190,7 @@ def prognosis(dfO):
 # ==========================================
 @st.fragment
 def assessProperties(modelle):
-    st.title("🌬️ Interaktive Schadstoff-Vorhersage")
+    st.title("Interaktive Schadstoff-Vorhersage")
     st.write(
         "Stelle die Szenario-Werte ein und klicke unten auf den Button, um die Werte zu berechnen."
     )
@@ -209,7 +258,7 @@ def assessProperties(modelle):
 
         # Der entscheidende Button innerhalb des Formulars
         submit_button = st.form_submit_button(
-            label="🔮 Luftqualität berechnen"
+            label="Luftqualität berechnen"
         )
 
     # 3. VORHERSAGE AUSFÜHREN (Erst nach Button-Klick)

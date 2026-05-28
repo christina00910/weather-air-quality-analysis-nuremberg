@@ -736,7 +736,7 @@ def showTab6():
 #######################################################
 @st.fragment
 def showTab7 ():
-    st.header("Vorhersage")
+    st.header("Ablationsstudie: Bedeutung der Vergangenheit")
     models = pr.prognosis (dfOrginal)
 
 #######################################################
