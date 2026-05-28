@@ -78,9 +78,21 @@ def calcWithOpenMeteo (dfO, stoff) :
     mae = mean_absolute_error(y_test, vorhersage_test)
     
     st.subheader("Modellbewertung")
-    st.subheader(f"R²: {r2:.3f}")
-    st.subheader(f"MAE: {mae:.2f}")
 
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            label="MAE",
+            value=f"{mae:.2f}"
+        )
+
+    with col2:
+        st.metric(
+            label="R²-Wert",
+            value=f"{r2:.2f}"
+        )
+    st.divider()
     # ------------------------------------------------------------
     # 2. Aktuelle Wetterdaten über API abrufen
     # ------------------------------------------------------------
@@ -147,7 +159,7 @@ def calcWithOpenMeteo (dfO, stoff) :
 
     st.subheader("Live-Wetterdaten für die Vorhersage")
     st.dataframe(live_daten, use_container_width=True)
-    
+    st.divider()
     # ------------------------------------------------------------
     # 4. Luftschadstoff vorhersagen
     # ------------------------------------------------------------
@@ -159,6 +171,7 @@ def calcWithOpenMeteo (dfO, stoff) :
     st.markdown(
         f"## **{vorhersage_live[0]:.2f} µg/m³**"
     )
+    st.divider()
     
     # ------------------------------------------------------------
     # 5. Live-Wetterdaten grafisch darstellen
@@ -239,73 +252,114 @@ def calcWithOpenMeteo (dfO, stoff) :
     lqi_farbe = lqi_farben[lqi_klasse]
 
     # Grafik / Übersicht erstellen (dein Original-Code bleibt fast identisch)
-    fig, ax = plt.subplots(figsize=(9, 7))
+    # Kompaktere Grafik / Übersicht erstellen
+    # ============================================================
+    # Grafik / Übersicht erstellen
+    # ============================================================
+
+    fig, ax = plt.subplots(figsize=(6.0, 4.2))
     ax.axis("off")
-    
+
+    # ------------------------------------------------------------
+    # Titel
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
         0.95,
         "Stündliche Live-Luftschadstoffvorhersage",
         ha="center",
-        fontsize=18,
+        fontsize=14,
         fontweight="bold",
     )
-    
+
+    # ------------------------------------------------------------
+    # Ort + Uhrzeit
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
         0.90,
         f"{stadt} | {datum_anzeige} | {uhrzeit_anzeige} Uhr",
         ha="center",
-        fontsize=11,
+        fontsize=9,
         color="gray",
     )
-    
+
+    # ------------------------------------------------------------
+    # Vorhergesagter Wert
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
-        0.84,
-        f"Vorhergesagter {schadstoff.upper()}-Wert: {wert:.1f} µg/m³",
+        0.83,
+        f"{schadstoff.upper()}: {wert:.1f} µg/m³",
         ha="center",
-        fontsize=16,
+        fontsize=13,
         fontweight="bold",
     )
-    
-    # LQI farbig hinterlegen
+
+    # ------------------------------------------------------------
+    # Luftqualitätsindex
+    # ------------------------------------------------------------
+
     ax.text(
         0.5,
-        0.76,
+        0.74,
         f"Luftqualitätsindex: {lqi_klasse}",
         ha="center",
-        fontsize=15,
+        fontsize=11,
         fontweight="bold",
         bbox=dict(
-            boxstyle="round,pad=0.4",
+            boxstyle="round,pad=0.3",
             facecolor=lqi_farbe,
             edgecolor="black",
-            linewidth=1.2,
+            linewidth=1,
         ),
     )
-    
+
+    # ------------------------------------------------------------
     # Tabelle mit Wetterdaten
+    # ------------------------------------------------------------
+
     tabelle = ax.table(
         cellText=anzeige_daten,
         colLabels=["Wettervariable", "Aktueller Wert"],
         cellLoc="left",
         colLoc="left",
         loc="center",
-        bbox=[0.15, 0.05, 0.7, 0.62],
+        bbox=[0.16, 0.06, 0.68, 0.54],
     )
-    
+
+    # Schriftgröße Tabelle
     tabelle.auto_set_font_size(False)
-    tabelle.set_fontsize(11)
-    tabelle.scale(1, 1.3)
-    
-    # Tabellenkopf fett machen
+    tabelle.set_fontsize(8.5)
+
+    # Tabellenhöhe kompakter
+    tabelle.scale(1, 1.0)
+
+    # ------------------------------------------------------------
+    # Tabellenkopf hervorheben
+    # ------------------------------------------------------------
+
     for spalte in range(2):
         zelle = tabelle[(0, spalte)]
         zelle.set_text_props(weight="bold")
         zelle.set_facecolor("#EAEAEA")
-    
-    plt.tight_layout()
+
+    # ------------------------------------------------------------
+    # Dünnere Linien für moderneres Design
+    # ------------------------------------------------------------
+
+    for key, zelle in tabelle.get_celld().items():
+        zelle.set_edgecolor("#444444")
+        zelle.set_linewidth(0.8)
+
+    # ------------------------------------------------------------
+    # Layout
+    # ------------------------------------------------------------
+
+    plt.tight_layout(pad=0.8)
     
     # --- STREAMLIT ERSETZUNG FÜR plt.show() ---
     
