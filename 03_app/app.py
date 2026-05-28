@@ -1236,82 +1236,63 @@ with tab9:
     durch weitere Einflussfaktoren geprägt werden.
     """)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("### 🌞 Ozon (O₃)")
-        st.metric(
-            label="Trend",
-            value="tendenziell steigend",
-            delta="warme & sonnige Wetterlagen"
-        )
-
-    with col2:
-        st.markdown("### 🚗 Stickstoffdioxid (NO₂)")
-        st.metric(
-            label="Trend",
-            value="tendenziell sinkend",
-            delta="- Verkehrsemissionen"
-        )
-
-    with col3:
-        st.markdown("### 🌫️ Feinstaub (PM10 & PM2.5)")
-        st.metric(
-            label="Trend",
-            value="tendenziell sinkend",
-            delta="- Feinstaubbelastung"
-        )
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.divider()
 
     st.subheader("Zentrale Erkenntnisse")
 
     st.markdown("""
-    - **Ozon (O₃)** steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
-      Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen.
+    ### 🌞 Ozon (O₃)
+    Steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
+    Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen und zunehmender Hitzeperioden könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen.
 
-    - **Stickstoffdioxid (NO₂)** zeigt langfristig eher sinkende Werte.  
-      Dies kann unter anderem auf technische Entwicklungen, strengere Emissionsvorgaben und Veränderungen im Verkehrssektor hindeuten.
+    ### 🚗 Stickstoffdioxid (NO₂)
+    Zeigt langfristig eher sinkende Werte.  
+    Dies kann unter anderem auf technische Entwicklungen, strengere Emissionsvorgaben und Veränderungen im Verkehrssektor hindeuten.
 
-    - **Feinstaub (PM10 und PM2.5)** weist ebenfalls rückläufige Tendenzen auf.  
-      Gleichzeitig zeigen die Analysen, dass Feinstaub besonders bei Inversionslagen, geringer Luftdurchmischung und verkehrsnahen Situationen erhöht auftreten kann.
+    ### 🌫️ Feinstaub (PM10 und PM2.5)
+    Weist ebenfalls rückläufige Tendenzen auf.  
+    Gleichzeitig zeigen die Analysen, dass Feinstaub besonders bei Inversionslagen, geringer Luftdurchmischung und verkehrsnahen Situationen erhöht auftreten kann.
 
-    - **Wetterdaten allein erklären die Luftqualität nur teilweise.**  
-      Die multiple Regression zeigt, dass meteorologische Variablen zwar signifikante Zusammenhänge aufweisen, die Erklärungskraft jedoch begrenzt bleibt.
+    ### ❤️ Gesundheitliche Bedeutung
+    Trotz teilweise sinkender Schadstoffwerte bleibt Luftverschmutzung weiterhin ein relevantes Gesundheitsthema. Besonders erhöhte Ozonwerte können die Atemwege belasten und stehen in Zusammenhang mit gesundheitlichen Risiken für empfindliche Personengruppen.
 
-    - **Zeitliche Variablen verbessern die Vorhersage deutlich.**  
-      Durch Faktoren wie Stunde, Monat, Wochenende oder Rush Hour können typische Tages- und Jahresmuster besser abgebildet werden.
+    ### 🌍 Regionale Unterschiede
+    Die Analyse verdeutlicht außerdem, dass Luftqualität regional sehr unterschiedlich ausfallen kann. Während in Nürnberg teilweise rückläufige Entwicklungen erkennbar sind, können Luftschadstoffbelastungen in anderen Regionen oder Großstädten deutlich stärker ausfallen.
+
+    ### 📊 Grenzen der Wetterdaten
+    Wetterdaten allein erklären die Luftqualität nur teilweise. Die multiple Regression zeigt, dass meteorologische Variablen zwar signifikante Zusammenhänge aufweisen, die Erklärungskraft jedoch begrenzt bleibt.
+
+    ### ⏱️ Zeitliche Muster
+    Zeitliche Variablen verbessern die Vorhersage deutlich. Durch Faktoren wie Stunde, Monat, Wochenende oder Rush Hour können typische Tages- und Jahresmuster besser abgebildet werden.
     """)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.divider()
 
     st.subheader("Ausblick")
 
     st.markdown("""
-    Für noch genauere Prognosen sollten künftig zusätzliche Einflussfaktoren integriert werden. 
-    Dazu zählen insbesondere Verkehrsdaten, industrielle Emissionen, Heizverhalten, Baustellen, Ferienzeiten 
-    sowie besondere Ereignisse wie Silvester oder Wetterlagen mit geringer Luftdurchmischung.
-
-    Insgesamt zeigt das Projekt, dass datenbasierte Verfahren wie Korrelationsanalysen, multiple lineare Regression 
-    und Random-Forest-Modelle geeignet sind, Zusammenhänge zwischen Wetter und Luftqualität sichtbar zu machen. 
-    Gleichzeitig wird deutlich, dass Luftqualität ein komplexes Zusammenspiel aus meteorologischen, zeitlichen 
-    und menschlich verursachten Faktoren ist.
+    * Das Projekt zeigt, dass datenbasierte Verfahren wie Korrelationsanalysen, multiple lineare Regression und Random-Forest-Modelle geeignet sind, Zusammenhänge zwischen Wetter und Luftqualität sichtbar zu machen.
+                
+    * Die Analyse bezieht sich ausschließlich auf die Region Nürnberg. Für zukünftige Untersuchungen könnten weitere Städte, Regionen oder internationale Datensätze integriert werden, um Unterschiede zwischen verschiedenen Umwelt- und Klimabedingungen besser vergleichen zu können.
+                
+    * Für präzisere Vorhersagen sollten zusätzlich weitere Einflussfaktoren wie Verkehrsdaten, Industrieemissionen, Heizverhalten oder historische Schadstoffwerte ergänzt werden. Dadurch könnten insbesondere die Vorhersagen von Stickstoffdioxid und Feinstaub weiter verbessert werden.
+                
+    * Insgesamt verdeutlicht das Projekt, dass Luftqualität ein komplexes Zusammenspiel aus Wetter, menschlichen Aktivitäten und zeitlichen Mustern darstellt und weiterhin eine wichtige Rolle für Umwelt und Gesundheit spielt.
     """)
 
-    st.markdown("<br>", unsafe_allow_html=True)
 
     with st.expander("💡 Mögliche Erweiterungen für zukünftige Analysen"):
 
         st.markdown("""
-        - Einbindung von Verkehrsdaten, z. B. Verkehrsaufkommen oder Staubereiche  
-        - Berücksichtigung von Industrie- und Heizemissionen  
-        - Einbindung detaillierter Wetterlagen wie Inversion, Windrichtung oder Luftaustausch  
-        - Modellierung besonderer Ereignisse wie Silvester, Ferien oder Baustellen  
-        - Vergleich mehrerer Messstationen innerhalb Nürnbergs oder Bayerns  
+        - Einbindung zusätzlicher Verkehrsdaten, z. B. Verkehrsaufkommen, Staubereiche oder Echtzeit-Verkehrsflüsse  
+        - Berücksichtigung weiterer Emissionsquellen wie Industrie, Heizungen oder Baustellen  
+        - Integration vorheriger Schadstoffmesswerte der letzten Stunden oder Tage zur besseren Erkennung kurzfristiger Belastungsmuster  
+        - Erweiterung der Analyse auf weitere Städte, Regionen oder internationale Datensätze  
+        - Vergleich verschiedener Messstationen innerhalb Nürnbergs oder Bayerns  
+        - Einbindung detaillierter Wetterlagen wie Inversion, Luftaustausch oder Windströmungen  
         - Einsatz weiterer Machine-Learning-Modelle wie Gradient Boosting oder neuronale Netze  
-        - Entwicklung eines Live-Warnsystems für erhöhte Schadstoffbelastungen  
+        - Entwicklung eines Live-Warnsystems für erhöhte Luftschadstoffbelastungen und gesundheitliche Risiken  
+        - Kombination von Luftqualitäts- und Gesundheitsdaten zur Analyse möglicher gesundheitlicher Auswirkungen  
         """)
 
     st.markdown("<br>", unsafe_allow_html=True)
