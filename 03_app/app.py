@@ -45,7 +45,7 @@ st.set_page_config(
 STOFF_MAP = {
     "Ozon (O₃)": "o3",
     "Stickstoffdioxid (NO₂)": "no2",
-    "Feinstaub (PM10)": "pm10",
+    "Feinstaub (PM10 & PM2.5)": "pm10",
 }
 
 
@@ -572,30 +572,69 @@ def showTab3 ():
         # Einzelstoff-Ansicht (O₃, NO₂ oder PM10) - gemeinsamer Block
         beschreibungen = {
             "o3": (
-                "Ozon (O₃) – Detailanalyse",
-                "Ozon ist ein bedingtes Reizgas, das besonders im Sommer bei hoher Einstrahlung entsteht. Weitere wissenschaftliche Beschreibung ergänzen......"
-            ),
+            "Ozon (O₃)",
+            """
+            Ozon (O₃) ist ein gasförmiger Luftschadstoff, der nicht direkt ausgestoßen wird,
+            sondern sich in der Atmosphäre aus sogenannten Vorläufersubstanzen bildet.
+            Dazu gehören vor allem Stickoxide (NOₓ) und flüchtige organische Verbindungen,
+            die beispielsweise durch Verkehr, Industrie oder Verbrennungsprozesse entstehen.
+
+            Besonders an warmen und sonnigen Tagen kommt es durch intensive Sonneneinstrahlung
+            zu chemischen Reaktionen in der Luft, wodurch die Ozonkonzentration ansteigt.
+            Deshalb treten erhöhte Ozonwerte häufig im Frühjahr und Sommer auf.
+
+            Hohe Ozonkonzentrationen können die Atemwege reizen, die Lungenfunktion beeinträchtigen
+            und insbesondere für Kinder, ältere Menschen sowie Personen mit Atemwegserkrankungen
+            gesundheitsschädlich sein.
+            """
+         ),
             "no2": (
-                "Stickstoffdioxid (NO₂) – Analysen",
-                "NO₂ entsteht primär bei Verbrennungsprozessen (z. B. Dieselmotoren)."
+            "Stickstoffdioxid (NO₂)",
+            """
+            Stickstoffdioxid (NO₂) ist ein gasförmiger Luftschadstoff, der hauptsächlich bei
+            Verbrennungsprozessen entsteht. Besonders hohe Konzentrationen treten im Straßenverkehr,
+            insbesondere durch Dieselfahrzeuge, Industrieanlagen und Heizsysteme auf.
+
+            NO₂ kann die Atemwege reizen und steht in Zusammenhang mit Atemwegserkrankungen sowie
+            einer verminderten Lungenfunktion. Hohe Werte treten häufig in stark befahrenen
+            Stadtgebieten auf.
+
+            Zusätzlich spielt Stickstoffdioxid eine wichtige Rolle bei der Bildung von bodennahem
+            Ozon und sekundärem Feinstaub.
+            """
             ),
             "pm10": (
-                "Feinstaub (PM10) – Partikelanalyse",
-                "Feinstaubpartikel dringen tief in die Atemwege ein. Quellen sind Industrie, Heizungen und Abrieb."
+            "Feinstaub (PM10 & PM2.5)",
+            """
+            Feinstaub umfasst sehr kleine Partikel in der Luft, die unter anderem durch Verkehr,
+            Industrie, Heizungen, Reifen- und Bremsabrieb sowie natürliche Quellen entstehen.
+
+            PM10 beschreibt Partikel mit einem Durchmesser von weniger als 10 Mikrometern,
+            während PM2.5 noch deutlich kleinere und feinere Partikel umfasst.
+            Aufgrund ihrer geringen Größe können die Partikel tief in die Atemwege eindringen.
+            Besonders PM2.5 kann sogar bis in die Lungenbläschen gelangen.
+
+            Hohe Feinstaubkonzentrationen können die Atemwege belasten und stehen in Zusammenhang
+            mit Herz-Kreislauf- sowie Atemwegserkrankungen.
+
+            Erhöhte PM10- und PM2.5-Werte treten häufig bei trockener Witterung,
+            wenig Wind oder Inversionslagen auf, da sich die Schadstoffe dann schlechter
+            in der Atmosphäre verteilen können.
+            """
             ),
         }
-        titel, info_text = beschreibungen[stoff_spalte]
-        st.subheader(titel)
-        st.info(info_text)
-        showEDAPlots(dfOrginal, stoff_spalte)
-        if (stoff_spalte == "o3") :
-            O3.showO3EDAPlots ()
+
+    titel, info_text = beschreibungen[stoff_spalte]
+    st.subheader(titel)
+    st.markdown(info_text)
+    showEDAPlots(dfOrginal, stoff_spalte)
+    if stoff_spalte == "o3":
+        O3.showO3EDAPlots()
    
 #######################################################
 @st.fragment
 def showTab4():
-
-    st.header("Korrelationen zwischen Wetter und Luftschadstoffen")
+    st.header("Korrelationenzwischen Wetter und Luftschadstoffen")
 
     st.markdown("""
     Die Korrelationsanalyse zeigt, ob und wie stark Wetterbedingungen mit der Luftqualität zusammenhängen. 
@@ -638,19 +677,61 @@ def showTab4():
 def showTab5 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Multiple Regression – Übersicht")
-        st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Regression zu sehen.")
+        st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die multiple lineare Regression anzuzeigen.")
     else:
-        st.header(f"Multiple Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
+        st.header(f"Multiple lineare Regression: Wetter als Prädiktor für {schadstoff_auswahl}")
+        st.markdown("""
+        Die multiple lineare Regression wurde verwendet, um den Einfluss verschiedener Wettervariablen 
+        auf die Luftschadstoffkonzentrationen statistisch zu untersuchen.
+        Dabei wird geprüft, ob zwischen Wetterfaktoren und Schadstoffwerten signifikante Zusammenhänge bestehen. 
+
+        Ein p-Wert kleiner als 0.05 deutet auf einen statistisch signifikanten Zusammenhang hin.
+        Die Regression bestätigt damit die bereits in der Korrelationsanalyse erkennbaren Zusammenhänge 
+        zwischen Wetterbedingungen und Luftschadstoffen.
+
+        Da die Variablen unterschiedliche Einheiten besitzen (z. B. °C, km/h oder Millimeter), 
+        sind die Koeffizienten jedoch nur eingeschränkt direkt miteinander vergleichbar.
+
+        Das R² zeigt zusätzlich, wie gut die Wettervariablen die Schadstoffkonzentrationen insgesamt 
+        erklären können. Das vergleichsweise niedrige R², vorallem beim Stickstoffdioxid (NO₂) und Feinstaub (PM10/PM2.5), deutet darauf hin, dass neben dem Wetter auch 
+        weitere Faktoren wie Verkehr, Tageszeit, Industrie, Heizungen oder saisonale Effekte einen Einfluss 
+        auf die Luftschadstoffbelastung haben.
+        """)
+
+        st.write("")
+
         kor.multipleLinearRegression(dfOrginal, stoff_spalte)
-    
 #######################################################
 @st.fragment
-def showTab6 ():
+def showTab6():
+
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Random Forest – Übersicht")
-        st.info("Wählen Sie links einen einzelnen Schadstoff, um das entsprechende Random-Forest-Modell zu sehen.")
+        st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um das Random-Forest-Modell anzuzeigen.")
     else:
+
         st.header(f"Random Forest: Wetter als Prädiktor für {schadstoff_auswahl}")
+
+        st.markdown("""
+        Der Random-Forest-Algorithmus wurde verwendet, um den Einfluss von Wetter- und Zeitfaktoren 
+        auf die Schadstoffkonzentrationen zu analysieren. Die Feature Importance zeigt dabei, 
+        welche Variablen besonders relevant für die Vorhersage der jeweiligen Luftschadstoffe sind.
+
+        Modell 1 verwendet ausschließlich Wettervariablen, um deren Einfluss auf die Schadstoffwerte zu untersuchen.
+
+        Modell 2 ergänzt zusätzlich Zeitfaktoren wie Stunde, Monat, Wochenende und Rush Hour. 
+        Dadurch verbessert sich das Modell deutlich (höheres R²), was darauf hinweist, dass zeitliche Muster 
+        einen wichtigen Einfluss auf die Luftschadstoffbelastung haben.
+
+        Im Gegensatz zur multiplen linearen Regression können beim Random Forest auch Variablen mit 
+        unterschiedlichen Einheiten (z. B. °C, km/h oder Millimeter) besser gemeinsam verarbeitet und verglichen werden.
+
+        Die Ergebnisse zeigen insgesamt, dass sowohl Wetterbedingungen als auch Verkehrs- und Tageszeitmuster 
+        relevant für die Entstehung und Verteilung der Luftschadstoffe sind.
+        """)
+
+        st.write("")
+
         fig = ran.showDiagrams(dfOrginal, stoff_spalte)
 #######################################################
 @st.fragment
@@ -660,9 +741,13 @@ def showTab7 ():
 
 #######################################################
 @st.fragment
-def showTab8 ():
-    st.header("Vorhersage")
-    op.calcWithOpenMeteo (dfOrginal, stoff_spalte)
+def showTab8():
+    if schadstoff_auswahl == "Übersicht aller Stoffe":
+        st.header("Vorhersage Live")
+        st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die Live-Vorhersage anzuzeigen.")
+    else:
+        st.header(f"Vorhersage Live: {schadstoff_auswahl}")
+        op.calcWithOpenMeteo(dfOrginal, stoff_spalte)
 
 #######################################################
 
@@ -672,64 +757,124 @@ dfOrginal = load()
 # 01 SIDEBAR-KONFIGURATION
 # ============================================================
 with st.sidebar:
-    st.write("🌦️ Filter & Einstellungen")
-    st.markdown("---")
+    st.markdown("""
+    <style>
+    section[data-testid="stSidebar"] > div {
+        padding-top: 1.2rem !important;
+    }
+    
+    .sidebar-item {
+    margin-bottom: 16px;
+    }
+                
+    .sidebar-title {
+        font-size: 25px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
 
-    # Globale Schadstoff-Auswahl (wirkt in Tab 3, 4, 5, 6)
+    .sidebar-section-title {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .sidebar-divider {
+        margin: 14px 0 14px 0;
+        border-top: 1px solid rgba(255,255,255,0.16);
+    }
+
+    div[role="radiogroup"] label {
+        padding: 0px 0 !important;
+        margin: 0px 0 !important;
+    }
+
+    div[role="radiogroup"] p {
+        font-size: 17px !important;
+        line-height: 1.2 !important;
+        font-weight: 600 !important;
+    }
+
+    .sidebar-text {
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    .sidebar-text b {
+        font-size: 15px;
+    }
+
+    .sidebar-gap {
+        height: 10px;
+    }
+
+    .sidebar-data-box {
+        background-color: rgba(3, 149, 176, 0.1);
+        padding: 9px 11px;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(1, 132, 157, 0.8);
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        color: #FAFAFA;
+        line-height: 1.35;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='sidebar-title'>🌦️ Filter & Einstellungen</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='sidebar-section-title'>Schadstoff-Auswahl:</div>", unsafe_allow_html=True)
+
     schadstoff_auswahl = st.radio(
-        "Schadstoff-Auswahl:",
-        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10)"],
+        "",
+        ["Übersicht aller Stoffe", "Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10 & PM2.5)"],
+        label_visibility="collapsed"
     )
 
-    # Spaltenname für Tabs, die einen einzelnen Stoff brauchen
-    # Fallback bei "Übersicht aller Stoffe" -> no2
     stoff_spalte = STOFF_MAP.get(schadstoff_auswahl, "no2")
 
-    st.markdown("---")
-
-    with st.spinner("Loading..."):
-        time.sleep(2)
+    st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
 
     st.markdown(
         f"""
-        <div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);">
-            <span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;">
-                ✅ Daten erfolgreich geladen: {len(dfOrginal):,} Zeilen!
-            </span>
+        <div class="sidebar-data-box">
+            ✅ Daten erfolgreich geladen:<br>
+            {len(dfOrginal):,} Zeilen
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.markdown("<div style='height: 200px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
 
-    # Sticky Footer
-    st.markdown(
-        """
-        <style>
-            .sidebar-footer {
-                position: absolute; 
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                background-color: #262730; 
-                padding: 15px 20px 20px 20px; 
-                text-align: left;
-                font-size: 12px;
-                color: #888888;
-                z-index: 999; 
-            }
-        </style>
-  
-        <div class="sidebar-footer">
-            <hr style="margin-top: 0; margin-bottom: 10px; border-color: #444444;">
-            <b>Projekt:</b> <br>Modulare Analyse von Wetter- und Luftqualitätsdaten<br>
-            <b>Milestone 1:</b> Nürnberg<br>
-            <b>Team:</b> Christina, Markus, Frank
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+<div class="sidebar-text">
+
+<div class="sidebar-item">
+<b>Projekt:</b><br>
+Analyse und Vorhersage von Wetter- und Luftqualitätsdaten
+</div>
+
+<div class="sidebar-item">
+<b>Region:</b><br>
+Nürnberg
+</div>
+
+<div class="sidebar-item">
+<b>Zeitraum:</b><br>
+11.05.2026 – 29.05.2026
+</div>
+
+<div class="sidebar-item">
+<b>Projektteam:</b><br>
+Christina Dürbeck<br>
+Frank Hasdorf<br>
+Markus Edelhoff
+</div>
+
+</div>
+""", unsafe_allow_html=True)
 
 # ============================================================
 # TAB-DESIGN ANPASSEN
@@ -794,9 +939,9 @@ button[data-baseweb="tab"]:hover {
 # ============================================================
 # 02 TABS DEFINIEREN & SEITENSTRUKTUR
 # ============================================================
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
     ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
-     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "Technische Insights"]
+     "Multiple Regression", "Random Forest", "Vorhersage", "Vorhersage Live", "Fazit", "Technische Insights"]
 )
 
 # ------------------------------------------------------------
@@ -845,7 +990,7 @@ bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
         st.info("🔮 Vorhersagemodelle")
 
     # =========================
-    # PROJEKT-INFOS
+    # PROJEKTINFOS & DATENQUELLEN
     # =========================
 
     st.markdown(
@@ -1123,14 +1268,115 @@ with tab7:
     showTab7 ()
 
 # ============================================================
-# TAB 7: VORHERSAGE2
+# TAB 8: VORHERSAGE2
 # ============================================================
 with tab8:
     showTab8 ()
+
 # ============================================================
-# TAB 8: TECHNISCHE INSIGHTS
+# TAB 9: Fazit
+# ============================================================
+# ============================================================
+# TAB 9: FAZIT
 # ============================================================
 with tab9:
+    st.header("Fazit und Ausblick")
+
+    st.markdown("""
+    Die Analyse zeigt, dass Wetterbedingungen einen messbaren Einfluss auf die Luftqualität in Nürnberg haben. 
+    Besonders deutlich werden die Zusammenhänge bei Ozon, während Stickstoffdioxid und Feinstaub zusätzlich stark 
+    durch weitere Einflussfaktoren geprägt werden.
+    """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("### 🌞 Ozon (O₃)")
+        st.metric(
+            label="Trend",
+            value="tendenziell steigend",
+            delta="warme & sonnige Wetterlagen"
+        )
+
+    with col2:
+        st.markdown("### 🚗 Stickstoffdioxid (NO₂)")
+        st.metric(
+            label="Trend",
+            value="tendenziell sinkend",
+            delta="- Verkehrsemissionen"
+        )
+
+    with col3:
+        st.markdown("### 🌫️ Feinstaub (PM10 & PM2.5)")
+        st.metric(
+            label="Trend",
+            value="tendenziell sinkend",
+            delta="- Feinstaubbelastung"
+        )
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    st.subheader("Zentrale Erkenntnisse")
+
+    st.markdown("""
+    - **Ozon (O₃)** steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
+      Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen.
+
+    - **Stickstoffdioxid (NO₂)** zeigt langfristig eher sinkende Werte.  
+      Dies kann unter anderem auf technische Entwicklungen, strengere Emissionsvorgaben und Veränderungen im Verkehrssektor hindeuten.
+
+    - **Feinstaub (PM10 und PM2.5)** weist ebenfalls rückläufige Tendenzen auf.  
+      Gleichzeitig zeigen die Analysen, dass Feinstaub besonders bei Inversionslagen, geringer Luftdurchmischung und verkehrsnahen Situationen erhöht auftreten kann.
+
+    - **Wetterdaten allein erklären die Luftqualität nur teilweise.**  
+      Die multiple Regression zeigt, dass meteorologische Variablen zwar signifikante Zusammenhänge aufweisen, die Erklärungskraft jedoch begrenzt bleibt.
+
+    - **Zeitliche Variablen verbessern die Vorhersage deutlich.**  
+      Durch Faktoren wie Stunde, Monat, Wochenende oder Rush Hour können typische Tages- und Jahresmuster besser abgebildet werden.
+    """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.subheader("Ausblick")
+
+    st.markdown("""
+    Für noch genauere Prognosen sollten künftig zusätzliche Einflussfaktoren integriert werden. 
+    Dazu zählen insbesondere Verkehrsdaten, industrielle Emissionen, Heizverhalten, Baustellen, Ferienzeiten 
+    sowie besondere Ereignisse wie Silvester oder Wetterlagen mit geringer Luftdurchmischung.
+
+    Insgesamt zeigt das Projekt, dass datenbasierte Verfahren wie Korrelationsanalysen, multiple lineare Regression 
+    und Random-Forest-Modelle geeignet sind, Zusammenhänge zwischen Wetter und Luftqualität sichtbar zu machen. 
+    Gleichzeitig wird deutlich, dass Luftqualität ein komplexes Zusammenspiel aus meteorologischen, zeitlichen 
+    und menschlich verursachten Faktoren ist.
+    """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.expander("💡 Mögliche Erweiterungen für zukünftige Analysen"):
+
+        st.markdown("""
+        - Einbindung von Verkehrsdaten, z. B. Verkehrsaufkommen oder Staubereiche  
+        - Berücksichtigung von Industrie- und Heizemissionen  
+        - Einbindung detaillierter Wetterlagen wie Inversion, Windrichtung oder Luftaustausch  
+        - Modellierung besonderer Ereignisse wie Silvester, Ferien oder Baustellen  
+        - Vergleich mehrerer Messstationen innerhalb Nürnbergs oder Bayerns  
+        - Einsatz weiterer Machine-Learning-Modelle wie Gradient Boosting oder neuronale Netze  
+        - Entwicklung eines Live-Warnsystems für erhöhte Schadstoffbelastungen  
+        """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.success("""
+    Zusammenfassend zeigt das Dashboard: Wetter- und Zeitfaktoren liefern wichtige Hinweise auf die Entwicklung der Luftqualität. 
+    Für präzisere Vorhersagen müssen jedoch zusätzliche Emissionsquellen und lokale Einflussfaktoren berücksichtigt werden.
+    """)
+
+# ============================================================
+# TAB 10: TECHNISCHE INSIGHTS
+# ============================================================
+with tab10:
     st.header("Technische Insights")
 
     def render_tech_tab():
