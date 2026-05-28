@@ -126,7 +126,7 @@ def trainiere_modelle(dfO, mit_lags=True):
 
 def prognosis(dfO):
     """Zeigt das Trainingsergebnis an und startet die App-Struktur."""
-    st.subheader("⚙️ Trainingsphase & Modellqualität")
+    st.subheader("Modellqualität: Verbesserung durch Generierung von Zeitreihen-Features")
 
     # Schneller Abruf aus dem Cache
     """Ruft das Training zweimal auf (mit und ohne Lags)
@@ -153,7 +153,23 @@ def prognosis(dfO):
             "Schadstoff": stoff.upper(),
             "R²-Score": ergebnisse_mit[stoff]["R²"],
         })
-
+    st.info("""
+    Der folgende Code berechnet die historischen Verzögerungen (Lags) und den gleitenden Durchschnitt für den Schadstoff:
+    
+    ```python
+    # Erstellung der Lags (1h, 2h und 24h Versatz)
+    df[f"{stoff}_lag_1h"] = df[stoff].shift(1)
+    df[f"{stoff}_lag_2h"] = df[stoff].shift(2)
+    df[f"{stoff}_lag_24h"] = df[stoff].shift(24)
+    
+    # Gleitender Durchschnitt der letzten 6 Stunden (verschoben um 1h)
+    df[f"{stoff}_roll_mean_6h"] = (
+        df[stoff].shift(1).rolling(window=6).mean()
+    )
+    ```
+    
+    *Hinweis: Durch diese Transformation entstehen in den ersten 24 Zeilen des Datensatzes `NaN`-Werte, die vor dem Modelltraining entfernt werden müssen.*
+    """)
 
     with st.expander("Lags"):
         st.write ("""Lags sind historische Messwerte aus früheren Zeitschritten, die für aktuelle Vorhersagen genutzt werden. Wenn wir die Luftqualität für morgen berechnen, ist der Wert von heute der erste Lag  und der von gestern der zweite.
