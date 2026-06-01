@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Authors: Frank Hasdorf, Christina Dürrbeck, Markus Edelhoff
+# @Authors: Christina Dürrbeck, Markus Edelhoff
 # @Project: Abschlussprojekt - app_aufbau
 #           Abschlussklasse Dezember 2025
 # @Date:   16-05-2026 15:56:50
@@ -1317,8 +1317,7 @@ Nürnberg
 <div class="sidebar-item">
 <b>Projektteam:</b><br>
 Christina Dürbeck<br>
-Markus Edelhoff<br>
-Frank Hasdorf                
+Markus Edelhoff                
 </div>
 
 </div>
@@ -1389,8 +1388,7 @@ button[data-baseweb="tab"]:hover {
 # ============================================================
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
     ["Startseite", "Wetterdaten", "Explorative Analyse", "Korrelationsanalyse",
-     "Multiple Regression", "Random Forest", "Vorhersage Live", "Vorhersage", "Fazit", "Technische Insights"]
-)
+     "Multiple Regression", "Random Forest", "Vorhersage Live", "Vorhersage", "Fazit", "Technische Insights"])
 
 # ------------------------------------------------------------
 # TAB 1: Einleitung & Überblick
