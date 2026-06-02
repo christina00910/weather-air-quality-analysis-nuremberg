@@ -1269,7 +1269,7 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='sidebar-title'>🌦️ Filter & Einstellungen</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sidebar-title'>🌦️ Filter</div>", unsafe_allow_html=True)
     st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
 
     st.markdown("<div class='sidebar-section-title'>Schadstoff-Auswahl:</div>", unsafe_allow_html=True)
@@ -1414,7 +1414,7 @@ bis hin zu Vorhersagemodellen für Luftschadstoffkonzentrationen.
 
     st.header("🔎 Analysebereiche")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1.2])
 
     with col1:
         st.info("📊 Explorative Analyse")
