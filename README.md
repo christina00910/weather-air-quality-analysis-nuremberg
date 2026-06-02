@@ -1,4 +1,4 @@
-# 🌍 Analyse und Vorhersage von Wetter- und Luftqualitätsdaten in Nürnberg
+# Analyse und Vorhersage von Wetter- und Luftqualitätsdaten in Nürnberg
 
 ## Projektbeschreibung
 
@@ -14,6 +14,13 @@ Im Fokus stehen die Luftschadstoffe:
 - Feinstaub PM2.5
 
 Zur Analyse werden verschiedene statistische Verfahren sowie Machine-Learning-Modelle eingesetzt. Zusätzlich wurde eine interaktive Streamlit-Webanwendung entwickelt.
+
+### Datengrundlage
+
+- Analysezeitraum: 1980–2024
+- Messintervall: Stündliche Messdaten
+- Untersuchungsregion: Nürnberg
+- PM2.5-Daten vollständig verfügbar ab 2008
 
 ---
 
@@ -95,10 +102,10 @@ Bestimmung wichtiger Einflussgrößen und Vorhersagemodellierung.
 
 ### Vorhersagemodelle
 
-- Random Forest
-- XGBoost
-- Zeitreihen-Lags
-- Live-Prognosen mit Open-Meteo
+- Random Forest Regressor
+- XGBoost Regressor
+- Zeitreihen-Lags historischer Schadstoffwerte
+- Live-Prognosen auf Basis aktueller Wetterdaten der Open-Meteo API
 
 ---
 
@@ -128,6 +135,7 @@ Bestimmung wichtiger Einflussgrößen und Vorhersagemodellierung.
 - Scikit-Learn
 - XGBoost
 - Streamlit
+- Open-Meteo API
 
 ---
 
@@ -144,5 +152,5 @@ Abschlussprojekt Mai 2026
 ## Anwendung starten
 
 ```bash
+pip install -r app/requirements.txt
 streamlit run app/app.py
-```
