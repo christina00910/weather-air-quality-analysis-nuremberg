@@ -66,7 +66,7 @@ Abschlussprojekt_DSI202512_Final
 
 ### Open-Meteo API
 
-Aktuelle Wetterdaten für die Live-Prognose.
+Aktuelle Wetterdaten für die Live-Prognose
 
 ---
 
