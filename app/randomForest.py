@@ -104,7 +104,7 @@ def random_forest_analyse(data, schadstoff, features, modellname):
 
     # Random-Forest-Modell erstellen
     modell = RandomForestRegressor(
-        n_estimators=100,
+        n_estimators=50, # bewusst reduziert für kürzere Laufzeit in der Streamlit-App
         random_state=42,
         n_jobs=-1)
 
