@@ -135,10 +135,10 @@ def prognosis(dfO):
     und liefert einen übersichtlichen Vergleich aller Ergebnisse.
     """
     print("Starte Training MIT Lags...")
-    _, ergebnisse_mit = trainiere_modelle(dfO, mit_lags=True)
+    modelle1, ergebnisse_mit = trainiere_modelle(dfO, mit_lags=True)
 
     print("Starte Training OHNE Lags...")
-    _, ergebnisse_ohne = trainiere_modelle(dfO, mit_lags=False)
+    modelle2, ergebnisse_ohne = trainiere_modelle(dfO, mit_lags=False)
 
     vergleichs_daten = []
 
@@ -196,7 +196,7 @@ Der Einsatz von Lags ist notwendig, weil die meisten Prozesse eine Trägheit bes
         **Kurz gesagt:** Je höher der $R^2$-Wert, desto verlässlicher ist die Prognose.
         """)    
     # Aufruf der Prognose-Oberfläche
-    assessProperties(ergebnisse_mit)
+    assessProperties(modelle1)
 
     return df_vergleich
 
@@ -330,9 +330,18 @@ def assessProperties(modelle):
         ])
 
         # Berechnungen für alle drei Schadstoffe (Skalar-Fehlerbehebung integriert)
-        pred_no2 = modelle["no2"].predict(wetter_szenarien)[0]
-        pred_o3 = modelle["o3"].predict(wetter_szenarien)[0]
-        pred_pm10 = modelle["pm10"].predict(wetter_szenarien)[0]
+        no2_szenarien = wetter_szenarien.copy ()
+        o3_szenarien = wetter_szenarien.copy ()
+        pm10_szenarien = wetter_szenarien.copy ()
+        colListNo2 = ["o3_lag_1h","o3_lag_2h","o3_lag_24h","o3_roll_mean_6h","pm10_lag_1h","pm10_lag_2h","pm10_lag_24h","pm10_roll_mean_6h"]
+        colListO3 = ["no2_lag_1h","no2_lag_2h","no2_lag_24h","no2_roll_mean_6h","pm10_lag_1h","pm10_lag_2h","pm10_lag_24h","pm10_roll_mean_6h"]
+        colListPM10 = ["no2_lag_1h","no2_lag_2h","no2_lag_24h","no2_roll_mean_6h","o3_lag_1h","o3_lag_2h","o3_lag_24h","o3_roll_mean_6h"]
+        no2_szenarien = no2_szenarien.drop(columns=colListNo2)
+        o3_szenarien = o3_szenarien.drop(columns=colListO3)
+        pm10_szenarien = pm10_szenarien.drop(columns=colListPM10)
+        pred_no2 = modelle["no2"].predict(no2_szenarien)[0]
+        pred_o3 = modelle["o3"].predict(o3_szenarien)[0]
+        pred_pm10 = modelle["pm10"].predict(pm10_szenarien)[0]
 
         # Visuelle Ausgabe der Ergebnisse in 3 Spalten
         st.success("Vorhergesagte Werte berechnet:")
