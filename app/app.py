@@ -31,7 +31,7 @@ import mytabs as t
 styling.apply_global_style()
 
 # ============================================================
-# 00 SEITENKONFIGURATION & CACHING
+# SEITENKONFIGURATION & CACHING
 # ============================================================
 custom_svg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px' fill='%231f1f1f'><path d='M131.5-131.5Q120-143 120-160v-40q0-17 11.5-28.5T160-240q17 0 28.5 11.5T200-200v40q0 17-11.5 28.5T160-120q-17 0-28.5-11.5Zm160 0Q280-143 280-160v-220q0-17 11.5-28.5T320-420q17 0 28.5 11.5T360-380v220q0 17-11.5 28.5T320-120q-17 0-28.5-11.5Zm160 0Q440-143 440-160v-140q0-17 11.5-28.5T480-340q17 0 28.5 11.5T520-300v140q0 17-11.5 28.5T480-120q-17 0-28.5-11.5Zm160 0Q600-143 600-160v-200q0-17 11.5-28.5T640-400q17 0 28.5 11.5T680-360v200q0 17-11.5 28.5T640-120q-17 0-28.5-11.5Zm160 0Q760-143 760-160v-360q0-17 11.5-28.5T800-560q17 0 28.5 11.5T840-520v360q0 17-11.5 28.5T800-120q-17 0-28.5-11.5ZM560-481q-16 0-30.5-6T503-504L400-607 188-395q-12 12-28.5 11.5T131-396q-11-12-10.5-28.5T132-452l211-211q12-12 26.5-17.5T400-686q16 0 31 5.5t26 17.5l103 103 212-212q12-12 28.5-11.5T829-771q11 12 10.5 28.5T828-715L617-504q-11 11-26 17t-31 6Z'/></svg>"
 
@@ -46,8 +46,6 @@ STOFF_MAP = {
     "Stickstoffdioxid (NO₂)": "no2",
     "Feinstaub (PM10 & PM2.5)": "pm10",
 }
-
-
 
 # ============================================================
 # Datensatz laden und vorbereiten (wird im gesamten Projekt verwendet)
@@ -156,8 +154,7 @@ with st.sidebar:
             {len(dfOrginal):,} Zeilen
         </div>
         """,
-        unsafe_allow_html=True
-    )
+        unsafe_allow_html=True)
 
     st.markdown("<div class='sidebar-divider'></div>", unsafe_allow_html=True)
 
@@ -254,9 +251,6 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
 # ------------------------------------------------------------
 # TAB 1: Einleitung & Überblick
 # ------------------------------------------------------------
-# =========================
-# TITEL & EINLEITUNG
-# =========================
 with tab1:
     t.showTab1 (dfOrginal, stoff_spalte)
 # ------------------------------------------------------------

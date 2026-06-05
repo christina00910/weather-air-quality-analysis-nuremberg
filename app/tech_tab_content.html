@@ -1,252 +1,274 @@
 <div class="tech-tab">
 
-    <h2>Datenbasis &amp; Datenbeschaffung (Data Sourcing)</h2>
+    <h2>Technische Insights</h2>
 
-    <p>Die Modellierung basiert auf einer Kombination aus historischen Wetterdaten und atmosphärischen Reanalysen, die über die <strong>Open-Meteo API</strong> (lizenzfrei für nicht-kommerzielle Nutzung, basierend auf Open-Data-Quellen) bezogen wurden.</p>
+    <p>
+        Die Anwendung wurde als interaktives Streamlit-Dashboard umgesetzt. Ziel war es,
+        historische Wetter- und Luftqualitätsdaten für Nürnberg strukturiert aufzubereiten,
+        visuell darzustellen und mithilfe statistischer Verfahren sowie Machine-Learning-Modelle auszuwerten.
+    </p>
 
-    <h3>1. Datenquellen &amp; APIs</h3>
-    <p>Aufgrund der unterschiedlichen Datenstruktur und Speicherorte wurden zwei separate Endpoints abgefragt und über den Zeitstempel (<code>timestamp</code>) zusammengeführt:</p>
+    <hr>
+
+    <h2>Datenbasis &amp; Datenquellen</h2>
+
+    <p>
+        Grundlage des Projekts sind historische Wetterdaten des Deutschen Wetterdienstes (DWD)
+        sowie Luftschadstoffdaten des Bayerischen Landesamtes für Umwelt (LfU).
+        Zusätzlich werden aktuelle Wetterdaten der Open-Meteo API für die Live-Vorhersage genutzt.
+    </p>
 
     <ul>
-        <li><strong>Meteorologische Treiber (Features):</strong>
-            <ul>
-                <li><strong>API:</strong> <code>Historical Weather API</code> (<code>/v1/archive</code>)</li>
-                <li><strong>Datenbasis:</strong> ERA5 und ERA5-Land Reanalysen (ECMWF).</li>
-                <li><strong>Variablen:</strong> Temperatur (2m), relative Luftfeuchtigkeit, Direktstrahlung, Diffusstrahlung und Globalstrahlung (<code>shortwave_radiation</code>).</li>
-            </ul>
-        </li>
-        <li><strong>Luftschadstoffe &amp; Zielvariablen:</strong>
-            <ul>
-                <li><strong>API:</strong> <code>Air Quality API</code> (<code>/v1/air-quality</code>)</li>
-                <li><strong>Datenbasis:</strong> CAMS (Copernicus Atmosphere Monitoring Service) Regional- und Globalkomponenten.</li>
-                <li><strong>Variablen:</strong> PM<sub>10</sub>, PM<sub>2.5</sub>, Stickstoffdioxid (NO<sub>2</sub>), Kohlenmonoxid (CO) und Ozon (O<sub>3</sub>).</li>
-            </ul>
-        </li>
+        <li><strong>Untersuchungsregion:</strong> Nürnberg</li>
+        <li><strong>Analysezeitraum:</strong> 1980 bis 2024</li>
+        <li><strong>Messintervall:</strong> stündliche Messdaten</li>
+        <li><strong>PM2.5-Daten:</strong> vollständig verfügbar ab 2008</li>
+        <li><strong>Niederschlagsdaten:</strong> vollständig verfügbar ab 1995</li>
     </ul>
 
-    <h3>1.a. Zeitlicher Rahmen &amp; Einschränkungen</h3>
-    <ul>
-        <li><strong>Untersuchungszeitraum:</strong> <code>2013-01-01</code> bis <code>[DEIN_ENDDATUM_HIER, z.B. 2023-12-31]</code></li>
-        <li><strong>Zeitliche Auflösung:</strong> Stündlich (<code>hourly</code>)</li>
-        <li><strong>Zeitzone:</strong> <code>Europe/Berlin</code> (inkl. automatischer Berücksichtigung von Sommer-/Winterzeit)</li>
-    </ul>
+    <h3>Verwendete Datenquellen</h3>
 
-    <blockquote>
-        <p><strong>⚠️ Wichtiger methodischer Hinweis (Data Science Insight):</strong><br>
-        Während reine Wetterdaten (ERA5) lückenlos bis ins Jahr 1940 zurückreichen, stehen die hochwertigen, europäisch validierten Luftschadstoff-Reanalysen des Copernicus-Dienstes (CAMS) erst <strong>ab dem Jahr 2013</strong> verlässlich zur Verfügung. Für ein valides Feature-Engineering (Kombination aus Chemie und Wetter) ist das Startjahr des Gesamtdatensatzes daher fix auf 2013 begrenzt.</p>
-    </blockquote>
-
-    <h3>1.b. Einheiten &amp; Datenvorbereitung</h3>
     <ul>
-        <li>Alle Gase und Feinstäube (PM<sub>10</sub>, PM<sub>2.5</sub>, NO<sub>2</sub>, O<sub>3</sub>) werden standardmäßig in <strong>µg/m³</strong> (Mikrogramm pro Kubikmeter) ausgegeben; Kohlenmonoxid (CO) in <strong>µg/m³</strong>.</li>
-        <li>Fehlende Werte (bedingt durch kleinere API-Ausfälle oder Reanalyse-Lücken) wurden im Zuge der Pipeline überprüft und [ergänze hier kurz deine Methode, z.B. <em>mittels linearer Interpolation bereinigt</em>].</li>
+        <li><strong>DWD:</strong> historische Wetterdaten der Messstation Nürnberg</li>
+        <li><strong>LfU:</strong> historische Luftschadstoffdaten für O<sub>3</sub>, NO<sub>2</sub>, PM10 und PM2.5</li>
+        <li><strong>Open-Meteo API:</strong> aktuelle Wetterdaten für die Live-Prognose</li>
     </ul>
 
     <hr>
 
-    <h2>2. Dynamische Datenerweiterung im RAM (Spalte: <code>Stadt</code>)</h2>
+    <h2>Datenaufbereitung</h2>
 
-    <p><strong>Der Fallstrick:</strong> Das manuelle Bearbeiten von Roh-CSV-Dateien bricht die Automatisierungskette (ETL) und macht das System starr für zukünftige Erweiterungen (z. B. Integration von München oder Augsburg).</p>
+    <p>
+        Die Wetter- und Schadstoffdaten wurden in Python verarbeitet, bereinigt und über zeitliche
+        Merkmale miteinander verknüpft. Ziel war es, eine einheitliche Datengrundlage für Analyse,
+        Visualisierung und Modellierung zu schaffen.
+    </p>
 
-    <p><strong>Die Lösung:</strong> Die Spalte <code>Stadt</code> wird live während des Ladeprozesses in der Funktion <code>load_data()</code> im Arbeitsspeicher (RAM) erzeugt:</p>
-
-    <pre><code>df['Stadt'] = 'Nürnberg'</code></pre>
-
-    <p>Durch die Manipulation der Spaltenliste mittels <code>cols.remove('Stadt')</code> und <code>cols.insert(1, 'Stadt')</code> wird die Spalte dynamisch an die zweite Position verschoben, direkt neben die Stationsnummer.</p>
-
-    <blockquote>
-        <p><strong>Präsentations-Nutzen:</strong> Nachweis von vorausschauendem Software-Design (Skalierbarkeit). Die Datenpipeline bleibt komplett automatisiert, die Rohdaten unangetastet. Bei einer Erweiterung auf andere Städte muss kein Datensatz händisch manipuliert werden.</p>
-    </blockquote>
-
-    <hr>
-
-    <h2>3. Die Filter-Bedingung des Sliders</h2>
-
-    <pre><code>df['Datum_Uhrzeit'].dt.year == selected_year
-df['Datum_Uhrzeit']: Greift auf die Spalte zu, in der unsere Datumsangaben stehen.</code></pre>
-
-    <p><em>.dt.year</em> ist ein sogenannter Accessor. Er sagt Pandas: „Behandle diese Spalte wie ein Datum und ziehe mir von jedem Eintrag nur das Kalenderjahr heraus" (z. B. 2026).</p>
-
-    <p><em>== selected_year</em> vergleicht jedes dieser Jahre mit der Variable <em>selected_year</em> (das Jahr, das der Nutzer im Slider angeklickt hat). Das Ergebnis ist eine Liste von True (Jahr stimmt überein) und False (Jahr stimmt nicht überein).</p>
-
-    <h3>3.a. Das Filtern (Die äußere Klammer)</h3>
-    <pre><code>df[...]</code></pre>
-    <p>Pandas nutzt diese True/False-Liste als <em>booleschen Filter</em>. Es wirft alle Zeilen raus, die False sind, und behält nur die Zeilen, bei denen die Bedingung True war.</p>
-
-    <h3>3.b. Das .copy() am Ende</h3>
-    <pre><code>.copy()</code></pre>
-    <p>Das ist ein wichtiger Best-Practice-Schritt in Pandas. Ohne <code>.copy()</code> hätten wir nur eine „Sicht" (eine Verknüpfung) auf den alten Datensatz. Wenn wir später versuchen, <code>df_year</code> zu verändern, würde Pandas eine Warnung ausgeben (<code>SettingWithCopyWarning</code>). Das <code>.copy()</code> erstellt einen komplett neuen, unabhängigen Datensatz im Arbeitsspeicher.</p>
-
-    <p><strong>Wichtig für Streamlit:</strong> Da diese Zeile jedes Mal von oben nach unten ausgeführt wird, wenn ein Nutzer den Slider bewegt, sorgt sie dafür, dass unsere Diagramme oder Tabellen darunter blitzschnell und dynamisch aktualisiert werden.</p>
-
-    <hr>
-
-    <h2>4. Dynamische Slider-Grenzen mittels Datetime-Auswertung</h2>
-
-    <p><strong>Der Fallstrick:</strong> Werden die Min- und Max-Werte eines Jahres-Sliders fest im Quellcode verankert (Hardcoding, z. B. <code>min_value=1980</code>, <code>max_value=2024</code>), stürzt die App ab, wirft Fehler oder ignoriert Daten, sobald der Datensatz in der Zukunft erweitert wird.</p>
-
-    <p><strong>Die Lösung:</strong> Nach dem Parsen der Datetime-Spalte ermittelt Pandas die Grenzen vollautomatisch aus den Echtdaten:</p>
-
-    <pre><code>min_year = int(df['Datum_Uhrzeit'].dt.year.min())
-max_year = int(df['Datum_Uhrzeit'].dt.year.max())</code></pre>
-
-    <blockquote>
-        <p><strong>Präsentations-Nutzen:</strong> Die App ist absolut wartungsfrei. Kommen neue historische Daten oder zukünftige Jahre hinzu, passt sich das User Interface (der Slider) beim nächsten Start der App vollautomatisch an – ohne dass eine einzige Zeile Code geändert werden muss.</p>
-    </blockquote>
-
-    <hr>
-
-    <h2>5. Optisches Feintuning: <code>config.toml</code> vs. CSS-Injection</h2>
-
-    <p><strong>Der Fallstrick:</strong> Streamlits Standard-Design sieht für wissenschaftliche Dashboards oft zu großflächig aus. Die Standard-KPI-Karten (<code>st.metric</code>) nehmen extrem viel Platz weg. Standardthemen lassen sich über die <code>config.toml</code> nur grob steuern (Hintergrundfarbe, Primärfarbe), nicht aber auf granularer Elementebene.</p>
-
-    <p><strong>Die Lösung:</strong> Für das globale App-Thema wird die <code>config.toml</code> genutzt. Für chirurgisch präzises Anpassen von Schriftgrößen und Abständen wird gezielt CSS über <code>st.markdown(..., unsafe_allow_html=True)</code> direkt in die jeweiligen Tabs injiziert:</p>
-
-    <pre><code>st.markdown(
-    f"""
-    &lt;div style="background-color: rgba(3, 149, 176, 0.1); padding: 12px; border-radius: 0.5rem; border: 1px solid rgba(1, 132, 157, 0.8);"&gt;
-        &lt;span style="font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #FAFAFA;"&gt;
-            ✅ Daten erfolgreich geladen: {len(df):,} Zeilen!
-        &lt;/span&gt;
-    &lt;/div&gt;
-    """,
-    unsafe_allow_html=True
-)</code></pre>
-
-    <blockquote>
-        <p><strong>Präsentations-Nutzen:</strong> Nachweis von fortgeschrittenem UI/UX-Engineering. Framework-Limitierungen werden sauber umgangen, um eine kompakte, professionelle Datendichte zu erzielen, die auf Dashboards im Industrie-Standard abgestimmt ist.</p>
-    </blockquote>
-
-    <hr>
-
-    <h2>6. Die <code>if-elif</code>-Logik in Tab 2 &amp; Invertierte Delta-Farben</h2>
-
-    <h3>6.a. Das Re-Rendering-Problem bei verschachtelten Strukturen</h3>
-
-    <p>In traditionellen Web-Frameworks müsste man komplexe Event-Listener in JavaScript schreiben, um Inhalte dynamisch auszutauschen. Streamlit arbeitet radikal anders: Sobald ein UI-Element (z. B. ein Radio-Button) bedient wird, läuft das gesamte Skript von oben nach unten neu durch. Durch die <code>if-elif</code>-Struktur:</p>
-
-    <pre><code>if schadstoff_auswahl == "Übersicht aller Stoffe":
-    # zeige WHO-Metriken und globale Auswertungen
-elif schadstoff_auswahl == "Ozon (O₃)":
-    # zeige spezifische Ozon-Grafiken</code></pre>
-
-    <p>…wird das Rendering hocheffizient gesteuert. Es wird im Arbeitsspeicher nur der HTML-Code für das aktive Unterthema generiert – das spart Rechenleistung im Browser des Nutzers und hält das Interface übersichtlich.</p>
-
-    <h3>6.b. Die „Börsenkurs-Inversion" bei Umweltmetriken</h3>
-
-    <p>Standardmäßig interpretiert <code>st.metric</code> einen positiven Delta-Wert als <em>gut/steigend</em> (grün) und einen negativen als <em>schlecht/sinkend</em> (rot) – perfekt für Aktienkurse oder Umsatzstatistiken.</p>
-
-    <p>Bei Schadstoffen gilt jedoch das genaue Gegenteil: <strong>Mehr Schadstoffe sind ein Alarmzeichen!</strong></p>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Situation</th>
-                <th>Differenz</th>
-                <th>Gewünschte Farbe</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Jahresmittelwert <strong>über</strong> WHO-Limit</td>
-                <td>positiv (+4,2 µg/m³)</td>
-                <td>Dreieck hoch, <strong>ROT</strong></td>
-            </tr>
-            <tr>
-                <td>Jahresmittelwert <strong>unter</strong> WHO-Limit</td>
-                <td>negativ (−5,1 µg/m³)</td>
-                <td>Dreieck runter, <strong>GRÜN</strong></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <p>Die technische Umsetzung:</p>
-
-    <pre><code>diff_ozon = mean_ozon - 100  # positiv bei Überschreitung
-
-c1.metric(
-    label="Ø Ozon (Ziel: ≤100)",
-    value=f"{mean_ozon:.1f} µg/m³",
-    delta=f"{diff_ozon:+.1f} µg/m³ vs. WHO",
-    delta_color="inverse"  # Plus = Rot, Minus = Grün
-)</code></pre>
-
-    <blockquote>
-        <p><strong>Präsentations-Nutzen:</strong> Exzellentes Beispiel für fachspezifische Anpassung. Es wird der Prüfungskommission bewiesen, dass Business-Logiken (Umweltrichtwerte) vollständig verstanden und in technische Parameter (<code>delta_color="inverse"</code>) übersetzt wurden.</p>
-    </blockquote>
-
-    <hr>
-
-    <h2>7. Kaskadierende Filterung: Slider, RAM-Kopie und Unter-Tabs</h2>
-
-    <p>Die Daten werden im RAM hierarchisch in drei Stufen gefiltert:</p>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Stufe</th>
-                <th>Auslöser</th>
-                <th>Aktion</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>1 – Global</strong></td>
-                <td>App-Start</td>
-                <td>Gesamtdatensatz (~400.000 Zeilen) wird via <code>@st.cache_data</code> unveränderlich gecacht</td>
-            </tr>
-            <tr>
-                <td><strong>2 – User-Interaktion</strong></td>
-                <td>Slider-Bewegung</td>
-                <td><code>df_year = df[df[...]].copy()</code> erstellt eine isolierte Jahreskopie im RAM; <code>.copy()</code> unterdrückt <code>SettingWithCopyWarning</code></td>
-            </tr>
-            <tr>
-                <td><strong>3 – Lokal in Tab 2</strong></td>
-                <td>Radio-Button-Klick</td>
-                <td><code>if-elif</code>-Logik greift blitzschnell auf das bereits vorgefilterte <code>df_year</code> zu</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <p><strong>Der Vorteil:</strong> Wechselt der Nutzer zwischen „Ozon" und „Feinstaub", muss nicht neu gefiltert werden – die Daten für das gewählte Jahr stehen bereits im RAM bereit. Erst eine Slider-Bewegung triggert ein neues globales Re-Rendering.</p>
-
-    <blockquote>
-        <p><strong>Präsentations-Nutzen:</strong> Nachweis von tiefem Verständnis für Performance-Optimierung, State-Management und RAM-Ressourcenschonung in modernen Web-Apps.</p>
-    </blockquote>
-
-    <hr>
-
-    <h2>8. Technische Insights: Speicherstrategie &amp; Performance-Optimierung</h2>
-
-    <h3>Ausgangslage &amp; Hybrid-Architektur</h3>
-    <p>Für die Plattform wird ein hybrider Speicheransatz implementiert, der nun auf <strong>zwei getrennten Datengrundlagen</strong> basiert:</p>
-    <ol>
-        <li><strong>Basis-CSV:</strong> Wird weiterhin für die allgemeinen Kernfunktionen und Standard-Datenstrukturen der Anwendung genutzt.</li>
-        <li><strong>Parquet-Datei (Ozon-Tab):</strong> Wird exklusiv für das Analyse-Modul des <em>Ozon-Paradoxons</em> eingesetzt. Da hier massiv verdichtete, stündliche Klimadaten seit 1980 für den Stadt-Land-Vergleich (Nürnberg vs. Schleswig) verarbeitet werden, stößt das CSV-Format an funktionale Grenzen. Der Wechsel auf ein spaltenorientiertes Format löst die daraus resultierenden Performance-Engpässe.</li>
-    </ol>
-
-    <hr>
-
-    <h3>Die Vorteile von Parquet im Ozon-Modul</h3>
-
-    <h4>1. Speicherkapazität (Komprimierung)</h4>
-    <p>CSV-Dateien speichern Daten zeilenweise als Klartext ab, was bei Millionen von Zeilen zu immensem Overhead führt. Parquet nutzt eine <strong>spaltenorientierte (columnar) Speicherarchitektur</strong>. Da in einer Spalte immer derselbe Datentyp liegt (z. B. Fließkommazahlen für die Temperatur), greifen Komprimierungsalgorithmen (wie Snappy) extrem effizient.</p>
     <ul>
-        <li><strong>Effekt:</strong> Die Dateigröße schrumpft im Vergleich zu einer unkomprimierten CSV um <strong>70–90 %</strong>. Das schont den lokalen Festplattenspeicher und reduziert den RAM-Verbrauch beim Einlesen drastisch.</li>
+        <li>Einlesen und Auswahl relevanter Spalten</li>
+        <li>Umwandlung von Datums- und Zeitangaben in ein einheitliches Datetime-Format</li>
+        <li>Zusammenführung von Wetter- und Luftschadstoffdaten über den Zeitbezug</li>
+        <li>Prüfung und Behandlung fehlender Werte</li>
+        <li>Filterung der Daten für modellbasierte Analysen ab 2008</li>
+        <li>Vorbereitung der Daten für statistische Verfahren und Machine-Learning-Modelle</li>
     </ul>
 
-    <h4>2. Ladezeitvorteil &amp; Streamlit-Performance</h4>
-    <p>In Streamlit führt jede Benutzerinteraktion (z. B. das Umschalten zwischen Nürnberg und Schleswig) zu einem vollständigen Rerun des Skripts.</p>
+    <hr>
+
+    <h2>Feature Engineering</h2>
+
+    <p>
+        Zusätzlich zu den ursprünglichen Wettervariablen wurden zeitliche Einflussfaktoren erstellt.
+        Diese Variablen helfen dabei, typische Tages-, Wochen- und Jahresmuster der Luftschadstoffbelastung
+        besser abzubilden.
+    </p>
+
     <ul>
-        <li><strong>I/O-Schnittgeschwindigkeit:</strong> Während bei einer CSV immer die <em>gesamte</em> Datei sequenziell von der Festplatte gelesen werden muss, erlaubt Parquet das gezielte Laden einzelner Spalten (<code>columns=['timestamp', 'stadt', 'temperatur_c']</code>).</li>
-        <li><strong>Typsicherheit:</strong> Zeitaufwendiges Parsen von Datums- und Zeitzonen-Strings entfällt komplett. Das vordefinierte Schema übergibt die Datentypen nativ an Pandas. Das Laden und Filtern der Daten geschieht in Streamlit dadurch nahezu <strong>in Echtzeit (Faktor 10x bis 100x schneller als CSV)</strong>.</li>
+        <li><strong>Stunde:</strong> Erfassung typischer Tagesverläufe</li>
+        <li><strong>Wochentag und Wochenende:</strong> Unterscheidung zwischen Arbeitswoche und Wochenende</li>
+        <li><strong>Monat:</strong> Abbildung saisonaler Muster</li>
+        <li><strong>Rush Hour:</strong> Kennzeichnung typischer Berufsverkehrszeiten</li>
+        <li><strong>Heizperiode:</strong> Monate mit potenziell erhöhtem Heizverhalten</li>
+        <li><strong>Nachtstunden:</strong> Zeiten mit geringerer Sonneneinstrahlung und stabileren Luftschichten</li>
+        <li><strong>Silvestereffekt:</strong> Sondervariable zur Betrachtung erhöhter Feinstaubwerte rund um den Jahreswechsel</li>
     </ul>
 
-    <h4>3. Nahtlose Skalierung in der Cloud (AWS Athena)</h4>
-    <p>Für eine spätere Überführung des Projekts in eine Cloud-Infrastruktur legt Parquet das fundamentale Design fest:</p>
+    <hr>
+
+    <h2>Explorative Analyse</h2>
+
+    <p>
+        Die explorative Datenanalyse dient dazu, langfristige Entwicklungen, saisonale Muster und besondere
+        Belastungssituationen sichtbar zu machen. Dadurch können erste Zusammenhänge zwischen Wetterbedingungen,
+        Zeitfaktoren und Luftschadstoffkonzentrationen erkannt werden.
+    </p>
+
     <ul>
-        <li><strong>Serverless Analytics mit AWS Athena:</strong> Athena berechnet die Abfragekosten exklusiv basierend auf der Menge der von S3 gescannten Daten.</li>
-        <li><strong>Kosteneffizienz in der Praxis:</strong> Führt man eine SQL-Abfrage aus, die nur den Mittelwert der Temperatur berechnet, scannt Athena dank des spaltenbasierten Parquet-Formats auch <em>nur diese eine Spalte</em> (und überspringt Windrichtung, Strahlung etc.). Zusammen mit der starken Komprimierung senkt dies die Datenmenge pro Abfrage im Vergleich zu CSV oft um <strong>über 90 %</strong>, was die Cloud-Infrastruktur extrem kosteneffizient und performant macht.</li>
+        <li>Jahresmittelwerte und langfristige Trends</li>
+        <li>Saisonale Muster und Jahreszeitenvergleiche</li>
+        <li>Rush-Hour-Effekte im Tagesverlauf</li>
+        <li>Analyse von Inversionswetterlagen</li>
+        <li>Vergleich zwischen Werktagen und Wochenenden</li>
+        <li>Analyse von LQI-Überschreitungen</li>
+        <li>Silvester-Effekt bei PM10</li>
     </ul>
+
+    <hr>
+
+    <h2>Statistische Verfahren</h2>
+
+    <p>
+        Zur Untersuchung der Zusammenhänge zwischen Wettervariablen und Luftschadstoffen wurden
+        Korrelationsanalysen sowie multiple lineare Regressionen eingesetzt.
+    </p>
+
+    <ul>
+        <li><strong>Korrelationsanalyse:</strong> Untersuchung linearer Zusammenhänge zwischen Wettervariablen und Schadstoffwerten</li>
+        <li><strong>Multiple lineare Regression:</strong> Prüfung, ob Wettervariablen statistisch signifikante Zusammenhänge mit den Schadstoffkonzentrationen aufweisen</li>
+        <li><strong>R²:</strong> Bewertung, wie viel Varianz der Schadstoffwerte durch das Modell erklärt werden kann</li>
+        <li><strong>p-Werte:</strong> Einschätzung der statistischen Signifikanz einzelner Einflussfaktoren</li>
+    </ul>
+
+    <hr>
+
+    <h2>Machine Learning</h2>
+
+    <p>
+        Für die modellbasierte Analyse und Vorhersage wurden Random-Forest-Modelle sowie ein XGBoost-Modell
+        eingesetzt. Dadurch können auch nichtlineare Zusammenhänge und komplexere Muster berücksichtigt werden.
+    </p>
+
+    <ul>
+        <li><strong>Random Forest Regressor:</strong> Analyse der Bedeutung von Wetter- und Zeitvariablen</li>
+        <li><strong>Feature Importance:</strong> Bewertung der wichtigsten Einflussgrößen für die jeweilige Schadstoffvorhersage</li>
+        <li><strong>XGBoost Regressor:</strong> Einsatz in der historischen Prognose mit zusätzlichen Lag-Features</li>
+        <li><strong>Lag-Features:</strong> Nutzung historischer Schadstoffwerte der letzten Stunden oder des Vortags</li>
+        <li><strong>Modellvergleich:</strong> Gegenüberstellung von Modellen mit und ohne historische Schadstoffwerte</li>
+    </ul>
+
+    <hr>
+
+    <h2>Modellbewertung</h2>
+
+    <p>
+        Die Modellqualität wurde mithilfe etablierter Regressionsmetriken bewertet. Dadurch lässt sich einschätzen,
+        wie gut die Modelle die tatsächlichen Luftschadstoffwerte annähern können.
+    </p>
+
+    <ul>
+        <li><strong>R²-Wert:</strong> Gibt an, wie viel der Streuung der Zielvariable durch das Modell erklärt wird</li>
+        <li><strong>MAE:</strong> Mittlerer absoluter Fehler zwischen tatsächlichen und vorhergesagten Werten</li>
+        <li><strong>Train-Test-Split:</strong> Aufteilung der Daten in Trainings- und Testdaten zur Modellbewertung</li>
+        <li><strong>Ablationsstudie:</strong> Vergleich der Modellqualität mit und ohne historische Schadstoffwerte</li>
+    </ul>
+
+    <hr>
+
+    <h2>Live-Vorhersage</h2>
+
+    <p>
+        Für die Live-Vorhersage werden aktuelle Wetterdaten der Open-Meteo API abgerufen und in dasselbe
+        Format gebracht wie die historischen Trainingsdaten. Anschließend wird ein Random-Forest-Modell genutzt,
+        um eine aktuelle Schadstoffkonzentration vorherzusagen.
+    </p>
+
+    <ul>
+        <li>Abruf aktueller Wetterdaten für Nürnberg</li>
+        <li>Umrechnung der Windgeschwindigkeit von km/h in m/s</li>
+        <li>Berechnung aktueller Zeitvariablen wie Stunde, Wochenende, Rush Hour, Nacht und Heizperiode</li>
+        <li>Erstellung eines Live-Datenframes im Modellformat</li>
+        <li>Vorhersage eines Luftschadstoffwertes in µg/m³</li>
+        <li>Einordnung des Ergebnisses anhand der LQI-Klassen</li>
+    </ul>
+
+    <hr>
+
+    <h2>Technischer Aufbau der Anwendung</h2>
+
+    <p>
+
+        Die Anwendung ist modular aufgebaut. Die Datei <code>app.py</code> dient als zentrale
+        Einstiegspunkt-Datei der Streamlit-App. Sie übernimmt die Seitenkonfiguration, das Laden
+        des Datensatzes, die Sidebar, das Tab-Layout sowie die Navigation zwischen den einzelnen
+        App-Bereichen.
+
+    </p>
+
+    <p>
+
+        Die eigentlichen Inhalte der Tabs sowie Analyse- und Modellfunktionen wurden in separate
+        Python-Dateien ausgelagert. Dadurch bleibt der Code übersichtlicher, wartbarer und leichter
+        erweiterbar.
+
+    </p>
+
+    <ul>
+
+        <li><code>app.py</code>: Einstiegspunkt, Seitenkonfiguration, Datenladen, Sidebar und Tab-Navigation</li>
+        <li><code>mytabs.py</code>: Auslagerung der einzelnen Streamlit-Tabs und Seiteninhalte</li>
+        <li><code>analyse.py</code>: allgemeine Analysefunktionen</li>
+        <li><code>analysePM.py</code>: explorative Analysen und Visualisierungen für Feinstaub und Schadstoffe</li>
+        <li><code>EDAPLots.py</code>: zusätzliche Funktionen für explorative Visualisierungen</li>
+        <li><code>korrelation.py</code>: Korrelationsanalyse und multiple lineare Regression</li>
+        <li><code>randomForest.py</code>: Random-Forest-Analyse</li>
+        <li><code>openMeteo.py</code>: Live-Vorhersage mit Open-Meteo API</li>
+        <li><code>stPrognosis.py</code>: historische Prognosemodelle und Ablationsstudie</li>
+        <li><code>silvester.py</code>: Analyse des Silvester-Effekts</li>
+        <li><code>styling.py</code>: einheitliches Styling der Diagramme</li>
+        <li><code>tech_tab_content.html</code>: HTML-Inhalt des Tabs „Technische Insights“</li>
+        <li><code>tech_tab.css</code>: eigenes Styling für den Tab „Technische Insights“</li>
+
+    </ul>
+
+    <hr>
+
+    <h2>Performance &amp; Streamlit-Optimierung</h2>
+
+    <p>
+        Da die Anwendung mit einem großen stündlichen Datensatz arbeitet, wurden einfache Performance-Maßnahmen
+        umgesetzt, um Ladezeiten zu reduzieren und die Interaktivität der App zu verbessern.
+    </p>
+
+    <ul>
+        <li><code>@st.cache_data</code> für das Laden des Datensatzes</li>
+        <li><code>@st.fragment</code> zur Strukturierung einzelner App-Bereiche</li>
+        <li>Modulare Funktionen zur Wiederverwendung von Analyse- und Visualisierungslogik</li>
+        <li>Reduzierte Modellkomplexität in der Live-App zur Verbesserung der Laufzeit</li>
+        <li>Gezieltes Schließen von Matplotlib-Figuren mit <code>plt.close()</code> zur Schonung von Ressourcen</li>
+    </ul>
+
+    <hr>
+
+    <h2>Verwendete Technologien</h2>
+
+    <ul>
+        <li><strong>Python:</strong> Programmiersprache für Datenanalyse, Modellierung und App-Entwicklung</li>
+        <li><strong>Pandas und NumPy:</strong> Datenaufbereitung, Transformation und numerische Berechnungen</li>
+        <li><strong>Matplotlib, Seaborn und Plotly:</strong> Visualisierung der Analyseergebnisse</li>
+        <li><strong>Scikit-Learn:</strong> Random Forest, Train-Test-Split und Modellmetriken</li>
+        <li><strong>XGBoost:</strong> Historische Prognosemodelle mit Lag-Features</li>
+        <li><strong>Streamlit:</strong> Interaktive Webanwendung</li>
+        <li><strong>Open-Meteo API:</strong> Abruf aktueller Wetterdaten für die Live-Prognose</li>
+        <li><strong>Git und GitHub:</strong> Versionsverwaltung und Projektorganisation</li>
+    </ul>
+
+    <hr>
+
+    <h2>Zentrale Modell-Erkenntnisse</h2>
+
+    <ul>
+        <li>Ozon (O<sub>3</sub>) lässt sich durch Wettervariablen vergleichsweise gut modellieren.</li>
+        <li>Stickstoffdioxid (NO<sub>2</sub>) und Feinstaub (PM10/PM2.5) werden stärker durch zusätzliche Faktoren wie Verkehr, Heizungen, Industrie oder kurzfristige Ereignisse beeinflusst.</li>
+        <li>Zeitvariablen wie Stunde, Monat, Wochenende und Rush Hour verbessern die Modellierung typischer Belastungsmuster.</li>
+        <li>Historische Schadstoffwerte erhöhen die Prognosequalität deutlich, da Luftschadstoffe eine zeitliche Trägheit besitzen.</li>
+        <li>Wetterdaten allein erklären die Luftqualität nur teilweise und sollten für präzisere Prognosen um weitere Datenquellen ergänzt werden.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Grenzen des Modells</h2>
+
+    <p>
+        Die Modelle zeigen relevante Zusammenhänge zwischen Wetter, Zeitfaktoren und Luftschadstoffkonzentrationen.
+        Gleichzeitig können nicht alle Einflussfaktoren vollständig abgebildet werden. Besonders NO<sub>2</sub> und
+        Feinstaub hängen stark von lokalen Emissionsquellen und kurzfristigen Ereignissen ab.
+    </p>
+
+    <ul>
+        <li>Keine Einbindung aktueller Verkehrsdaten</li>
+        <li>Keine direkten Informationen zu Industrieemissionen oder Heizverhalten</li>
+        <li>Keine Berücksichtigung von Baustellen, Staubaufwirbelung oder Ferntransport</li>
+        <li>Live-Vorhersage basiert auf aktuellen Wetterdaten, jedoch nicht auf aktuellen Schadstoffmesswerten</li>
+    </ul>
+
+    <hr>
+
+    <h2>Ausblick</h2>
+
+    <p>
+        Für zukünftige Erweiterungen könnten zusätzliche Datenquellen integriert werden, um insbesondere kurzfristige
+        Vorhersagen weiter zu verbessern. Dazu zählen beispielsweise Verkehrsdaten, aktuelle Schadstoffmesswerte,
+        Emissionsdaten oder weitere regionale Messstationen.
+    </p>
 
 </div>
