@@ -165,40 +165,42 @@
 
     <h2>Technischer Aufbau der Anwendung</h2>
 
-    <p>
+<p>
+    Die Anwendung ist modular aufgebaut. Die Datei <code>app.py</code> dient als zentrale
+    Einstiegspunkt-Datei der Streamlit-App. Sie übernimmt die Seitenkonfiguration, das Laden
+    des Datensatzes sowie die Einbindung der einzelnen Module.
+</p>
 
-        Die Anwendung ist modular aufgebaut. Die Datei <code>app.py</code> dient als zentrale
-        Einstiegspunkt-Datei der Streamlit-App. Sie übernimmt die Seitenkonfiguration, das Laden
-        des Datensatzes, die Sidebar, das Tab-Layout sowie die Navigation zwischen den einzelnen
-        App-Bereichen.
+<p>
+    Die Benutzeroberfläche, Analysefunktionen, Machine-Learning-Modelle und Styling-Komponenten
+    wurden in separate Python-Dateien ausgelagert. Dadurch bleibt der Code übersichtlicher,
+    wartbarer und leichter erweiterbar.
+</p>
 
-    </p>
+<ul>
 
-    <p>
+    <li><code>app.py</code>: Einstiegspunkt, Seitenkonfiguration, Datenladen und Modulsteuerung</li>
+    <li><code>mytabs.py</code>: Inhalte und Logik der einzelnen Streamlit-Tabs</li>
+    <li><code>sidebar.py</code>: Aufbau und Konfiguration der Sidebar</li>
+    <li><code>analyse.py</code>: allgemeine Analysefunktionen</li>
+    <li><code>analysePM.py</code>: explorative Analysen und Visualisierungen der PM10- und PM2.5-Konzentrationen</li>
+    <li><code>EDAPlots.py</code>: Funktionen für explorative Datenanalysen und Diagramme</li>
+    <li><code>korrelation.py</code>: Korrelationsanalyse und multiple lineare Regression</li>
+    <li><code>randomForest.py</code>: Random-Forest-Modellierung und Feature-Importance-Analysen</li>
+    <li><code>openMeteo.py</code>: Live-Vorhersage mit aktuellen Wetterdaten der Open-Meteo API</li>
+    <li><code>stPrognosis.py</code>: historische Prognosemodelle und Ablationsstudie</li>
+    <li><code>silvester.py</code>: Analyse des Silvester-Effekts auf Feinstaubkonzentrationen</li>
+    <li><code>styling.py</code>: zentrales Diagramm- und Layout-Styling</li>
+    <li><code>tech_tab_content.html</code>: HTML-Inhalt des Tabs „Technische Insights“</li>
+    <li><code>tech_tab.css</code>: individuelles Styling des Tabs „Technische Insights“</li>
 
-        Die eigentlichen Inhalte der Tabs sowie Analyse- und Modellfunktionen wurden in separate
-        Python-Dateien ausgelagert. Dadurch bleibt der Code übersichtlicher, wartbarer und leichter
-        erweiterbar.
+</ul>
 
-    </p>
-
-    <ul>
-
-        <li><code>app.py</code>: Einstiegspunkt, Seitenkonfiguration, Datenladen, Sidebar und Tab-Navigation</li>
-        <li><code>mytabs.py</code>: Auslagerung der einzelnen Streamlit-Tabs und Seiteninhalte</li>
-        <li><code>analyse.py</code>: allgemeine Analysefunktionen</li>
-        <li><code>analysePM.py</code>: explorative Analysen und Visualisierungen für Feinstaub und Schadstoffe</li>
-        <li><code>EDAPLots.py</code>: zusätzliche Funktionen für explorative Visualisierungen</li>
-        <li><code>korrelation.py</code>: Korrelationsanalyse und multiple lineare Regression</li>
-        <li><code>randomForest.py</code>: Random-Forest-Analyse</li>
-        <li><code>openMeteo.py</code>: Live-Vorhersage mit Open-Meteo API</li>
-        <li><code>stPrognosis.py</code>: historische Prognosemodelle und Ablationsstudie</li>
-        <li><code>silvester.py</code>: Analyse des Silvester-Effekts</li>
-        <li><code>styling.py</code>: einheitliches Styling der Diagramme</li>
-        <li><code>tech_tab_content.html</code>: HTML-Inhalt des Tabs „Technische Insights“</li>
-        <li><code>tech_tab.css</code>: eigenes Styling für den Tab „Technische Insights“</li>
-
-    </ul>
+<p>
+    Durch die Aufteilung in eigenständige Module können neue Analyseverfahren, zusätzliche
+    Schadstoffe oder weitere Datenquellen unkompliziert ergänzt werden, ohne die Hauptanwendung
+    grundlegend anpassen zu müssen.
+</p>
 
     <hr>
 
