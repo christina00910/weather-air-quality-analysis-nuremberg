@@ -19,6 +19,7 @@ import stPrognosis as pr
 import O3
 import korrelation as kor
 import silvester as sil
+import EDAPlots as eda
 
 
 # ============================================================
@@ -559,7 +560,7 @@ def showTab3 ():
     titel, info_text = beschreibungen[stoff_spalte]
     st.subheader(titel)
     st.markdown(info_text)
-    showEDAPlots(dfOrginal, stoff_spalte)
+    eda.showEDAPlots(dfOrginal, stoff_spalte)
     #if stoff_spalte == "o3":
         #O3.showO3EDAPlots()
    
@@ -701,3 +702,85 @@ def showTab8():
         historische Schadstoffwerte der letzten Stunden oder zusätzliche Umwelteinflüsse ergänzt werden.
         """)
         op.calcWithOpenMeteo(dfOrginal, stoff_spalte)
+
+
+# ============================================================
+# Fazit-Tab
+# ============================================================
+@st.fragment
+def showTab9 ():
+   st.header("Fazit und Ausblick")
+
+    st.markdown("""
+    Die Analyse zeigt, dass Wetterbedingungen einen messbaren Einfluss auf die Luftqualität in Nürnberg haben. 
+    Besonders deutlich werden die Zusammenhänge bei Ozon, während Stickstoffdioxid und Feinstaub zusätzlich stark 
+    durch weitere Einflussfaktoren geprägt werden.
+    """)
+
+    st.divider()
+
+    st.subheader("Zentrale Erkenntnisse")
+
+    st.markdown("""
+    #### 🌞 Ozon (O₃)
+    Steigt vor allem bei hohen Temperaturen und intensiver Sonneneinstrahlung an.  
+    Die Analyse zeigt, dass Ozon stark durch meteorologische Bedingungen beeinflusst wird. Aufgrund steigender Temperaturen und zunehmender Hitzeperioden könnten Ozonbelastungen künftig weiter an Bedeutung gewinnen. 
+    
+    Zusätzlich besteht eine enge Wechselwirkung zwischen Ozon und Stickstoffdioxid. Obwohl sinkende NO₂-Werte grundsätzlich positiv sind, können sie unter bestimmten Bedingungen dazu führen, dass Ozon langsamer abgebaut wird und dadurch höhere Ozonkonzentrationen entstehen.
+
+    ### 🚗 Stickstoffdioxid (NO₂)
+    Zeigt langfristig eher sinkende Werte.  
+    Dies kann unter anderem auf technische Entwicklungen, strengere Emissionsvorgaben und Veränderungen im Verkehrssektor hindeuten.
+
+    ### 🌫️ Feinstaub (PM10 und PM2.5)
+    Weist ebenfalls rückläufige Tendenzen auf.  
+    Gleichzeitig zeigen die Analysen, dass Feinstaub besonders bei Inversionslagen, geringer Luftdurchmischung und verkehrsnahen Situationen erhöht auftreten kann.
+
+    ### ❤️ Gesundheitliche Bedeutung
+    Trotz teilweise sinkender Schadstoffwerte bleibt Luftverschmutzung weiterhin ein relevantes Gesundheitsthema. Besonders erhöhte Ozonwerte können die Atemwege belasten und stehen in Zusammenhang mit gesundheitlichen Risiken für empfindliche Personengruppen.
+
+    ### 🌍 Regionale Unterschiede
+    Die Analyse verdeutlicht außerdem, dass Luftqualität regional sehr unterschiedlich ausfallen kann. Während in Nürnberg teilweise rückläufige Entwicklungen erkennbar sind, können Luftschadstoffbelastungen in anderen Regionen oder Großstädten deutlich stärker ausfallen.
+
+    ### 📊 Grenzen der Wetterdaten
+    Wetterdaten allein erklären die Luftqualität nur teilweise. Die multiple Regression zeigt, dass meteorologische Variablen zwar signifikante Zusammenhänge aufweisen, die Erklärungskraft jedoch begrenzt bleibt.
+
+    ### ⏱️ Zeitliche Muster
+    Zeitliche Variablen verbessern die Vorhersage deutlich. Durch Faktoren wie Stunde, Monat, Wochenende oder Rush Hour können typische Tages- und Jahresmuster besser abgebildet werden.
+    """)
+
+    st.divider()
+
+    st.subheader("Ausblick")
+
+    st.markdown("""
+    * Das Projekt zeigt, dass datenbasierte Verfahren wie Korrelationsanalysen, multiple lineare Regression und Random-Forest-Modelle geeignet sind, Zusammenhänge zwischen Wetter und Luftqualität sichtbar zu machen.
+                
+    * Die Analyse bezieht sich ausschließlich auf die Region Nürnberg. Für zukünftige Untersuchungen könnten weitere Städte, Regionen oder internationale Datensätze integriert werden, um Unterschiede zwischen verschiedenen Umwelt- und Klimabedingungen besser vergleichen zu können.
+                
+    * Für präzisere Vorhersagen sollten zusätzlich weitere Einflussfaktoren wie Verkehrsdaten, Industrieemissionen, Heizverhalten oder historische Schadstoffwerte ergänzt werden. Dadurch könnten insbesondere die Vorhersagen von Stickstoffdioxid und Feinstaub weiter verbessert werden.
+                
+    * Insgesamt verdeutlicht das Projekt, dass Luftqualität ein komplexes Zusammenspiel aus Wetter, menschlichen Aktivitäten und zeitlichen Mustern darstellt und weiterhin eine wichtige Rolle für Umwelt und Gesundheit spielt.
+    """)
+
+
+    with st.expander("💡 Mögliche Erweiterungen für zukünftige Analysen"):
+
+        st.markdown("""
+        - Einbindung zusätzlicher Verkehrsdaten zur Verbesserung der Vorhersage von Stickstoffdioxid (NO₂)
+        - Berücksichtigung weiterer Emissionsquellen wie Industrieanlagen, Heizsysteme oder Baustellen
+        - Integration historischer Schadstoffmesswerte zur Verbesserung kurzfristiger Vorhersagen
+        - Erweiterung der Analyse auf weitere Städte und Regionen zur Untersuchung regionaler Unterschiede
+        - Vergleich unterschiedlicher Messstationen innerhalb Nürnbergs oder Bayerns
+        - Berücksichtigung detaillierter meteorologischer Einflussfaktoren wie Inversionslagen, Luftaustausch oder Windströmungen
+        - Einsatz weiterer Machine-Learning-Verfahren wie Gradient Boosting oder neuronaler Netze
+        - Entwicklung eines automatisierten Warnsystems für erhöhte Luftschadstoffbelastungen
+        - Verknüpfung von Luftqualitäts- und Gesundheitsdaten zur Untersuchung möglicher gesundheitlicher Auswirkungen
+        """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.success("""
+    Zusammenfassend zeigt das Dashboard: Wetter- und Zeitfaktoren liefern wichtige Hinweise auf die Entwicklung der Luftqualität. 
+    Für präzisere Vorhersagen müssen jedoch zusätzliche Emissionsquellen und lokale Einflussfaktoren berücksichtigt werden.
+    """)
