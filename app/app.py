@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Authors: Christina Dürrbeck, Markus Edelhoff
-# @Project: Abschlussprojekt - app_aufbau
-#           Abschlussklasse Dezember 2025
-# @Date:   16-05-2026 15:56:50
-# @Last Modified time: 2026-05-20
+# @Project: Abschlussprojekt DSI - app_aufbau
+# @Date:    11.05.2026 bis 29.05.2026
 
 import streamlit as st
 import pandas as pd
@@ -38,8 +36,7 @@ custom_svg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' he
 st.set_page_config(
     page_title="Schadstoff/Wetter-Korrelation am Beispiel der Stadt Nürnberg",
     page_icon=custom_svg,
-    layout="wide"
-)
+    layout="wide")
 
 # Mapping: Anzeige-Label im Radio -> Spaltenname im DataFrame
 STOFF_MAP = {
@@ -57,6 +54,9 @@ def showEDAPlots (df_prepared, stoff):
 
     st.divider()
     
+# ============================================================
+# Grafiken der EDA-Analyse
+# ============================================================  
 # 1. Jahrestrend (Läuft in Millisekunden aus dem Cache)
     fig_year = an.calcMeanYear(df_prepared, stoff)
 
@@ -210,10 +210,8 @@ def showEDAPlots (df_prepared, stoff):
         """
         <div style="margin-top: 50px;"></div>
         """,
-        unsafe_allow_html=True
-    )
-
-
+        unsafe_allow_html=True)
+    
     st.divider()
 
     # 3. Rush-Hour-Effekt (Tagesverlauf)
@@ -395,27 +393,23 @@ def showEDAPlots (df_prepared, stoff):
             fontsize=TITLE_SIZE,
             fontweight="normal",
             color="white",
-            pad=15
-        )
+            pad=15)
 
         # Achsenbeschriftungen
         ax.set_xlabel(
             ax.get_xlabel(),
             fontsize=LABEL_SIZE,
-            fontweight="normal"
-        )
+            fontweight="normal")
 
         ax.set_ylabel(
             ax.get_ylabel(),
             fontsize=LABEL_SIZE,
-            fontweight="normal"
-        )
+            fontweight="normal")
 
         # Zahlen auf Achsen
         ax.tick_params(
             axis="both",
-            labelsize=TICK_SIZE
-        )
+            labelsize=TICK_SIZE)
 
         # Grafik anzeigen
         st.pyplot(fig_exceed, use_container_width=False)
@@ -450,8 +444,7 @@ def showEDAPlots (df_prepared, stoff):
             """
             <div style="margin-top: 50px;"></div>
             """,
-            unsafe_allow_html=True
-        )
+            unsafe_allow_html=True)
 
     st.divider()
 
@@ -493,8 +486,7 @@ def showEDAPlots (df_prepared, stoff):
         # Zahlen auf Achsen
         ax.tick_params(
             axis="both",
-            labelsize=TICK_SIZE
-        )
+            labelsize=TICK_SIZE)
 
         # Grafik anzeigen
         st.pyplot(fig_season, use_container_width=False)
@@ -529,8 +521,7 @@ def showEDAPlots (df_prepared, stoff):
             """
             <div style="margin-top: 50px;"></div>
             """,
-            unsafe_allow_html=True
-        )
+            unsafe_allow_html=True)
 
     st.divider()
     
@@ -554,27 +545,23 @@ def showEDAPlots (df_prepared, stoff):
             fontsize=TITLE_SIZE,
             fontweight="normal",
             color="white",
-            pad=15
-        )
+            pad=15)
 
         # Achsenbeschriftungen
         ax.set_xlabel(
             ax.get_xlabel(),
             fontsize=LABEL_SIZE,
-            fontweight="bold"
-        )
+            fontweight="bold")
 
         ax.set_ylabel(
             ax.get_ylabel(),
             fontsize=LABEL_SIZE,
-            fontweight="normal"
-        )
+            fontweight="normal")
 
         # Zahlen auf Achsen
         ax.tick_params(
             axis="both",
-            labelsize=TICK_SIZE
-        )
+            labelsize=TICK_SIZE)
 
         # Grafik anzeigen
         st.pyplot(fig_weekend, use_container_width=False)
@@ -609,8 +596,7 @@ def showEDAPlots (df_prepared, stoff):
             """
             <div style="margin-top: 50px;"></div>
             """,
-            unsafe_allow_html=True
-        )
+            unsafe_allow_html=True)
 
     st.divider()
 
@@ -638,27 +624,23 @@ def showEDAPlots (df_prepared, stoff):
                 fontsize=TITLE_SIZE,
                 fontweight="normal",
                 color="white",
-                pad=15
-            )
+                pad=15)
 
             # Achsenbeschriftungen
             ax.set_xlabel(
                 ax.get_xlabel(),
                 fontsize=LABEL_SIZE,
-                fontweight="normal"
-            )
+                fontweight="normal")
 
             ax.set_ylabel(
                 ax.get_ylabel(),
                 fontsize=LABEL_SIZE,
-                fontweight="normal"
-            )
+                fontweight="normal")
 
             # Zahlen auf Achsen
             ax.tick_params(
                 axis="both",
-                labelsize=TICK_SIZE
-            )
+                labelsize=TICK_SIZE)
 
             # Grafik anzeigen
             st.pyplot(fig_silvester, use_container_width=False)
@@ -677,11 +659,13 @@ def showEDAPlots (df_prepared, stoff):
                 """
                 <div style="margin-top: 50px;"></div>
                 """,
-                unsafe_allow_html=True
-            )
-
+                unsafe_allow_html=True)
     return
 
+
+# ============================================================
+# Datensatz laden und vorbereiten (wird im gesamten Projekt verwendet)
+# ============================================================
 @st.cache_data
 def load ():
     """
@@ -697,13 +681,15 @@ def load ():
     dfRead ['datumstunde'] = pd.to_datetime(
         dfRead ['datumstunde'].astype(str), 
         format='%Y%m%d%H', 
-        errors='coerce'
-    )
+        errors='coerce')
+    
     spaltenList = ['datum', 'stunde', 'temperatur', 'luftfeuchtigkeit',  'windgeschwindigkeit', 'windrichtung',  'luftdruck', 'niederschlagshoehe_mm', 'sonnenscheindauer_minuten', 'relative_luftfeuchtigkeit', 'gesamtbewoelkung', 'no2', 'o3', 'pm10', 'pm2x5']
     dfO = dfRead[spaltenList].copy()
     return dfO 
 
-#######################################################
+# ============================================================
+# Wetterdaten-Tab 
+# ============================================================
 @st.fragment
 def showTab2():
     st.header("Wetterdaten")
@@ -939,129 +925,65 @@ def showTab2():
     werden Jahresmittelwerte dargestellt. Niederschlag und Sonnenscheindauer werden als Jahressummen ausgewiesen.
     """)
 
-#######################################################
+# ============================================================
+# Explorative Analyse-Tab
+# ============================================================
 @st.fragment
 def showTab3 ():
-    if schadstoff_auswahl == "Übersicht aller Stoffe":
-        # Slider auch hier - teilt sich den Wert mit Tab 2 über st.session_state.selected_year
-        min_year_t3 = int(dfOrginal['datum'].dt.year.min())
-        max_year_t3 = int(dfOrginal['datum'].dt.year.max())
-        selected_year_t3 = st.slider(
-            "Wähle ein Jahr für die Analyse:",
-            min_value=min_year_t3,
-            max_value=max_year_t3,
-            value=st.session_state.selected_year,
-            key="year_slider_tab3"
-        )
-        st.session_state.selected_year = selected_year_t3
-    
-        # df_year neu auf Basis des aktuellen Slider-Werts berechnen
-        df_year = dfOrginal[dfOrginal['datum'].dt.year == selected_year_t3].copy()
-    
-        st.header(f"Luftqualität & Schadstoffanalyse ({selected_year_t3})")
-        st.markdown("---")
-        
-        st.subheader("Gesamtübersicht der Luftbelastung vs. WHO-Grenzwerte")
-        st.write("Die Dreiecke zeigen die Abweichung zu den offiziellen WHO-Jahresgrenzwerten an (Grün = Unter dem Limit, Rot = Überschreitung).")
+    # Einzelstoff-Ansicht (O₃, NO₂ oder PM10) - gemeinsamer Block
+    beschreibungen = {
+        "o3": (
+        "Ozon (O₃)",
+        """
+        Ozon (O₃) ist ein gasförmiger Luftschadstoff, der nicht direkt ausgestoßen wird,
+        sondern sich in der Atmosphäre aus sogenannten Vorläufersubstanzen bildet.
+        Dazu gehören vor allem Stickoxide (NOₓ) und flüchtige organische Verbindungen,
+        die beispielsweise durch Verkehr, Industrie oder Verbrennungsprozesse entstehen.
 
-        c1, c2, c3, c4 = st.columns(4)
+        Besonders an warmen und sonnigen Tagen kommt es durch intensive Sonneneinstrahlung
+        zu chemischen Reaktionen in der Luft, wodurch die Ozonkonzentration ansteigt.
+        Deshalb treten erhöhte Ozonwerte häufig im Frühjahr und Sommer auf.
 
-        mean_ozon  = df_year['o3'].mean()
-        mean_no2   = df_year['no2'].mean()
-        mean_pm10  = df_year['pm10'].mean()
-        mean_pm25  = df_year['pm2x5'].mean()
+        Hohe Ozonkonzentrationen können die Atemwege reizen, die Lungenfunktion beeinträchtigen
+        und insbesondere für Kinder, ältere Menschen sowie Personen mit Atemwegserkrankungen
+        gesundheitsschädlich sein.
+        """
+        ),
+        "no2": (
+        "Stickstoffdioxid (NO₂)",
+        """
+        Stickstoffdioxid (NO₂) ist ein gasförmiger Luftschadstoff, der hauptsächlich bei
+        Verbrennungsprozessen entsteht. Besonders hohe Konzentrationen treten im Straßenverkehr,
+        insbesondere durch Dieselfahrzeuge, Industrieanlagen und Heizsysteme auf.
 
-        # WHO-Jahresgrenzwerte (µg/m³)
-        diff_ozon = mean_ozon - 100
-        diff_no2  = mean_no2 - 25
-        diff_pm10 = mean_pm10 - 15
-        diff_pm25 = mean_pm25 - 5
+        NO₂ kann die Atemwege reizen und steht in Zusammenhang mit Atemwegserkrankungen sowie
+        einer verminderten Lungenfunktion. Hohe Werte treten häufig in stark befahrenen
+        Stadtgebieten auf.
 
-        c1.metric(
-            label="Ø Ozon (Ziel: ≤100)",
-            value=f"{mean_ozon:.1f} µg/m³",
-            delta=f"{diff_ozon:+.1f} µg/m³ vs. WHO",
-            delta_color="inverse"
-        )
+        Zusätzlich spielt Stickstoffdioxid eine wichtige Rolle bei der Bildung von bodennahem
+        Ozon und sekundärem Feinstaub.
+        """
+        ),
+        "pm10": (
+        "Feinstaub (PM10 & PM2.5)",
+        """
+        Feinstaub umfasst sehr kleine Partikel in der Luft, die unter anderem durch Verkehr,
+        Industrie, Heizungen, Reifen- und Bremsabrieb sowie natürliche Quellen entstehen.
 
-        c2.metric(
-            label="Ø NO₂ (Ziel: ≤25)",
-            value=f"{mean_no2:.1f} µg/m³",
-            delta=f"{diff_no2:+.1f} µg/m³ vs. WHO",
-            delta_color="inverse"
-        )
+        PM10 beschreibt Partikel mit einem Durchmesser von weniger als 10 Mikrometern,
+        während PM2.5 noch deutlich kleinere und feinere Partikel umfasst.
+        Aufgrund ihrer geringen Größe können die Partikel tief in die Atemwege eindringen.
+        Besonders PM2.5 kann sogar bis in die Lungenbläschen gelangen.
 
-        c3.metric(
-            label="Ø PM10 (Ziel: ≤15)",
-            value=f"{mean_pm10:.1f} µg/m³",
-            delta=f"{diff_pm10:+.1f} µg/m³ vs. WHO",
-            delta_color="inverse"
-        )
+        Hohe Feinstaubkonzentrationen können die Atemwege belasten und stehen in Zusammenhang
+        mit Herz-Kreislauf- sowie Atemwegserkrankungen.
 
-        c4.metric(
-            label="Ø PM2.5 (Ziel: ≤5)",
-            value=f"{mean_pm25:.1f} µg/m³",
-            delta=f"{diff_pm25:+.1f} µg/m³ vs. WHO",
-            delta_color="inverse"
-        )
-
-        st.markdown("---")
-
-    else:
-        # Einzelstoff-Ansicht (O₃, NO₂ oder PM10) - gemeinsamer Block
-        beschreibungen = {
-            "o3": (
-            "Ozon (O₃)",
-            """
-            Ozon (O₃) ist ein gasförmiger Luftschadstoff, der nicht direkt ausgestoßen wird,
-            sondern sich in der Atmosphäre aus sogenannten Vorläufersubstanzen bildet.
-            Dazu gehören vor allem Stickoxide (NOₓ) und flüchtige organische Verbindungen,
-            die beispielsweise durch Verkehr, Industrie oder Verbrennungsprozesse entstehen.
-
-            Besonders an warmen und sonnigen Tagen kommt es durch intensive Sonneneinstrahlung
-            zu chemischen Reaktionen in der Luft, wodurch die Ozonkonzentration ansteigt.
-            Deshalb treten erhöhte Ozonwerte häufig im Frühjahr und Sommer auf.
-
-            Hohe Ozonkonzentrationen können die Atemwege reizen, die Lungenfunktion beeinträchtigen
-            und insbesondere für Kinder, ältere Menschen sowie Personen mit Atemwegserkrankungen
-            gesundheitsschädlich sein.
-            """
-         ),
-            "no2": (
-            "Stickstoffdioxid (NO₂)",
-            """
-            Stickstoffdioxid (NO₂) ist ein gasförmiger Luftschadstoff, der hauptsächlich bei
-            Verbrennungsprozessen entsteht. Besonders hohe Konzentrationen treten im Straßenverkehr,
-            insbesondere durch Dieselfahrzeuge, Industrieanlagen und Heizsysteme auf.
-
-            NO₂ kann die Atemwege reizen und steht in Zusammenhang mit Atemwegserkrankungen sowie
-            einer verminderten Lungenfunktion. Hohe Werte treten häufig in stark befahrenen
-            Stadtgebieten auf.
-
-            Zusätzlich spielt Stickstoffdioxid eine wichtige Rolle bei der Bildung von bodennahem
-            Ozon und sekundärem Feinstaub.
-            """
-            ),
-            "pm10": (
-            "Feinstaub (PM10 & PM2.5)",
-            """
-            Feinstaub umfasst sehr kleine Partikel in der Luft, die unter anderem durch Verkehr,
-            Industrie, Heizungen, Reifen- und Bremsabrieb sowie natürliche Quellen entstehen.
-
-            PM10 beschreibt Partikel mit einem Durchmesser von weniger als 10 Mikrometern,
-            während PM2.5 noch deutlich kleinere und feinere Partikel umfasst.
-            Aufgrund ihrer geringen Größe können die Partikel tief in die Atemwege eindringen.
-            Besonders PM2.5 kann sogar bis in die Lungenbläschen gelangen.
-
-            Hohe Feinstaubkonzentrationen können die Atemwege belasten und stehen in Zusammenhang
-            mit Herz-Kreislauf- sowie Atemwegserkrankungen.
-
-            Erhöhte PM10- und PM2.5-Werte treten häufig bei trockener Witterung,
-            wenig Wind oder Inversionslagen auf, da sich die Schadstoffe dann schlechter
-            in der Atmosphäre verteilen können.
-            """
-            ),
-        }
+        Erhöhte PM10- und PM2.5-Werte treten häufig bei trockener Witterung,
+        wenig Wind oder Inversionslagen auf, da sich die Schadstoffe dann schlechter
+        in der Atmosphäre verteilen können.
+        """
+        ),
+    }
 
     titel, info_text = beschreibungen[stoff_spalte]
     st.subheader(titel)

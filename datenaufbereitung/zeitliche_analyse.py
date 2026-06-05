@@ -90,9 +90,7 @@ plt.show()
 
 # Durchschnittliche Schadstoffwerte pro Stunde analysieren
 # Dadurch wird sichtbar, wie sich die Werte im Tagesverlauf verändern.
-
 schadstoff_stunde = df.groupby("stunde")[schadstoff].mean()
-
 plt.figure(figsize=(12,6))
 plt.plot(
     schadstoff_stunde.index,
