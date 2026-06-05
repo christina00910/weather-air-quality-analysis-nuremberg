@@ -992,7 +992,9 @@ def showTab3 ():
     #if stoff_spalte == "o3":
         #O3.showO3EDAPlots()
    
-#######################################################
+# ============================================================
+# Korrelationsanalyse-Tab
+# ============================================================
 @st.fragment
 def showTab4():
     st.header("Korrelationenzwischen Wetter und Luftschadstoffen")
@@ -1030,7 +1032,9 @@ def showTab4():
         • Niederschlag zeigt insgesamt nur schwache Zusammenhänge mit den Luftschadstoffwerten.
         """)
     
-#######################################################
+# ============================================================
+# Multiple lineare Regression-Tab
+# ============================================================
 @st.fragment
 def showTab5 ():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
@@ -1061,7 +1065,10 @@ def showTab5 ():
         st.divider()
 
         kor.multipleLinearRegression(dfOrginal, stoff_spalte)
-#######################################################
+
+# ============================================================
+# Random Forest-Tab
+# ============================================================
 @st.fragment
 def showTab6():
 
@@ -1089,13 +1096,18 @@ def showTab6():
         st.divider()
 
         fig = ran.showDiagrams(dfOrginal, stoff_spalte)
-#######################################################
+
+# ============================================================
+# Ablationsstudie-Tab
+# ============================================================
 @st.fragment
 def showTab7 ():
     st.header("Ablationsstudie: Bedeutung der Vergangenheit")
     models = pr.prognosis (dfOrginal)
 
-#######################################################
+# ============================================================
+# Live-Vorhersage-Tab
+# ============================================================
 @st.fragment
 def showTab8():
     if schadstoff_auswahl == "Übersicht aller Stoffe":
@@ -1119,64 +1131,55 @@ def showTab8():
         """)
         op.calcWithOpenMeteo(dfOrginal, stoff_spalte)
 
-#######################################################
-
+# ============================================================
+# Laden der Daten
+# ============================================================
 dfOrginal = load()
 
 # ============================================================
-# 01 SIDEBAR-KONFIGURATION
+# SIDEBAR-KONFIGURATION
 # ============================================================
 with st.sidebar:
     st.markdown("""
     <style>
     section[data-testid="stSidebar"] > div {
-        padding-top: 1.2rem !important;
-    }
+        padding-top: 1.2rem !important;}
     
     .sidebar-item {
-    margin-bottom: 16px;
-    }
+    margin-bottom: 16px;}
                 
     .sidebar-title {
         font-size: 25px;
         font-weight: 800;
-        margin-bottom: 8px;
-    }
+        margin-bottom: 8px;}
 
     .sidebar-section-title {
         font-size: 18px;
         font-weight: 800;
-        margin-bottom: 4px;
-    }
+        margin-bottom: 4px;}
 
     .sidebar-divider {
         margin: 14px 0 14px 0;
-        border-top: 1px solid rgba(255,255,255,0.16);
-    }
+        border-top: 1px solid rgba(255,255,255,0.16);}
 
     div[role="radiogroup"] label {
         padding: 0px 0 !important;
-        margin: 0px 0 !important;
-    }
+        margin: 0px 0 !important;}
 
     div[role="radiogroup"] p {
         font-size: 17px !important;
         line-height: 1.2 !important;
-        font-weight: 600 !important;
-    }
+        font-weight: 600 !important;}
 
     .sidebar-text {
         font-size: 14px;
-        line-height: 1.45;
-    }
+        line-height: 1.45;}
 
     .sidebar-text b {
-        font-size: 15px;
-    }
+        font-size: 15px;}
 
     .sidebar-gap {
-        height: 10px;
-    }
+        height: 10px;}
 
     .sidebar-data-box {
         background-color: rgba(3, 149, 176, 0.1);
@@ -1186,8 +1189,7 @@ with st.sidebar:
         font-family: 'Courier New', Courier, monospace;
         font-size: 14px;
         color: #FAFAFA;
-        line-height: 1.35;
-    }
+        line-height: 1.35;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -1199,8 +1201,7 @@ with st.sidebar:
     schadstoff_auswahl = st.radio(
         "",
         ["Ozon (O₃)", "Stickstoffdioxid (NO₂)", "Feinstaub (PM10 & PM2.5)"],
-        label_visibility="collapsed"
-    )
+        label_visibility="collapsed")
 
     stoff_spalte = STOFF_MAP.get(schadstoff_auswahl, "no2")
 
@@ -1278,8 +1279,7 @@ button[data-baseweb="tab"] {
 
 /* LETZTE LINIE WEG */
 button[data-baseweb="tab"]:last-child {
-    border-right: none !important;
-}
+    border-right: none !important;}
 
 /* TAB TEXT */
 button[data-baseweb="tab"] p {
@@ -1289,18 +1289,15 @@ button[data-baseweb="tab"] p {
     margin: 0 !important;
     text-align: center !important;
 
-    line-height: 1.2 !important;
-}
+    line-height: 1.2 !important;}
 
 /* AKTIVER TAB */
 button[data-baseweb="tab"][aria-selected="true"] p {
-    color: #00B5E2 !important;
-}
+    color: #00B5E2 !important;}
 
 /* HOVER */
 button[data-baseweb="tab"]:hover {
-    background-color: rgba(255,255,255,0.025) !important;
-}
+    background-color: rgba(255,255,255,0.025) !important;}
 
 </style>
 """, unsafe_allow_html=True)
@@ -1531,22 +1528,19 @@ Dabei wurden die Daten:
             dfOrginal,
             height=400,
             use_container_width=True,
-            hide_index=True
-        )
+            hide_index=True)
 
     # Technische Infos anzeigen
     with st.expander("Technische Datensatzinformationen anzeigen"):
         dtypes_df = pd.DataFrame({
             "Spalte": dfOrginal.columns,
             "Datentyp": dfOrginal.dtypes.astype(str),
-            "Null-Werte": dfOrginal.isna().sum().values
-        })
+            "Null-Werte": dfOrginal.isna().sum().values})
 
         st.dataframe(
             dtypes_df,
             use_container_width=True,
-            hide_index=True
-        )
+            hide_index=True)
 
     st.info("""
     Da PM2.5-Daten erst ab 2008 vollständig verfügbar sind, wurden alle vergleichenden Analysen 
