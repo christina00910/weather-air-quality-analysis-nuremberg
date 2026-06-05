@@ -24,6 +24,7 @@
         <li><strong>Messintervall:</strong> stündliche Messdaten</li>
         <li><strong>PM2.5-Daten:</strong> vollständig verfügbar ab 2008</li>
         <li><strong>Niederschlagsdaten:</strong> vollständig verfügbar ab 1995</li>
+        <li><strong>Anzahl Datensätze:</strong> 394.488 Zeilen</li>
     </ul>
 
     <h3>Verwendete Datenquellen</h3>
@@ -114,16 +115,18 @@
     <h2>Machine Learning</h2>
 
     <p>
-        Für die modellbasierte Analyse und Vorhersage wurden Random-Forest-Modelle sowie ein XGBoost-Modell
-        eingesetzt. Dadurch können auch nichtlineare Zusammenhänge und komplexere Muster berücksichtigt werden.
+        Für die modellbasierte Analyse wurden unterschiedliche Machine-Learning-Ansätze eingesetzt.
+        Der Random Forest wurde für die Einflussanalyse der Wetter- und Zeitvariablen sowie für die
+        Live-Vorhersage genutzt. Zusätzlich wurde in der historischen Prognose ein XGBoost-Modell
+        verwendet, um den Einfluss historischer Schadstoffwerte auf die Vorhersagequalität zu untersuchen.
     </p>
 
     <ul>
-        <li><strong>Random Forest Regressor:</strong> Analyse der Bedeutung von Wetter- und Zeitvariablen</li>
-        <li><strong>Feature Importance:</strong> Bewertung der wichtigsten Einflussgrößen für die jeweilige Schadstoffvorhersage</li>
-        <li><strong>XGBoost Regressor:</strong> Einsatz in der historischen Prognose mit zusätzlichen Lag-Features</li>
-        <li><strong>Lag-Features:</strong> Nutzung historischer Schadstoffwerte der letzten Stunden oder des Vortags</li>
-        <li><strong>Modellvergleich:</strong> Gegenüberstellung von Modellen mit und ohne historische Schadstoffwerte</li>
+        <li><strong>Random Forest Regressor:</strong> Einflussanalyse und Live-Vorhersage auf Basis von Wetter- und Zeitvariablen</li>
+        <li><strong>Feature Importance:</strong> Bewertung der relativen Bedeutung einzelner Einflussgrößen im Random-Forest-Modell</li>
+        <li><strong>XGBoost Regressor:</strong> Einsatz in der historischen Prognose und Ablationsstudie</li>
+        <li><strong>Lag-Features:</strong> Einbindung vergangener Schadstoffwerte der letzten Stunden und des Vortags</li>
+        <li><strong>Modellvergleich:</strong> Vergleich von Modellen mit und ohne historische Schadstoffwerte</li>
     </ul>
 
     <hr>
@@ -148,15 +151,16 @@
 
     <p>
         Für die Live-Vorhersage werden aktuelle Wetterdaten der Open-Meteo API abgerufen und in dasselbe
-        Format gebracht wie die historischen Trainingsdaten. Anschließend wird ein Random-Forest-Modell genutzt,
-        um eine aktuelle Schadstoffkonzentration vorherzusagen.
+        Format gebracht wie die historischen Trainingsdaten. Anschließend wird ein Random-Forest-Modell
+        genutzt, um für den ausgewählten Luftschadstoff eine aktuelle Konzentration vorherzusagen.
     </p>
 
     <ul>
         <li>Abruf aktueller Wetterdaten für Nürnberg</li>
-        <li>Umrechnung der Windgeschwindigkeit von km/h in m/s</li>
-        <li>Berechnung aktueller Zeitvariablen wie Stunde, Wochenende, Rush Hour, Nacht und Heizperiode</li>
-        <li>Erstellung eines Live-Datenframes im Modellformat</li>
+        <li>Übernahme aktueller Wettervariablen wie Temperatur, Luftfeuchtigkeit, Niederschlag, Luftdruck, Bewölkung, Windrichtung und Sonnenscheindauer</li>
+        <li>Umrechnung der von der API gelieferten Windgeschwindigkeit von km/h in m/s zur Anpassung an die historischen Trainingsdaten</li>
+        <li>Berechnung aktueller Zeitvariablen wie Stunde, Wochenende, Rush Hour, Nacht, Heizperiode und Silvestereffekt</li>
+        <li>Erstellung eines Live-Datenframes im gleichen Feature-Format wie beim Modelltraining</li>
         <li>Vorhersage eines Luftschadstoffwertes in µg/m³</li>
         <li>Einordnung des Ergebnisses anhand der LQI-Klassen</li>
     </ul>
@@ -228,7 +232,7 @@
         <li><strong>Pandas und NumPy:</strong> Datenaufbereitung, Transformation und numerische Berechnungen</li>
         <li><strong>Matplotlib, Seaborn und Plotly:</strong> Visualisierung der Analyseergebnisse</li>
         <li><strong>Scikit-Learn:</strong> Random Forest, Train-Test-Split und Modellmetriken</li>
-        <li><strong>XGBoost:</strong> Historische Prognosemodelle mit Lag-Features</li>
+        <li><strong>XGBoost:</strong> Historische Prognose und Ablationsstudie mit Lag-Features</li>
         <li><strong>Streamlit:</strong> Interaktive Webanwendung</li>
         <li><strong>Open-Meteo API:</strong> Abruf aktueller Wetterdaten für die Live-Prognose</li>
         <li><strong>Git und GitHub:</strong> Versionsverwaltung und Projektorganisation</li>
@@ -239,10 +243,10 @@
     <h2>Zentrale Modell-Erkenntnisse</h2>
 
     <ul>
-        <li>Ozon (O<sub>3</sub>) lässt sich durch Wettervariablen vergleichsweise gut modellieren.</li>
+        <li>Ozon (O<sub>3</sub>) lässt sich durch Wetter- und Zeitvariablen vergleichsweise gut modellieren.</li>
         <li>Stickstoffdioxid (NO<sub>2</sub>) und Feinstaub (PM10/PM2.5) werden stärker durch zusätzliche Faktoren wie Verkehr, Heizungen, Industrie oder kurzfristige Ereignisse beeinflusst.</li>
         <li>Zeitvariablen wie Stunde, Monat, Wochenende und Rush Hour verbessern die Modellierung typischer Belastungsmuster.</li>
-        <li>Historische Schadstoffwerte erhöhen die Prognosequalität deutlich, da Luftschadstoffe eine zeitliche Trägheit besitzen.</li>
+        <li>Historische Schadstoffwerte verbessern die Prognosequalität deutlich, da Luftschadstoffe zeitliche Abhängigkeiten aufweisen.</li>
         <li>Wetterdaten allein erklären die Luftqualität nur teilweise und sollten für präzisere Prognosen um weitere Datenquellen ergänzt werden.</li>
     </ul>
 
@@ -261,6 +265,7 @@
         <li>Keine direkten Informationen zu Industrieemissionen oder Heizverhalten</li>
         <li>Keine Berücksichtigung von Baustellen, Staubaufwirbelung oder Ferntransport</li>
         <li>Live-Vorhersage basiert auf aktuellen Wetterdaten, jedoch nicht auf aktuellen Schadstoffmesswerten</li>
+        <li>Die Live-Vorhersage ist als experimenteller Prognoseansatz zu verstehen und ersetzt keine amtlichen Mess- oder Warnsysteme.</li>
     </ul>
 
     <hr>
