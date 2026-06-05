@@ -24,7 +24,7 @@ import stPrognosis as pr
 import O3
 import korrelation as kor
 import silvester as sil
-import tabs as t
+import mytabs as t
 
 
 # Globales Styling für alle matplotlib/seaborn-Charts aktivieren
@@ -258,47 +258,47 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(
 # TITEL & EINLEITUNG
 # =========================
 with tab1:
-    t.showTab1 ()
+    t.showTab1 (dfOrginal, stoff_spalte)
 # ------------------------------------------------------------
 # TAB 2: WETTERDATEN
 # ------------------------------------------------------------
 with tab2:
-    t.showTab2 ()
+    t.showTab2 (dfOrginal, stoff_spalte)
 # ============================================================
 # TAB 3: EXPLORATIVE ANALYSE / LUFTQUALITÄT
 # ============================================================
 with tab3:
-    t.showTab3 ()
+    t.showTab3 (dfOrginal, stoff_spalte)
 # ============================================================
 # TAB 4: KORRELATIONSANALYSE
 # ============================================================
 with tab4:
-    t.showTab4 ()
+    t.showTab4 (dfOrginal, stoff_spalte)
 # ============================================================
 # TAB 5: MULTIPLE REGRESSION
 # ============================================================
 with tab5:
-    t.showTab5 ()
+    t.showTab5 (dfOrginal, stoff_spalte, schadstoff_auswahl)
 # ============================================================
 # TAB 6: RANDOM FOREST
 # ============================================================
 with tab6:
-    t.showTab6 ()
+    t.showTab6 (dfOrginal, stoff_spalte, schadstoff_auswahl)
 # ============================================================
 # TAB 7: VORHERSAGE1
 # ============================================================
 with tab7:
-    t.showTab8 ()
+    t.showTab8 (dfOrginal, stoff_spalte, schadstoff_auswahl)
 # ============================================================
 # TAB 8: VORHERSAGE2
 # ============================================================
 with tab8:
-    t.showTab7 ()
+    t.showTab7 (dfOrginal, stoff_spalte, schadstoff_auswahl)
 # ============================================================
 # TAB 9: FAZIT
 # ============================================================
 with tab9:
-    t.showTab9 ()
+    t.showTab9 (dfOrginal, stoff_spalte)
 # ============================================================
 # TAB 10: TECHNISCHE INSIGHTS
 # ============================================================

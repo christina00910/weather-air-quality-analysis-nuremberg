@@ -26,7 +26,7 @@ import EDAPlots as eda
 # Wetterdaten-Tab 
 # ============================================================
 @st.fragment
-def showTab1():
+def showTab1 (dfOrginal, stoff_spalte):
     st.title("🌍 Analyse und Vorhersage von Wetter- und Luftqualitätsdaten")
 
     st.markdown("""
@@ -263,7 +263,7 @@ Dabei wurden die Daten:
     """)
 
 @st.fragment
-def showTab2():
+def showTab2 (dfOrginal, stoff_spalte):
     st.header("Wetterdaten")
 
     st.markdown("""
@@ -501,7 +501,7 @@ def showTab2():
 # Explorative Analyse-Tab
 # ============================================================
 @st.fragment
-def showTab3 ():
+def showTab3 (dfOrginal, stoff_spalte):
     # Einzelstoff-Ansicht (O₃, NO₂ oder PM10) - gemeinsamer Block
     beschreibungen = {
         "o3": (
@@ -568,7 +568,7 @@ def showTab3 ():
 # Korrelationsanalyse-Tab
 # ============================================================
 @st.fragment
-def showTab4():
+def showTab4(dfOrginal, stoff_spalte):
     st.header("Korrelationenzwischen Wetter und Luftschadstoffen")
 
     st.markdown("""
@@ -608,7 +608,7 @@ def showTab4():
 # Multiple lineare Regression-Tab
 # ============================================================
 @st.fragment
-def showTab5 ():
+def showTab5 (dfOrginal, stoff_spalte, schadstoff_auswahl):
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Multiple Regression – Übersicht")
         st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die multiple lineare Regression anzuzeigen.")
@@ -642,7 +642,7 @@ def showTab5 ():
 # Random Forest-Tab
 # ============================================================
 @st.fragment
-def showTab6():
+def showTab6(dfOrginal, stoff_spalte, schadstoff_auswahl):
 
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Random Forest – Übersicht")
@@ -673,7 +673,7 @@ def showTab6():
 # Ablationsstudie-Tab
 # ============================================================
 @st.fragment
-def showTab7 ():
+def showTab7 (dfOrginal, stoff_spalte, schadstoff_auswahl):
     st.header("Ablationsstudie: Bedeutung der Vergangenheit")
     models = pr.prognosis (dfOrginal)
 
@@ -681,7 +681,7 @@ def showTab7 ():
 # Live-Vorhersage-Tab
 # ============================================================
 @st.fragment
-def showTab8():
+def showTab8(dfOrginal, stoff_spalte, schadstoff_auswahl):
     if schadstoff_auswahl == "Übersicht aller Stoffe":
         st.header("Vorhersage Live")
         st.info("Bitte wählen Sie links einen einzelnen Schadstoff aus, um die Live-Vorhersage anzuzeigen.")
@@ -708,8 +708,8 @@ def showTab8():
 # Fazit-Tab
 # ============================================================
 @st.fragment
-def showTab9 ():
-   st.header("Fazit und Ausblick")
+def showTab9 (dfOrginal, stoff_spalte):
+    st.header("Fazit und Ausblick")
 
     st.markdown("""
     Die Analyse zeigt, dass Wetterbedingungen einen messbaren Einfluss auf die Luftqualität in Nürnberg haben. 

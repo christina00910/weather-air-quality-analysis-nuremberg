@@ -19,7 +19,7 @@ import stPrognosis as pr
 import O3
 import korrelation as kor
 import silvester as sil
-import tabs as t
+
 
 
 def showEDAPlots (df_prepared, stoff):        
